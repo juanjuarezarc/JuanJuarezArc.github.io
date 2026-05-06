@@ -18,11 +18,17 @@ body {
   color: #111;
 }
 
-/* GLOBAL IMAGE RULE (NO DISTORTION EVER) */
+/* 🧱 IMAGE FRAME SYSTEM (CONTROLLED, NO OVERFLOW) */
 img {
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: contain;
+
   display: block;
+
+  border: 1px solid rgba(0,0,0,0.18);
+  background: #f2f2f2;
+  padding: 6px;
 }
 
 /* NAV */
@@ -57,12 +63,10 @@ nav {
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 0 20px;
 }
 
 .hero-content {
   max-width: 800px;
-  transition: opacity 0.15s linear, transform 0.15s linear;
 }
 
 .hero h1 {
@@ -92,9 +96,10 @@ nav {
   align-items: start;
 }
 
-/* PINUP */
+/* PINUP FRAME (4032x6048 CONTROLLED) */
 .pinup {
   width: 100%;
+  aspect-ratio: 2 / 3;
 }
 
 /* TEXT */
@@ -126,16 +131,20 @@ nav {
   align-items: start;
 }
 
-/* LEFT: 3 HORIZONTAL */
+/* 3 HORIZONTAL PLANS (36x24) */
 .three-plans {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 26px;
 }
 
-/* RIGHT: VERTICAL */
-.vertical {
-  width: 100%;
+.three-plans img {
+  aspect-ratio: 3 / 2;
+}
+
+/* RIGHT VERTICAL (36x48) */
+.vertical img {
+  aspect-ratio: 3 / 4;
 }
 </style>
 </head>
@@ -143,7 +152,7 @@ nav {
 <body>
 
 <nav>
-  <div class="nav-left">JUAN JUAREZ  2B Spring 26</div>
+  <div class="nav-left">JUAN JUAREZ — FINAL REVIEW</div>
   <div class="nav-right">
     <a href="index.html">Back</a>
   </div>
@@ -151,11 +160,9 @@ nav {
 
 <!-- HERO -->
 <section class="hero">
-  <div class="hero-content" id="hero">
+  <div class="hero-content">
     <h1>AIR</h1>
-    <p>
-      Atmospheric spatial system exploring wind, pressure, and environmental movement.
-    </p>
+    <p>Atmospheric spatial system exploring wind, pressure, and environmental movement.</p>
   </div>
 </section>
 
@@ -165,26 +172,22 @@ nav {
   <!-- TOP ROW -->
   <div class="top-row">
 
-    <!-- LEFT IMAGE (4032x6048) -->
     <div class="pinup">
-      <img src="model_photo_1.JPEG">
+      <img src="images/pinup.jpg">
     </div>
 
-    <!-- RIGHT TEXT -->
     <div class="crit">
 
       <div class="title">2B DESIGN STUDIO</div>
       <div class="subtitle">ENVIRONMENTS II</div>
 
-      The Atmospheric Circuit is a vertical terrain designed as a 1:1 simulation of a rugged, rocky ascent for the high-endurance runner.
+      The Atmospheric Circuit is a vertical terrain designed as a 1:1 simulation of a rugged ascent.
 
-      The project investigates the contradiction between geological mass and digital infrastructure, where a primordial cave experience is facilitated by hyper-engineered systems.
+      The project investigates the contradiction between geological mass and digital infrastructure.
 
-      At its foundation, a rectangular wind catcher drives air through a subterranean earth tube network, leveraging stable ground temperatures to pre-cool the atmosphere.
+      A wind catcher drives air through subterranean earth tubes.
 
-      The runner’s journey is defined by the friction between the jagged, cave-like interior and a decentralized network of servers.
-
-      The ascent culminates beneath a skylight, grounding the runner in natural light within a hyper-engineered void.
+      The ascent culminates beneath a skylight, creating a controlled rupture between systems.
 
       <br><br>
 
@@ -203,14 +206,12 @@ nav {
   <!-- BOTTOM ROW -->
   <div class="bottom-row">
 
-    <!-- 3 HORIZONTAL (36x24) -->
     <div class="three-plans">
-      <img src="Floor_Plans-01.png">
+      <img src="images/img1.jpg">
       <img src="images/img2.jpg">
       <img src="images/img3.jpg">
     </div>
 
-    <!-- 1 VERTICAL (36x48) -->
     <div class="vertical">
       <img src="images/img4.jpg">
     </div>
@@ -218,18 +219,6 @@ nav {
   </div>
 
 </section>
-
-<script>
-const hero = document.getElementById("hero");
-
-window.addEventListener("scroll", () => {
-  const y = window.scrollY;
-  const t = Math.min(y / 500, 1);
-
-  hero.style.opacity = 1 - t;
-  hero.style.transform = `translateY(${t * -40}px)`;
-});
-</script>
 
 </body>
 </html>
