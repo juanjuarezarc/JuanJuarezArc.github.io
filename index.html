@@ -6,13 +6,18 @@
 <title>Portfolio World</title>
 
 <style>
-* { margin:0; padding:0; box-sizing:border-box; }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
 body {
   font-family: Arial;
-  background:#fff;
-  color:#111;
-  overflow-x:hidden;
+  background: #fff;
+  color: #111;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
 }
 
 /* LINKS */
@@ -31,7 +36,10 @@ a {
   z-index: 9999;
   transition: opacity 0.45s ease;
 }
-.transition.active { opacity: 1; }
+
+.transition.active {
+  opacity: 1;
+}
 
 /* NAV */
 nav {
@@ -39,52 +47,147 @@ nav {
   top: 0;
   width: 100%;
   padding: 20px 30px;
+
   display: flex;
   justify-content: space-between;
+  align-items: center;
+
   z-index: 100;
 }
 
-.nav-links {
-  display: flex;
-  gap: 24px;
-}
-
-.nav-links a {
+.nav-left {
   font-size: 13px;
   opacity: 0.6;
 }
-.nav-links a:hover {
+
+.nav-right {
+  display: flex;
+  gap: 20px;
+  font-size: 13px;
+}
+
+.nav-right a {
+  opacity: 0.65;
+  transition: opacity 0.2s ease;
+}
+
+.nav-right a:hover {
   opacity: 1;
 }
 
-/* WORLD */
+/* ========================= */
+/* 🎬 CAMERA SPACE SYSTEM */
+/* ========================= */
+
 .world {
-  height: 300vh;
+  perspective: 1200px;
 }
 
-/* ZONES */
+/* SECTIONS = SPACE PLANES */
 .zone {
-  position: sticky;
-  top: 0;
-  height: 100vh;
+  min-height: 100vh;
 
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  text-align:center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
 
-  opacity: 0.2;
-  transform: scale(0.98);
-  filter: blur(8px);
+  opacity: 0;
+  transform: translateY(60px) scale(0.95) translateZ(-200px);
+  filter: blur(12px);
 
-  transition: all 0.55s cubic-bezier(0.2,0.8,0.2,1);
+  transition:
+    opacity 0.45s cubic-bezier(0.2, 0.8, 0.2, 1),
+    transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1),
+    filter 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .zone.active {
   opacity: 1;
-  transform: scale(1);
+  transform: translateY(0px) scale(1) translateZ(0px);
   filter: blur(0);
+}
+
+/* TYPOGRAPHY */
+h1 {
+  font-size: 48px;
+  letter-spacing: -1px;
+}
+
+p {
+  max-width: 600px;
+  margin-top: 10px;
+  color: #444;
+}
+
+/* ========================= */
+/* 🎬 CINEMATIC WORK GRID */
+/* ========================= */
+
+.grid {
+  margin-top: 60px;
+  width: 70vw;
+  max-width: 700px;
+
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 110px);
+  gap: 12px;
+
+  position: relative;
+}
+
+.grid::before {
+  content: "";
+  position: absolute;
+  inset: -40px;
+  background: radial-gradient(circle at center, rgba(0,0,0,0.03), transparent 60%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.grid:hover::before {
+  opacity: 1;
+}
+
+.cell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  border: 1px solid #eee;
+  font-size: 13px;
+
+  opacity: 0.7;
+  transition: all 0.22s cubic-bezier(0.2, 0.9, 0.2, 1);
+}
+
+.grid:hover .cell {
+  opacity: 0.25;
+  filter: blur(1px);
+}
+
+.cell:hover {
+  opacity: 1 !important;
+  filter: blur(0) !important;
+  transform: scale(1.08);
+  z-index: 10;
+}
+
+/* WIP */
+.empty {
+  background: transparent;
+  opacity: 0.35;
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+
+/* PROJECT */
+.project {
+  background: #fafafa;
+  font-weight: 500;
 }
 </style>
 </head>
@@ -93,30 +196,61 @@ nav {
 
 <div class="transition"></div>
 
+<!-- NAV -->
 <nav>
-  <div>JUAN JUAREZ</div>
-  <div class="nav-links">
-    <a href="#home">World</a>
-    <a href="air.html">AIR</a>
-    <a href="pressure.html">PRESSURE</a>
+  <div class="nav-left">JUAN JUAREZ</div>
+
+  <div class="nav-right">
+    <a href="#world">World</a>
+    <a href="#work">Work</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
   </div>
 </nav>
 
+<!-- WORLD -->
 <div class="world">
 
   <section class="zone active" id="home">
-    <h1>Designing spatial systems</h1>
+    <h1>Design</h1>
     <p>Scroll through an architectural world</p>
   </section>
 
-  <section class="zone" id="air">
-    <h1>AIR</h1>
-    <p>Airflow as spatial structure</p>
+  <section class="zone" id="work">
+    <h1>Work</h1>
+    <p>Selected architectural explorations</p>
+
+    <div class="grid">
+      <a class="cell project" href="air.html">AIR</a>
+      <a class="cell project" href="pressure.html">PRESSURE</a>
+      <div class="cell empty">WIP</div>
+      <div class="cell empty">WIP</div>
+
+      <div class="cell empty">WIP</div>
+      <div class="cell empty">WIP</div>
+      <div class="cell empty">WIP</div>
+      <div class="cell empty">WIP</div>
+
+      <div class="cell empty">WIP</div>
+      <div class="cell empty">WIP</div>
+      <div class="cell empty">WIP</div>
+      <div class="cell empty">WIP</div>
+
+      <div class="cell empty">WIP</div>
+      <div class="cell empty">WIP</div>
+      <div class="cell empty">WIP</div>
+      <div class="cell empty">WIP</div>
+    </div>
   </section>
 
-  <section class="zone" id="pressure">
-    <h1>PRESSURE</h1>
-    <p>Compression and spatial intensity</p>
+  <section class="zone" id="about">
+    <h1>About</h1>
+    <p>Architecture student focused on spatial systems and environmental logic.</p>
+  </section>
+
+  <section class="zone" id="contact">
+    <h1>Contact</h1>
+    <p>your@email.com</p>
   </section>
 
 </div>
@@ -124,29 +258,56 @@ nav {
 <script>
 const zones = document.querySelectorAll(".zone");
 
-function updateZones() {
-  let closest = null;
-  let closestDist = Infinity;
-
-  zones.forEach(z => {
-    const dist = Math.abs(z.getBoundingClientRect().top);
-    if (dist < closestDist) {
-      closestDist = dist;
-      closest = z;
-    }
-  });
-
-  zones.forEach(z => z.classList.remove("active"));
-  if (closest) closest.classList.add("active");
-}
+/* CAMERA-LIKE SCROLL MOTION */
+let lastScroll = 0;
 
 window.addEventListener("scroll", () => {
-  requestAnimationFrame(updateZones);
+  const current = window.scrollY;
+  const direction = current > lastScroll ? 1 : -1;
+  lastScroll = current;
+
+  zones.forEach((zone, i) => {
+    const rect = zone.getBoundingClientRect();
+    const center = window.innerHeight / 2;
+
+    const distance = rect.top - center;
+
+    const depth = Math.min(Math.max(distance * 0.05, -40), 40);
+
+    zone.style.transform = `
+      translateY(${depth * direction}px)
+      scale(${rect.top < center ? 1 : 0.98})
+    `;
+  });
 });
 
-updateZones();
+/* ACTIVE SECTION SYSTEM */
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      zones.forEach(z => z.classList.remove("active"));
+      entry.target.classList.add("active");
+    }
+  });
+}, { threshold: 0.6 });
 
-/* TRANSITION */
+zones.forEach(z => observer.observe(z));
+
+/* NAV */
+document.querySelectorAll(".nav-right a").forEach(link => {
+  link.addEventListener("click", e => {
+    let href = link.getAttribute("href");
+    if (href === "#world") href = "#home";
+
+    const target = document.querySelector(href);
+    if (target) {
+      e.preventDefault();
+      target.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  });
+});
+
+/* TRANSITIONS */
 const overlay = document.querySelector(".transition");
 
 document.querySelectorAll("a").forEach(link => {
@@ -155,6 +316,7 @@ document.querySelectorAll("a").forEach(link => {
 
     if (href.includes(".html")) {
       e.preventDefault();
+
       overlay.classList.add("active");
 
       setTimeout(() => {
