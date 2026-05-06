@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Juan Juarez</title>
+
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: Arial, sans-serif;
+  background:#fff;
+  color:#111;
+  overflow-x:hidden;
+}
+
+/* NAV */
+header {
+  position:fixed;
+  top:0;
+  width:100%;
+  height:56px;
+  padding:0 20px;
+
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+
+  background:rgba(255,255,255,0.85);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid #eee;
+  z-index:1000;
+
+  transition:transform 0.35s ease;
+}
+
+header.hidden { transform:translateY(-100%); }
+
+nav a {
+  margin-left:15px;
+  text-decoration:none;
+  color:#555;
+  font-size:14px;
+}
+
+/* HERO */
+.hero {
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  color:white;
+  position:relative;
+  overflow:hidden;
+}
+
+.hero-bg {
+  position:absolute;
+  inset:0;
+  background:url('https://images.unsplash.com/photo-1501785888041-af3ef285b470') center/cover;
+  transform:scale(1.2);
+}
+
+.hero-overlay {
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,0.4);
+}
+
+.hero-content {
+  position:relative;
+  z-index:2;
+  transition:transform 0.2s ease, opacity 0.2s ease;
+}
+
+/* SECTIONS */
+section {
+  padding:120px 20px;
+  max-width:900px;
+  margin:auto;
+  opacity:0.3;
+  transform:scale(0.97);
+  transition:all 0.8s ease;
+}
+
+section.active {
+  opacity:1;
+  transform:scale(1);
+}
+
+.project img {
+  width:100%;
+  border-radius:12px;
+  margin-top:20px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div>JUAN JUAREZ</div>
+  <nav>
+    <a href="#work">Work</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
+  </nav>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-overlay"></div>
+
+  <div class="hero-content">
+    <h1>Designing environments<br>through movement</h1>
+  </div>
+</div>
+
+<!-- WORK -->
+<section id="work">
+  <h2>Work</h2>
+
+  <a href="air.html">
+    <div class="project">
+      <img src="https://images.unsplash.com/photo-1529429612779-c8e40ef2f36d">
+      <h3>AIR</h3>
+    </div>
+  </a>
+
+  <a href="pressure.html">
+    <div class="project">
+      <img src="https://images.unsplash.com/photo-1523413651479-597eb2da0ad6">
+      <h3>Pressure</h3>
+    </div>
+  </a>
+</section>
+
+<section id="about">
+  <h2>About</h2>
+  <p>Architecture student focused on systems, space, and environment.</p>
+</section>
+
+<section id="contact">
+  <h2>Contact</h2>
+  <p>your@email.com</p>
+</section>
+
+<script>
+/* NAV HIDE */
+let last = 0;
+const header = document.querySelector("header");
+
+window.addEventListener("scroll", () => {
+  const y = window.scrollY;
+
+  if (y > last && y > 80) header.classList.add("hidden");
+  else header.classList.remove("hidden");
+
+  last = y;
+});
+
+/* HERO KEYNOTE ZOOM */
+const heroBg = document.querySelector(".hero-bg");
+const heroContent = document.querySelector(".hero-content");
+
+/* SCROLL SYSTEM */
+let ticking = false;
+
+function animate(){
+  const y = window.scrollY;
+
+  heroBg.style.transform = `scale(${1.2 - y * 0.00025})`;
+  heroContent.style.transform = `translateY(${y * 0.15}px)`;
+  heroContent.style.opacity = Math.max(1 - y / 600, 0);
+
+  ticking = false;
+}
+
+window.addEventListener("scroll", () => {
+  if (!ticking) {
+    requestAnimationFrame(animate);
+    ticking = true;
+  }
+});
+
+/* SECTION FOCUS SYSTEM (VISION PRO FEEL) */
+const sections = document.querySelectorAll("section");
+
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      sections.forEach(s => s.classList.remove("active"));
+      entry.target.classList.add("active");
+    }
+  });
+}, { threshold: 0.5 });
+
+sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>
