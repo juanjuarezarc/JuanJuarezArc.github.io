@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIR</title>
+
+<style>
+/* ===== GLOBAL RESET ===== */
+body {
+  margin: 0;
+  font-family: Arial;
+  background: white;
+  color: #111;
+}
+
+/* REMOVE BLUE LINKS */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ===== TRANSITION LAYER ===== */
+.transition {
+  position: fixed;
+  inset: 0;
+  background: white;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 9999;
+  transition: opacity 0.45s ease;
+}
+
+.transition.active {
+  opacity: 1;
+}
+
+/* ===== SCENE SYSTEM ===== */
+.scene {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 40px;
+
+  opacity: 0;
+  transform: translateY(40px) scale(0.96);
+  filter: blur(10px);
+
+  transition: all 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.scene.active {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0);
+}
+
+/* CONTINUOUS SPACE EFFECT */
+body.morph-out .scene {
+  opacity: 0.2;
+  transform: scale(1.05);
+  filter: blur(12px);
+}
+</style>
+
+</head>
+
+<body>
+
+<!-- IMPORTANT: transition overlay MUST be first inside body -->
+<div class="transition"></div>
+
+<!-- BACK BUTTON -->
+<header>
+  <a href="index.html">← Back</a>
+</header>
+
+<!-- ===== SCENES ===== -->
+<div class="scene active">
+  <h1>AIR</h1>
+  <p>Airflow as spatial structure</p>
+</div>
+
+<div class="scene">
+  <p>Air defines movement-based spatial boundaries.</p>
+</div>
+
+<div class="scene">
+  <p>System of airflow shaping architecture.</p>
+</div>
+
+<!-- ===== SCRIPT (PUT AT BOTTOM) ===== -->
+<script>
+const overlay = document.querySelector(".transition");
+
+/* SCENE OBSERVER */
+const scenes = document.querySelectorAll(".scene");
+
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      scenes.forEach(s => s.classList.remove("active"));
+      entry.target.classList.add("active");
+    }
+  });
+}, {
+  threshold: 0.5,
+  rootMargin: "0px 0px -15% 0px"
+});
+
+scenes.forEach(s => observer.observe(s));
+
+/* PAGE TRANSITION (VISION PRO MORPH) */
+document.querySelectorAll("a").forEach(link => {
+  link.addEventListener("click", e => {
+    const href = link.getAttribute("href");
+
+    if (href.includes(".html")) {
+      e.preventDefault();
+
+      document.body.classList.add("morph-out");
+      overlay.classList.add("active");
+
+      setTimeout(() => {
+        window.location.href = href;
+      }, 450);
+    }
+  });
+});
+</script>
+
+</body>
+</html>

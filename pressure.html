@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pressure</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+  background: white;
+  color: #111;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.transition {
+  position: fixed;
+  inset: 0;
+  background: white;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 9999;
+  transition: opacity 0.45s ease;
+}
+
+.transition.active {
+  opacity: 1;
+}
+
+.scene {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 40px;
+
+  opacity: 0;
+  transform: translateY(40px) scale(0.96);
+  filter: blur(10px);
+
+  transition: all 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.scene.active {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0);
+}
+
+body.morph-in .scene {
+  opacity: 1;
+  transform: scale(1);
+  filter: blur(0);
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="transition"></div>
+
+<header>
+  <a href="index.html">← Back</a>
+</header>
+
+<div class="scene active">
+  <h1>PRESSURE</h1>
+  <p>Compression and spatial intensity</p>
+</div>
+
+<div class="scene">
+  <p>Pressure defines space through resistance.</p>
+</div>
+
+<div class="scene">
+  <p>Structural tension shaping environment.</p>
+</div>
+
+<script>
+const overlay = document.querySelector(".transition");
+const scenes = document.querySelectorAll(".scene");
+
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      scenes.forEach(s => s.classList.remove("active"));
+      entry.target.classList.add("active");
+    }
+  });
+}, {
+  threshold: 0.5,
+  rootMargin: "0px 0px -15% 0px"
+});
+
+scenes.forEach(s => observer.observe(s));
+
+document.querySelectorAll("a").forEach(link => {
+  link.addEventListener("click", e => {
+    const href = link.getAttribute("href");
+
+    if (href.includes(".html")) {
+      e.preventDefault();
+
+      document.body.classList.add("morph-in");
+      overlay.classList.add("active");
+
+      setTimeout(() => {
+        window.location.href = href;
+      }, 450);
+    }
+  });
+});
+</script>
+
+</body>
+</html>
