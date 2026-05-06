@@ -3,98 +3,231 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AIR</title>
+<title>AIR — Final Review</title>
 
 <style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 body {
-  margin:0;
   font-family: Arial;
-  background:white;
-  color:#111;
+  background: #fff;
+  color: #111;
 }
 
-a { color:inherit; text-decoration:none; }
-
-.transition {
-  position:fixed;
-  inset:0;
-  background:white;
-  opacity:0;
-  pointer-events:none;
-  z-index:9999;
-  transition:opacity 0.45s ease;
-}
-.transition.active { opacity:1; }
-
-.scene {
-  min-height:100vh;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  text-align:center;
-  padding:40px;
-
-  opacity:0;
-  transform:translateY(40px) scale(0.96);
-  filter:blur(8px);
-
-  transition:all 0.6s cubic-bezier(0.2,0.8,0.2,1);
+/* GLOBAL IMAGE RULE (NO DISTORTION EVER) */
+img {
+  width: 100%;
+  height: auto;
+  display: block;
 }
 
-.scene.active {
-  opacity:1;
-  transform:translateY(0) scale(1);
-  filter:blur(0);
+/* NAV */
+nav {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  padding: 18px 28px;
+  display: flex;
+  justify-content: space-between;
+  z-index: 200;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(10px);
+}
+
+.nav-left {
+  font-size: 13px;
+  opacity: 0.6;
+}
+
+.nav-right a {
+  font-size: 13px;
+  text-decoration: none;
+  color: #111;
+  opacity: 0.65;
+}
+
+/* HERO */
+.hero {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 20px;
+}
+
+.hero-content {
+  max-width: 800px;
+  transition: opacity 0.15s linear, transform 0.15s linear;
+}
+
+.hero h1 {
+  font-size: 56px;
+}
+
+.hero p {
+  margin-top: 12px;
+  font-size: 14px;
+  color: #444;
+}
+
+/* BOARD */
+.board {
+  width: 100%;
+  padding: 100px 3vw 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 90px;
+}
+
+/* TOP ROW */
+.top-row {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 50px;
+  align-items: start;
+}
+
+/* PINUP */
+.pinup {
+  width: 100%;
+}
+
+/* TEXT */
+.crit {
+  font-size: 13px;
+  line-height: 1.65;
+  color: #222;
+  white-space: pre-line;
+}
+
+/* TYPOGRAPHY */
+.title {
+  font-size: 44px;
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  font-size: 13px;
+  letter-spacing: 2px;
+  opacity: 0.65;
+  margin-bottom: 22px;
+}
+
+/* BOTTOM ROW */
+.bottom-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 50px;
+  align-items: start;
+}
+
+/* LEFT: 3 HORIZONTAL */
+.three-plans {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 26px;
+}
+
+/* RIGHT: VERTICAL */
+.vertical {
+  width: 100%;
 }
 </style>
 </head>
 
 <body>
 
-<div class="transition"></div>
+<nav>
+  <div class="nav-left">JUAN JUAREZ — FINAL REVIEW</div>
+  <div class="nav-right">
+    <a href="index.html">Back</a>
+  </div>
+</nav>
 
-<header>
-  <a href="index.html">← Back</a>
-</header>
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-content" id="hero">
+    <h1>AIR</h1>
+    <p>
+      Atmospheric spatial system exploring wind, pressure, and environmental movement.
+    </p>
+  </div>
+</section>
 
-<div class="scene active">
-  <h1>AIR</h1>
-  <p>Airflow as spatial structure</p>
-</div>
+<!-- BOARD -->
+<section class="board">
 
-<div class="scene">
-  <p>Air defines movement-based space.</p>
-</div>
+  <!-- TOP ROW -->
+  <div class="top-row">
 
-<div class="scene">
-  <p>Environmental systems shaping architecture.</p>
-</div>
+    <!-- LEFT IMAGE (4032x6048) -->
+    <div class="pinup">
+      <img src="images/pinup.jpg">
+    </div>
+
+    <!-- RIGHT TEXT -->
+    <div class="crit">
+
+      <div class="title">2B DESIGN STUDIO</div>
+      <div class="subtitle">ENVIRONMENTS II</div>
+
+      The Atmospheric Circuit is a vertical terrain designed as a 1:1 simulation of a rugged, rocky ascent for the high-endurance runner.
+
+      The project investigates the contradiction between geological mass and digital infrastructure, where a primordial cave experience is facilitated by hyper-engineered systems.
+
+      At its foundation, a rectangular wind catcher drives air through a subterranean earth tube network, leveraging stable ground temperatures to pre-cool the atmosphere.
+
+      The runner’s journey is defined by the friction between the jagged, cave-like interior and a decentralized network of servers.
+
+      The ascent culminates beneath a skylight, grounding the runner in natural light within a hyper-engineered void.
+
+      <br><br>
+
+      Fall 2026<br>
+      Instructors:<br>
+      Jennifer Chen<br>
+      <strong>Kordae Henry</strong><br>
+      Angelica Lorenzi<br>
+      Peter Trummer<br>
+      William Virgil
+
+    </div>
+
+  </div>
+
+  <!-- BOTTOM ROW -->
+  <div class="bottom-row">
+
+    <!-- 3 HORIZONTAL (36x24) -->
+    <div class="three-plans">
+      <img src="images/img1.jpg">
+      <img src="images/img2.jpg">
+      <img src="images/img3.jpg">
+    </div>
+
+    <!-- 1 VERTICAL (36x48) -->
+    <div class="vertical">
+      <img src="images/img4.jpg">
+    </div>
+
+  </div>
+
+</section>
 
 <script>
-const overlay = document.querySelector(".transition");
-const scenes = document.querySelectorAll(".scene");
+const hero = document.getElementById("hero");
 
-const observer = new IntersectionObserver(entries => {
-  entries.forEach(e => {
-    if (e.isIntersecting) {
-      scenes.forEach(s => s.classList.remove("active"));
-      e.target.classList.add("active");
-    }
-  });
-}, { threshold: 0.5 });
+window.addEventListener("scroll", () => {
+  const y = window.scrollY;
+  const t = Math.min(y / 500, 1);
 
-scenes.forEach(s => observer.observe(s));
-
-document.querySelectorAll("a").forEach(link => {
-  link.addEventListener("click", e => {
-    e.preventDefault();
-    overlay.classList.add("active");
-
-    setTimeout(() => {
-      window.location.href = link.href;
-    }, 450);
-  });
+  hero.style.opacity = 1 - t;
+  hero.style.transform = `translateY(${t * -40}px)`;
 });
 </script>
 
