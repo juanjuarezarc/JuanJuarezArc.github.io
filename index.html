@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spatial Portfolio World</title>
+
+<style>
+/* =========================
+   GLOBAL
+========================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: #fff;
+  color: #111;
+  overflow-x: hidden;
+}
+
+/* remove blue links */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* =========================
+   WORLD STRUCTURE
+========================= */
+.world {
+  height: 300vh; /* creates scroll space */
+}
+
+/* each zone is pinned in space */
+.zone {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+
+  transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  opacity: 0.2;
+  transform: scale(0.98);
+  filter: blur(8px);
+}
+
+/* active zone */
+.zone.active {
+  opacity: 1;
+  transform: scale(1);
+  filter: blur(0);
+}
+
+/* background depth illusion */
+.zone::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(circle at center, #ffffff, #f3f3f3);
+}
+
+/* =========================
+   TYPOGRAPHY
+========================= */
+h1 {
+  font-size: 48px;
+  letter-spacing: -1px;
+}
+
+p {
+  max-width: 600px;
+  margin-top: 10px;
+  color: #444;
+}
+
+/* =========================
+   NAV (minimal Apple style)
+========================= */
+nav {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  z-index: 100;
+}
+
+nav a {
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+/* =========================
+   MICRO MOTION LAYER
+========================= */
+.zone {
+  will-change: transform, opacity, filter;
+}
+</style>
+
+</head>
+
+<body>
+
+<nav>
+  <div>JUAN JUAREZ</div>
+  <div>
+    <a href="#home">World</a>
+    <a href="#air">AIR</a>
+    <a href="#pressure">PRESSURE</a>
+  </div>
+</nav>
+
+<div class="world">
+
+  <!-- ================= HOME ZONE ================= -->
+  <section class="zone active" id="home">
+    <h1>Designing spatial systems</h1>
+    <p>Scroll to move through a continuous architectural world.</p>
+  </section>
+
+  <!-- ================= AIR ZONE ================= -->
+  <section class="zone" id="air">
+    <h1>AIR</h1>
+    <p>Airflow becomes structure. Movement defines space.</p>
+  </section>
+
+  <!-- ================= PRESSURE ZONE ================= -->
+  <section class="zone" id="pressure">
+    <h1>PRESSURE</h1>
+    <p>Compression, resistance, and spatial intensity.</p>
+  </section>
+
+</div>
+
+<script>
+const zones = document.querySelectorAll(".zone");
+
+/* 🔥 WORLD FOCUS SYSTEM */
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+
+      zones.forEach(z => z.classList.remove("active"));
+      entry.target.classList.add("active");
+
+    }
+  });
+}, {
+  threshold: 0.6
+});
+
+zones.forEach(z => observer.observe(z));
+
+/* 🧠 SMOOTH NAV SCROLL */
+document.querySelectorAll("nav a").forEach(link => {
+  link.addEventListener("click", e => {
+    const id = link.getAttribute("href").replace("#", "");
+    const target = document.getElementById(id);
+
+    if (target) {
+      e.preventDefault();
+      target.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+      });
+    }
+  });
+});
+</script>
+
+</body>
+</html>
