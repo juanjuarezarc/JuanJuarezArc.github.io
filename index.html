@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfolio World</title>
+
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: Arial;
+  background:#fff;
+  color:#111;
+  overflow-x:hidden;
+}
+
+/* LINKS */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* TRANSITION */
+.transition {
+  position: fixed;
+  inset: 0;
+  background: white;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 9999;
+  transition: opacity 0.45s ease;
+}
+.transition.active { opacity: 1; }
+
+/* NAV */
+nav {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  padding: 20px 30px;
+  display: flex;
+  justify-content: space-between;
+  z-index: 100;
+}
+
+.nav-links {
+  display: flex;
+  gap: 24px;
+}
+
+.nav-links a {
+  font-size: 13px;
+  opacity: 0.6;
+}
+.nav-links a:hover {
+  opacity: 1;
+}
+
+/* WORLD */
+.world {
+  height: 300vh;
+}
+
+/* ZONES */
+.zone {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+
+  opacity: 0.2;
+  transform: scale(0.98);
+  filter: blur(8px);
+
+  transition: all 0.55s cubic-bezier(0.2,0.8,0.2,1);
+}
+
+.zone.active {
+  opacity: 1;
+  transform: scale(1);
+  filter: blur(0);
+}
+</style>
+</head>
+
+<body>
+
+<div class="transition"></div>
+
+<nav>
+  <div>JUAN JUAREZ</div>
+  <div class="nav-links">
+    <a href="#home">World</a>
+    <a href="air.html">AIR</a>
+    <a href="pressure.html">PRESSURE</a>
+  </div>
+</nav>
+
+<div class="world">
+
+  <section class="zone active" id="home">
+    <h1>Designing spatial systems</h1>
+    <p>Scroll through an architectural world</p>
+  </section>
+
+  <section class="zone" id="air">
+    <h1>AIR</h1>
+    <p>Airflow as spatial structure</p>
+  </section>
+
+  <section class="zone" id="pressure">
+    <h1>PRESSURE</h1>
+    <p>Compression and spatial intensity</p>
+  </section>
+
+</div>
+
+<script>
+const zones = document.querySelectorAll(".zone");
+
+function updateZones() {
+  let closest = null;
+  let closestDist = Infinity;
+
+  zones.forEach(z => {
+    const dist = Math.abs(z.getBoundingClientRect().top);
+    if (dist < closestDist) {
+      closestDist = dist;
+      closest = z;
+    }
+  });
+
+  zones.forEach(z => z.classList.remove("active"));
+  if (closest) closest.classList.add("active");
+}
+
+window.addEventListener("scroll", () => {
+  requestAnimationFrame(updateZones);
+});
+
+updateZones();
+
+/* TRANSITION */
+const overlay = document.querySelector(".transition");
+
+document.querySelectorAll("a").forEach(link => {
+  link.addEventListener("click", e => {
+    const href = link.getAttribute("href");
+
+    if (href.includes(".html")) {
+      e.preventDefault();
+      overlay.classList.add("active");
+
+      setTimeout(() => {
+        window.location.href = href;
+      }, 450);
+    }
+  });
+});
+</script>
+
+</body>
+</html>
