@@ -12,18 +12,30 @@
   box-sizing: border-box;
 }
 
+/* 🔥 FIX: NO HORIZONTAL SCROLL EVER */
+html, body {
+  overflow-x: hidden;
+}
+
 body {
   font-family: Arial;
   background: #fff;
   color: #111;
 }
 
-/* GLOBAL IMAGE SYSTEM */
+/* GLOBAL IMAGE SYSTEM (SAFE SCALING) */
 img {
   display: block;
+
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+
   border: 1px solid rgba(0,0,0,0.18);
   background: #f2f2f2;
   padding: 6px;
+
+  box-sizing: border-box;
 }
 
 /* NAV */
@@ -61,16 +73,12 @@ nav {
   padding: 0 20px;
 }
 
-/* 🔥 ONLY THIS FADES */
+/* 🔥 ONLY AIR FADES */
 .hero-content {
   max-width: 800px;
 
-  transition:
-    opacity 0.08s linear,
-    transform 0.08s linear,
-    filter 0.08s linear;
-
-  will-change: transform, opacity;
+  transition: opacity 0.08s linear, transform 0.08s linear, filter 0.08s linear;
+  will-change: transform, opacity, filter;
 }
 
 .hero h1 {
@@ -98,9 +106,11 @@ nav {
   grid-template-columns: 1.3fr 1fr;
   gap: 50px;
   align-items: start;
+
+  max-width: 100%;
 }
 
-/* MAIN PINUP */
+/* PINUP */
 .pinup {
   width: 100%;
   display: flex;
@@ -109,10 +119,9 @@ nav {
 }
 
 .pinup img {
+  max-height: 85vh;
   width: auto;
   max-width: 100%;
-  height: auto;
-  max-height: 85vh;
   object-fit: contain;
 }
 
@@ -140,44 +149,34 @@ nav {
 /* BOTTOM ROW */
 .bottom-row {
   display: grid;
-  grid-template-columns: 1.15fr 1fr;
+  grid-template-columns: 1.1fr 0.9fr;
   gap: 40px;
-  align-items: stretch;
+  align-items: start;
 
-  /* entire composition visible in one screen */
-  height: 85vh;
+  width: 100%;
 }
 
-/* LEFT COLUMN */
+/* LEFT STACK */
 .three-plans {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-
-  height: 100%;
   gap: 18px;
 }
 
-/* 3 STACKED IMAGES */
+/* LEFT IMAGES */
 .three-plans img {
   width: 100%;
-  height: calc((100% - 36px) / 3);
-
-  object-fit: contain;
+  height: auto;
   aspect-ratio: 3 / 2;
+  object-fit: contain;
 }
 
-/* RIGHT VERTICAL IMAGE */
-.vertical {
-  height: 100%;
-}
-
+/* RIGHT IMAGE */
 .vertical img {
   width: 100%;
-  height: 100%;
-
-  object-fit: contain;
+  height: auto;
   aspect-ratio: 3 / 4;
+  object-fit: contain;
 }
 </style>
 </head>
@@ -209,37 +208,27 @@ nav {
 <!-- BOARD -->
 <section class="board">
 
-  <!-- TOP -->
   <div class="top-row">
 
-    <!-- MAIN 4032x6048 -->
     <div class="pinup">
       <img src="images/pinup.jpg">
     </div>
 
-    <!-- TEXT -->
     <div class="crit">
 
 <div class="title">2B DESIGN STUDIO</div>
 <div class="subtitle">ENVIRONMENTS II</div>
 
 The Atmospheric Circuit is a vertical terrain
-designed as a 1:1 simulation of a rugged, rocky
-ascent for the high-endurance runner.
+designed as a 1:1 simulation of a rugged ascent.
 
-The project investigates the contradiction
-between geological mass and digital infrastructure,
-where a primordial cave experience is facilitated
-by hyper-engineered systems.
+The project investigates the contradiction between
+geological mass and digital infrastructure.
 
-At its foundation, a rectangular wind catcher
-drives air through a subterranean earth tube
-network, leveraging stable ground temperatures
-to pre-cool the atmosphere.
+A wind catcher drives air through subterranean systems.
 
 The ascent culminates beneath a skylight,
-grounding the runner in natural light within
-a hyper-engineered void.
+creating a controlled rupture between systems.
 
 <br><br>
 
@@ -255,17 +244,14 @@ William Virgil
 
   </div>
 
-  <!-- BOTTOM -->
   <div class="bottom-row">
 
-    <!-- LEFT -->
     <div class="three-plans">
       <img src="images/img1.jpg">
       <img src="images/img2.jpg">
       <img src="images/img3.jpg">
     </div>
 
-    <!-- RIGHT -->
     <div class="vertical">
       <img src="images/img4.jpg">
     </div>
@@ -278,21 +264,11 @@ William Virgil
 const hero = document.getElementById("hero-content");
 
 window.addEventListener("scroll", () => {
-
   const scroll = window.scrollY;
-
-  /* smooth Vision Pro style fade */
   const fade = Math.max(1 - scroll / 450, 0);
 
   hero.style.opacity = fade;
-
-  /* subtle spatial drift */
-  hero.style.transform = `
-    translateY(${scroll * -0.08}px)
-    scale(${1 - scroll * 0.00015})
-  `;
-
-  /* soft atmospheric blur */
+  hero.style.transform = `translateY(${scroll * -0.08}px) scale(${1 - scroll * 0.00015})`;
   hero.style.filter = `blur(${scroll * 0.015}px)`;
 });
 </script>
