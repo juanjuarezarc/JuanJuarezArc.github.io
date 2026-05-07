@@ -61,6 +61,18 @@ nav {
   padding: 0 20px;
 }
 
+/* 🔥 ONLY THIS FADES */
+.hero-content {
+  max-width: 800px;
+
+  transition:
+    opacity 0.08s linear,
+    transform 0.08s linear,
+    filter 0.08s linear;
+
+  will-change: transform, opacity;
+}
+
 .hero h1 {
   font-size: 56px;
 }
@@ -129,12 +141,10 @@ nav {
 .bottom-row {
   display: grid;
   grid-template-columns: 1.15fr 1fr;
-
   gap: 40px;
-
   align-items: stretch;
 
-  /* 🔥 entire composition visible in one screen */
+  /* entire composition visible in one screen */
   height: 85vh;
 }
 
@@ -151,7 +161,6 @@ nav {
 /* 3 STACKED IMAGES */
 .three-plans img {
   width: 100%;
-
   height: calc((100% - 36px) / 3);
 
   object-fit: contain;
@@ -163,7 +172,7 @@ nav {
   height: 100%;
 }
 
-.vertical img {model_photo_1.JPEG
+.vertical img {
   width: 100%;
   height: 100%;
 
@@ -185,13 +194,15 @@ nav {
 
 <!-- HERO -->
 <section class="hero">
-  <div class="hero-content">
+  <div class="hero-content" id="hero-content">
+
     <h1>AIR</h1>
 
     <p>
       Atmospheric spatial system exploring wind, pressure,
       and environmental movement.
     </p>
+
   </div>
 </section>
 
@@ -247,14 +258,14 @@ William Virgil
   <!-- BOTTOM -->
   <div class="bottom-row">
 
-    <!-- LEFT: 3 STACKED -->
+    <!-- LEFT -->
     <div class="three-plans">
       <img src="images/img1.jpg">
       <img src="images/img2.jpg">
       <img src="images/img3.jpg">
     </div>
 
-    <!-- RIGHT: VERTICAL -->
+    <!-- RIGHT -->
     <div class="vertical">
       <img src="images/img4.jpg">
     </div>
@@ -262,6 +273,29 @@ William Virgil
   </div>
 
 </section>
+
+<script>
+const hero = document.getElementById("hero-content");
+
+window.addEventListener("scroll", () => {
+
+  const scroll = window.scrollY;
+
+  /* smooth Vision Pro style fade */
+  const fade = Math.max(1 - scroll / 450, 0);
+
+  hero.style.opacity = fade;
+
+  /* subtle spatial drift */
+  hero.style.transform = `
+    translateY(${scroll * -0.08}px)
+    scale(${1 - scroll * 0.00015})
+  `;
+
+  /* soft atmospheric blur */
+  hero.style.filter = `blur(${scroll * 0.015}px)`;
+});
+</script>
 
 </body>
 </html>
