@@ -18,14 +18,9 @@ body {
   color: #111;
 }
 
-/* 🧱 IMAGE FRAME SYSTEM (CONTROLLED, NO OVERFLOW) */
+/* GLOBAL IMAGE SYSTEM */
 img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-
   display: block;
-
   border: 1px solid rgba(0,0,0,0.18);
   background: #f2f2f2;
   padding: 6px;
@@ -63,10 +58,7 @@ nav {
   align-items: center;
   justify-content: center;
   text-align: center;
-}
-
-.hero-content {
-  max-width: 800px;
+  padding: 0 20px;
 }
 
 .hero h1 {
@@ -96,10 +88,20 @@ nav {
   align-items: start;
 }
 
-/* PINUP FRAME (4032x6048 CONTROLLED) */
+/* MAIN PINUP */
 .pinup {
   width: 100%;
-  aspect-ratio: 2 / 3;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.pinup img {
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: 85vh;
+  object-fit: contain;
 }
 
 /* TEXT */
@@ -126,24 +128,46 @@ nav {
 /* BOTTOM ROW */
 .bottom-row {
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 50px;
-  align-items: start;
+  grid-template-columns: 1.15fr 1fr;
+
+  gap: 40px;
+
+  align-items: stretch;
+
+  /* 🔥 entire composition visible in one screen */
+  height: 85vh;
 }
 
-/* 3 HORIZONTAL PLANS (36x24) */
+/* LEFT COLUMN */
 .three-plans {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 26px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  height: 100%;
+  gap: 18px;
 }
 
+/* 3 STACKED IMAGES */
 .three-plans img {
+  width: 100%;
+
+  height: calc((100% - 36px) / 3);
+
+  object-fit: contain;
   aspect-ratio: 3 / 2;
 }
 
-/* RIGHT VERTICAL (36x48) */
+/* RIGHT VERTICAL IMAGE */
+.vertical {
+  height: 100%;
+}
+
 .vertical img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: contain;
   aspect-ratio: 3 / 4;
 }
 </style>
@@ -153,6 +177,7 @@ nav {
 
 <nav>
   <div class="nav-left">JUAN JUAREZ — FINAL REVIEW</div>
+
   <div class="nav-right">
     <a href="index.html">Back</a>
   </div>
@@ -162,56 +187,74 @@ nav {
 <section class="hero">
   <div class="hero-content">
     <h1>AIR</h1>
-    <p>Atmospheric spatial system exploring wind, pressure, and environmental movement.</p>
+
+    <p>
+      Atmospheric spatial system exploring wind, pressure,
+      and environmental movement.
+    </p>
   </div>
 </section>
 
 <!-- BOARD -->
 <section class="board">
 
-  <!-- TOP ROW -->
+  <!-- TOP -->
   <div class="top-row">
 
+    <!-- MAIN 4032x6048 -->
     <div class="pinup">
       <img src="images/pinup.jpg">
     </div>
 
+    <!-- TEXT -->
     <div class="crit">
 
-      <div class="title">2B DESIGN STUDIO</div>
-      <div class="subtitle">ENVIRONMENTS II</div>
+<div class="title">2B DESIGN STUDIO</div>
+<div class="subtitle">ENVIRONMENTS II</div>
 
-      The Atmospheric Circuit is a vertical terrain designed as a 1:1 simulation of a rugged ascent.
+The Atmospheric Circuit is a vertical terrain
+designed as a 1:1 simulation of a rugged, rocky
+ascent for the high-endurance runner.
 
-      The project investigates the contradiction between geological mass and digital infrastructure.
+The project investigates the contradiction
+between geological mass and digital infrastructure,
+where a primordial cave experience is facilitated
+by hyper-engineered systems.
 
-      A wind catcher drives air through subterranean earth tubes.
+At its foundation, a rectangular wind catcher
+drives air through a subterranean earth tube
+network, leveraging stable ground temperatures
+to pre-cool the atmosphere.
 
-      The ascent culminates beneath a skylight, creating a controlled rupture between systems.
+The ascent culminates beneath a skylight,
+grounding the runner in natural light within
+a hyper-engineered void.
 
-      <br><br>
+<br><br>
 
-      Fall 2026<br>
-      Instructors:<br>
-      Jennifer Chen<br>
-      <strong>Kordae Henry</strong><br>
-      Angelica Lorenzi<br>
-      Peter Trummer<br>
-      William Virgil
+Fall 2026<br>
+Instructors:<br>
+Jennifer Chen<br>
+<strong>Kordae Henry</strong><br>
+Angelica Lorenzi<br>
+Peter Trummer<br>
+William Virgil
 
     </div>
 
   </div>
 
-  <!-- BOTTOM ROW -->
+  <!-- BOTTOM -->
   <div class="bottom-row">
 
+    <!-- LEFT: 3 STACKED -->
     <div class="three-plans">
       <img src="images/img1.jpg">
       <img src="images/img2.jpg">
       <img src="images/img3.jpg">
     </div>
 
+    <!-- RIGHT: VERTICAL -->
     <div class="vertical">
       <img src="images/img4.jpg">
     </div>
