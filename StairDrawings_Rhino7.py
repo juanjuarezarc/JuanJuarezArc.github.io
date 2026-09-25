@@ -85,7 +85,7 @@ DIM_EXT_OFFSET_MM = 1.0
 DIM_EXT_EXTENSION_MM = 0.0
 LABEL_MM = 5.0                # view labels (TOP VIEW etc.)
 STYLE_KEY = "StairDrawings.StyleVersion"
-STYLE_VERSION = "4"           # bump to reset every file's style to the defaults
+STYLE_VERSION = "5"           # bump to reset every file's style to the defaults
 PAGE_UNITS_KEY = "StairDrawings.PageUnits"
 DIMSTYLE_LENGTHS = ("TextHeight", "ArrowLength", "TextGap", "ExtensionLineOffset",
                     "ExtensionLineExtension", "DimensionLineExtension", "BaselineSpacing",
@@ -563,13 +563,10 @@ def ensure_dimstyle(doc, model_scale):
     DS = rd.DimensionStyle
     existing = doc.DimStyles.FindName(DIMSTYLE_NAME)
     stamp = doc.Strings.GetValue(STYLE_SECTION, STYLE_KEY) if existing is not None else None
-    # an unstamped style with ticks + text above the line was made by an
-    # earlier version of this script: replace it. Anything else is kept.
-    legacy = (existing is not None and not stamp
-              and getattr(existing, "ArrowType1", None) == _enum(DS, "ArrowType", "Tick")
-              and getattr(existing, "DimTextLocation", None) == _enum(DS, "TextLocation", "AboveDimLine"))
-    outdated = bool(stamp) and stamp != STYLE_VERSION
-    if existing is None or legacy or outdated:
+    # a style this version has not set up yet (made by an earlier version, or
+    # left half-made by a run that stopped early) gets the studio defaults.
+    # Once stamped, the style is kept as the user edits it.
+    if existing is None or stamp != STYLE_VERSION:
         mm = Rhino.RhinoMath.UnitScale(Rhino.UnitSystem.Millimeters, doc.PageUnitSystem)
         if existing is None:
             i = doc.DimStyles.Add(DIMSTYLE_NAME)
