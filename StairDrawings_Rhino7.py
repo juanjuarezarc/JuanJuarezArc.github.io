@@ -70,6 +70,7 @@ LAYER_ROOT = "STAIR DRAWINGS"
 PAGE_PREFIX = "STAIR DRAWING "  # layouts are named STAIR DRAWING 01, 02, ...
 DRAWING_GAP_FT = 6.0            # space between drawings placed side by side
 REG_SECTION = "StairDrawings"   # document strings: one entry per drawing
+STYLE_SECTION = "StairDrawings.Style"  # document strings: annotation style stamps
 TAG_KEY = "StairDrawings.Drawing"  # user string on every drawn object
 DIMSTYLE_NAME = "STAIR DRAWINGS"
 FONT = "Arial"
@@ -534,19 +535,39 @@ def pick_drawing(reg, source_ids):
     return "{:02d}".format(nxt), False
 
 
+def _enum(owner, enum_name, member):
+    """owner.enum_name.member, or None if this Rhino version lacks it."""
+    try:
+        return System.Enum.Parse(getattr(owner, enum_name), member)
+    except Exception:
+        return None
+
+
+def _set(obj, prop, value):
+    """Set obj.prop, skipping properties this Rhino version does not have."""
+    if value is None:
+        return
+    try:
+        setattr(obj, prop, value)
+    except Exception as e:
+        print("StairDrawings: annotation style setting {} skipped ({}).".format(prop, e))
+
+
 def ensure_dimstyle(doc, model_scale):
     """Use the file's 'STAIR DRAWINGS' annotation style if it exists; otherwise
     create it with the studio defaults (sizes are millimetres on the sheet).
     Only the model-space scale is set on every run: Rhino shows annotation at
-    its page size on layouts and at page size x model_scale in the model."""
+    its page size on layouts and at page size x model_scale in the model.
+    The style's version and layout units are kept in the document strings
+    (section STYLE_SECTION), since Rhino 7 styles cannot hold user text."""
     DS = rd.DimensionStyle
     existing = doc.DimStyles.FindName(DIMSTYLE_NAME)
-    stamp = existing.GetUserString(STYLE_KEY) if existing is not None else None
+    stamp = doc.Strings.GetValue(STYLE_SECTION, STYLE_KEY) if existing is not None else None
     # an unstamped style with ticks + text above the line was made by an
     # earlier version of this script: replace it. Anything else is kept.
     legacy = (existing is not None and not stamp
-              and existing.ArrowType1 == DS.ArrowType.Tick
-              and existing.DimTextLocation == DS.TextLocation.AboveDimLine)
+              and getattr(existing, "ArrowType1", None) == _enum(DS, "ArrowType", "Tick")
+              and getattr(existing, "DimTextLocation", None) == _enum(DS, "TextLocation", "AboveDimLine"))
     outdated = bool(stamp) and stamp != STYLE_VERSION
     if existing is None or legacy or outdated:
         mm = Rhino.RhinoMath.UnitScale(Rhino.UnitSystem.Millimeters, doc.PageUnitSystem)
@@ -556,36 +577,36 @@ def ensure_dimstyle(doc, model_scale):
         else:
             ds = existing.Duplicate()
             print("StairDrawings: updated the old STAIR DRAWINGS annotation style.")
-        ds.Font = rd.Font(FONT)
-        ds.TextHeight = DIM_TEXT_MM * mm
-        ds.ArrowType1 = DS.ArrowType.Rectangle
-        ds.ArrowType2 = DS.ArrowType.Rectangle
-        ds.ArrowLength = DIM_ARROW_MM * mm
-        ds.TextGap = DIM_GAP_MM * mm
-        ds.ExtensionLineOffset = DIM_EXT_OFFSET_MM * mm
-        ds.ExtensionLineExtension = DIM_EXT_EXTENSION_MM * mm
-        ds.DimTextLocation = DS.TextLocation.InDimLine
-        ds.DimTextOrientation = rd.TextOrientation.InPlane
-        ds.DimTextAngleType = DS.LeaderContentAngleStyle.Aligned
-        ds.DimensionLengthDisplay = DS.LengthDisplay.FeetAndInches
-        ds.LengthResolution = 2          # nearest 1/4"
-        ds.ZeroSuppress = System.Enum.Parse(DS.ZeroSuppression, "None")
-        ds.DrawTextMask = False
+        _set(ds, "Font", rd.Font(FONT))
+        _set(ds, "TextHeight", DIM_TEXT_MM * mm)
+        _set(ds, "ArrowType1", _enum(DS, "ArrowType", "Rectangle"))
+        _set(ds, "ArrowType2", _enum(DS, "ArrowType", "Rectangle"))
+        _set(ds, "ArrowLength", DIM_ARROW_MM * mm)
+        _set(ds, "TextGap", DIM_GAP_MM * mm)
+        _set(ds, "ExtensionLineOffset", DIM_EXT_OFFSET_MM * mm)
+        _set(ds, "ExtensionLineExtension", DIM_EXT_EXTENSION_MM * mm)
+        _set(ds, "DimTextLocation", _enum(DS, "TextLocation", "InDimLine"))
+        _set(ds, "DimTextOrientation", _enum(rd, "TextOrientation", "InPlane"))
+        _set(ds, "DimTextAngleType", _enum(DS, "LeaderContentAngleStyle", "Aligned"))
+        _set(ds, "DimensionLengthDisplay", _enum(DS, "LengthDisplay", "FeetAndInches"))
+        _set(ds, "LengthResolution", 2)          # nearest 1/4"
+        _set(ds, "ZeroSuppress", _enum(DS, "ZeroSuppression", "None"))
+        _set(ds, "DrawTextMask", False)
     else:
         ds = existing.Duplicate()
         # sizes are stored in the layout units of the file the style was made
         # in; convert if this file's layout units differ (keeps user edits)
-        old = ds.GetUserString(PAGE_UNITS_KEY)
+        old = doc.Strings.GetValue(STYLE_SECTION, PAGE_UNITS_KEY)
         if old and old != doc.PageUnitSystem.ToString():
             f = Rhino.RhinoMath.UnitScale(System.Enum.Parse(Rhino.UnitSystem, old), doc.PageUnitSystem)
             for prop in DIMSTYLE_LENGTHS:
                 if hasattr(ds, prop):
-                    setattr(ds, prop, getattr(ds, prop) * f)
+                    _set(ds, prop, getattr(ds, prop) * f)
             print("StairDrawings: converted the annotation style from {} to {} layout units.".format(
                 old, doc.PageUnitSystem))
-    ds.SetUserString(STYLE_KEY, STYLE_VERSION)
-    ds.SetUserString(PAGE_UNITS_KEY, doc.PageUnitSystem.ToString())
-    ds.DimensionScale = model_scale
+    doc.Strings.SetString(STYLE_SECTION, STYLE_KEY, STYLE_VERSION)
+    doc.Strings.SetString(STYLE_SECTION, PAGE_UNITS_KEY, doc.PageUnitSystem.ToString())
+    _set(ds, "DimensionScale", model_scale)
     doc.DimStyles.Modify(ds, doc.DimStyles.FindName(DIMSTYLE_NAME).Id, True)
     return doc.DimStyles.FindName(DIMSTYLE_NAME)
 
