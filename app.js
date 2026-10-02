@@ -215,6 +215,8 @@ function onScroll() {
   requestAnimationFrame(() => {
     ticking = false;
     $('#nav').classList.toggle('scrolled', scrollY > 8);
+    const cue = $('.cue');
+    if (cue) cue.classList.toggle('gone', scrollY > 20);
     const hero = $('.hero'), inner = $('.hero-inner');
     if (!hero || !inner || reduceMotion) return;
     const r = hero.getBoundingClientRect();
@@ -865,11 +867,27 @@ function gh(method, path, body) {
 let ghQueue = Promise.resolve();
 const queued = fn => (ghQueue = ghQueue.then(fn, fn));
 
+// A real write test: creating an (unused, invisible) blob needs Contents: write.
+// Reading the repo's "permissions" isn't enough — it reports the account's rights, not the token's.
 async function ghCanWrite() {
-  const r = await gh('GET', '');
-  if (!r.ok) return false;
-  const j = await r.json();
-  return !!(j.permissions && j.permissions.push);
+  const r = await gh('POST', '/git/blobs', { content: '', encoding: 'utf-8' });
+  return r.ok;
+}
+
+// Turn a failed GitHub response into a plain-English message
+async function ghProblem(r) {
+  if (!r) return 'Could not reach GitHub — check your connection';
+  if (r.status === 401) return 'Your GitHub token expired — log in again';
+  if (r.status === 403 || r.status === 404) return 'Your token can’t write to this site — make one with Contents: Read and write, then log in again';
+  if (r.status === 409 || r.status === 422) return 'The site changed somewhere else (another tab?). Copy your text, reload, and redo the change.';
+  const j = await r.json().catch(() => ({}));
+  return `GitHub refused the change (${r.status}${j.message ? ': ' + j.message : ''})`;
+}
+
+function relogin() {
+  tokenStore.set(null);
+  token = null;
+  login();
 }
 
 const b64ToText = s => new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\s/g, '')), c => c.charCodeAt(0)));
@@ -914,14 +932,10 @@ async function save() {
     contentSha = (await r.json()).content.sha;
     dirty = false;
     toast('Saved — live on your site in about a minute', 3500);
-  } else if (r && r.status === 401) {
-    toast('Your GitHub token expired — log in again to save', 4000);
-    tokenStore.set(null); token = null;
-    login();
-  } else if (r && (r.status === 409 || r.status === 422)) {
-    toast('The site changed somewhere else (another tab?). Copy your text, reload, and redo the change.', 7000);
   } else {
-    toast('Could not save — check your connection', 4000);
+    toast(await ghProblem(r), 8000);
+    // Bad or expired token: ask for a new one. Your unsaved edits stay on the page — Save again after.
+    if (r && [401, 403, 404].includes(r.status)) relogin();
   }
   updateDock();
 }
@@ -939,16 +953,19 @@ async function login() {
     try { ok = await ghCanWrite(); } catch { /* offline */ }
     if (ok) {
       tokenStore.set(token);
-      try { C = await ghLoad(); } catch { toast('Could not load the latest content from GitHub', 4000); }
+      try {
+        const latest = await ghLoad();       // also refreshes the version id needed to save
+        if (!dirty) C = latest;              // keep unsaved edits if re-logging in mid-edit
+      } catch { toast('Could not load the latest content from GitHub', 4000); }
       owner = true;
       render();            // re-render so blocks get their edit tools
       showDock();
       setEditing(true);
-      toast('Owner mode — edit anything, then Save');
+      toast(dirty ? 'Logged in — press Save to publish your changes' : 'Owner mode — edit anything, then Save', 4000);
       return;
     }
     token = null;
-    title = 'That token can’t edit this site — try again';
+    title = 'That token can’t write to this site. Check it has Contents: Read and write on this repository.';
   }
 }
 
@@ -986,7 +1003,8 @@ async function upload(file) {
     r = await queued(() => ghPut('uploads/' + name, b64, `Upload ${file.name}`));
   } catch { /* offline */ }
   if (!r || !r.ok) {
-    toast(r && r.status === 401 ? 'Your GitHub token expired — log in again' : 'Upload failed', 5000);
+    toast(await ghProblem(r), 8000);
+    if (r && [401, 403, 404].includes(r.status)) relogin();
     return null;
   }
   const url = '/uploads/' + name;

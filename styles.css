@@ -94,6 +94,7 @@ h2 { font-size: clamp(38px, 6vw, 84px); font-weight: 600; letter-spacing: -.04em
   background: linear-gradient(var(--fg), transparent);
   animation: cue 2.6s var(--ease) 1.2s infinite both;
 }
+.cue.gone { animation: none; opacity: 0; transform: scaleY(0); transition: opacity .4s var(--ease), transform .4s var(--ease); }
 @keyframes cue {
   0% { transform: scaleY(0); opacity: 0; }
   30% { opacity: 1; }
