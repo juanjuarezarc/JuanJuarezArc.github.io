@@ -7,7 +7,7 @@
   "resume": ""
  },
  "home": {
-  "heroTitle": "Dania",
+  "heroTitle": "Juan Juarez Jr.",
   "heroSub": "Scroll through an architectural world",
   "workTitle": "Work",
   "workSub": "Selected architectural explorations",
@@ -34,7 +34,7 @@
      "type": "image",
      "x": 0,
      "y": 0,
-     "w": 7,
+     "w": 4,
      "h": 5,
      "caption": "AIR",
      "link": "p:air"
@@ -42,9 +42,9 @@
     {
      "id": "w2",
      "type": "image",
-     "x": 7,
+     "x": 4,
      "y": 0,
-     "w": 5,
+     "w": 4,
      "h": 5,
      "caption": "PRESSURE",
      "link": "p:pressure"
@@ -55,7 +55,7 @@
      "x": 0,
      "y": 5,
      "w": 4,
-     "h": 3,
+     "h": 6,
      "caption": "WIP"
     },
     {
@@ -64,16 +64,25 @@
      "x": 4,
      "y": 5,
      "w": 4,
-     "h": 3,
+     "h": 6,
      "caption": "WIP"
     },
     {
      "id": "w5",
      "type": "image",
      "x": 8,
+     "y": 0,
+     "w": 4,
+     "h": 5,
+     "caption": "WIP"
+    },
+    {
+     "id": "5bh0djbq",
+     "type": "image",
+     "x": 8,
      "y": 5,
      "w": 4,
-     "h": 3,
+     "h": 6,
      "caption": "WIP"
     }
    ]
