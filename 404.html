@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<meta charset="UTF-8">
+<title>Redirecting…</title>
+<script>
+  // Friendly short links: /admin → owner login, /p/name → project page, anything else → home
+  (function () {
+    var p = location.pathname, m = p.match(/^\/p\/([^\/]+)\/?$/);
+    location.replace(m ? '/?p=' + m[1] : /^\/admin\/?$/i.test(p) ? '/?admin' : '/');
+  })();
+</script>
