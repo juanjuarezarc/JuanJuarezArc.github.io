@@ -78,7 +78,7 @@ async function boot() {
     if (token) {
       // owner: load the newest content straight from GitHub (Pages can lag ~1 min)
       try {
-        if (await ghCanWrite()) { C = await ghLoad(); owner = true; }
+        if (!(await ghTokenProblem())) { C = await ghLoad(); owner = true; }
         else { tokenStore.set(null); token = null; }
       } catch { /* offline or rate-limited — fall back to the public copy */ }
     }
@@ -867,20 +867,30 @@ function gh(method, path, body) {
 let ghQueue = Promise.resolve();
 const queued = fn => (ghQueue = ghQueue.then(fn, fn));
 
-// A real write test: creating an (unused, invisible) blob needs Contents: write.
-// Reading the repo's "permissions" isn't enough — it reports the account's rights, not the token's.
-async function ghCanWrite() {
-  const r = await gh('POST', '/git/blobs', { content: '', encoding: 'utf-8' });
-  return r.ok;
+// Checks a token step by step and returns null if it can edit the site,
+// or a plain-English reason (including GitHub's own words) if it can't.
+async function ghTokenProblem() {
+  let r;
+  try { r = await gh('GET', ''); } catch { return 'Could not reach GitHub — check your connection and try again.'; }
+  if (r.status === 401) return 'GitHub doesn’t recognise that token. It may be mistyped, expired or deleted — copy it again.';
+  if (r.status === 403 || r.status === 404) return `That token can’t see ${GH.repo}. Under “Repository access”, pick “Only select repositories” and choose it.`;
+  if (!r.ok) return `GitHub error ${r.status} while checking the token.`;
+  // Write test: creating an unused, invisible blob needs Contents: write
+  try { r = await gh('POST', '/git/blobs', { content: 'portfolio-login-check', encoding: 'utf-8' }); }
+  catch { return 'Could not reach GitHub — check your connection and try again.'; }
+  if (r.ok) return null;
+  const j = await r.json().catch(() => ({}));
+  return `That token can read the site but GitHub won’t let it save (${r.status}: ${j.message || 'no details'}). ` +
+         'Set Repository permissions → Contents to “Read and write”, or use the simple token link below.';
 }
 
 // Turn a failed GitHub response into a plain-English message
 async function ghProblem(r) {
   if (!r) return 'Could not reach GitHub — check your connection';
   if (r.status === 401) return 'Your GitHub token expired — log in again';
-  if (r.status === 403 || r.status === 404) return 'Your token can’t write to this site — make one with Contents: Read and write, then log in again';
+  const j = await r.clone().json().catch(() => ({}));
+  if (r.status === 403 || r.status === 404) return `GitHub won’t let this token save (${r.status}: ${j.message || 'no details'}) — log in with a token that can edit the site`;
   if (r.status === 409 || r.status === 422) return 'The site changed somewhere else (another tab?). Copy your text, reload, and redo the change.';
-  const j = await r.json().catch(() => ({}));
   return `GitHub refused the change (${r.status}${j.message ? ': ' + j.message : ''})`;
 }
 
@@ -940,18 +950,22 @@ async function save() {
   updateDock();
 }
 
+const TOKEN_HELP =
+  'Paste a GitHub access token that can edit <b>' + esc(GH.repo) + '</b>. It is kept only in this browser.<br><br>' +
+  '<b>Simplest:</b> <a href="https://github.com/settings/tokens/new?scopes=public_repo&description=Portfolio%20site" target="_blank" rel="noopener" style="text-decoration:underline">make a classic token</a> ' +
+  '(the “public_repo” box is pre-ticked — just pick an expiry and click Generate).<br>' +
+  '<b>Or, tighter:</b> a <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener" style="text-decoration:underline">fine-grained token</a> ' +
+  'with only this repository and Contents: Read and write.';
+
 async function login() {
-  let title = 'Owner login';
+  let problem = '';
   for (;;) {
-    const t = await ask(title, '', 'password',
-      'Paste your GitHub access token. It needs <b>Contents: Read and write</b> on ' +
-      `<b>${esc(GH.repo)}</b>. <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener" style="text-decoration:underline">Create one</a>. ` +
-      'It is kept only in this browser.');
+    const t = await ask('Owner login', '', 'password',
+      (problem ? `<span style="color:#000"><b>${esc(problem)}</b></span><br><br>` : '') + TOKEN_HELP);
     if (t === null) return;
     token = t.trim();
-    let ok = false;
-    try { ok = await ghCanWrite(); } catch { /* offline */ }
-    if (ok) {
+    problem = await ghTokenProblem();
+    if (!problem) {
       tokenStore.set(token);
       try {
         const latest = await ghLoad();       // also refreshes the version id needed to save
@@ -965,7 +979,6 @@ async function login() {
       return;
     }
     token = null;
-    title = 'That token can’t write to this site. Check it has Contents: Read and write on this repository.';
   }
 }
 
