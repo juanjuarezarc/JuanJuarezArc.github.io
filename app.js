@@ -4,7 +4,7 @@
 /* =========================================================
    Where the site lives on GitHub — owner mode saves here
    ========================================================= */
-const GH = { owner: 'Juanjuarezarc', repo: 'Juanjuarezarc.github.io', branch: 'main' };
+const GH = { owner: 'juanjuarezarc', repo: 'JuanJuarezArc.github.io', branch: 'main' };
 
 /* =========================================================
    Basics
