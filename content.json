@@ -7,7 +7,7 @@
   "resume": ""
  },
  "home": {
-  "heroTitle": "Juan Juarez Jr.",
+  "heroTitle": "Pug",
   "heroSub": "Scroll through an architectural world",
   "workTitle": "Work",
   "workSub": "Selected architectural explorations",
@@ -47,7 +47,8 @@
      "w": 4,
      "h": 5,
      "caption": "PRESSURE",
-     "link": "p:pressure"
+     "link": "p:pressure",
+     "z": 1
     },
     {
      "id": "w3",
@@ -84,6 +85,16 @@
      "w": 4,
      "h": 6,
      "caption": "WIP"
+    },
+    {
+     "id": "wpay7gio",
+     "type": "image",
+     "x": 0,
+     "y": 11,
+     "w": 4,
+     "h": 5,
+     "src": "/uploads/20261002-7o4jfjd6.jpg",
+     "caption": ""
     }
    ]
   },
