@@ -7,7 +7,7 @@
   "resume": ""
  },
  "home": {
-  "heroTitle": "Design",
+  "heroTitle": "Desgn",
   "heroSub": "Scroll through an architectural world",
   "workTitle": "Work",
   "workSub": "Selected architectural explorations",
@@ -17,31 +17,129 @@
   "contactText": "<p>Open to internships, collaborations and conversations.</p>"
  },
  "projects": {
-  "air": { "title": "AIR", "sub": "Spatial systems driven by airflow" },
-  "pressure": { "title": "PRESSURE", "sub": "Form under environmental load" }
+  "air": {
+   "title": "AIR",
+   "sub": "Spatial systems driven by airflow"
+  },
+  "pressure": {
+   "title": "PRESSURE",
+   "sub": "Form under environmental load"
+  }
  },
  "boards": {
   "work": {
    "items": [
-    { "id": "w1", "type": "image", "x": 0, "y": 0, "w": 7, "h": 5, "caption": "AIR", "link": "p:air" },
-    { "id": "w2", "type": "image", "x": 7, "y": 0, "w": 5, "h": 5, "caption": "PRESSURE", "link": "p:pressure" },
-    { "id": "w3", "type": "image", "x": 0, "y": 5, "w": 4, "h": 3, "caption": "WIP" },
-    { "id": "w4", "type": "image", "x": 4, "y": 5, "w": 4, "h": 3, "caption": "WIP" },
-    { "id": "w5", "type": "image", "x": 8, "y": 5, "w": 4, "h": 3, "caption": "WIP" }
+    {
+     "id": "w1",
+     "type": "image",
+     "x": 0,
+     "y": 0,
+     "w": 7,
+     "h": 5,
+     "caption": "AIR",
+     "link": "p:air"
+    },
+    {
+     "id": "w2",
+     "type": "image",
+     "x": 7,
+     "y": 0,
+     "w": 5,
+     "h": 5,
+     "caption": "PRESSURE",
+     "link": "p:pressure"
+    },
+    {
+     "id": "w3",
+     "type": "image",
+     "x": 0,
+     "y": 5,
+     "w": 4,
+     "h": 3,
+     "caption": "WIP"
+    },
+    {
+     "id": "w4",
+     "type": "image",
+     "x": 4,
+     "y": 5,
+     "w": 4,
+     "h": 3,
+     "caption": "WIP"
+    },
+    {
+     "id": "w5",
+     "type": "image",
+     "x": 8,
+     "y": 5,
+     "w": 4,
+     "h": 3,
+     "caption": "WIP"
+    }
    ]
   },
   "air": {
    "items": [
-    { "id": "a1", "type": "text", "x": 0, "y": 0, "w": 4, "h": 3, "size": "m", "html": "<p>Describe the project — the site, the question, the process and what you learned.</p>" },
-    { "id": "a2", "type": "image", "x": 5, "y": 0, "w": 7, "h": 5, "caption": "Image" },
-    { "id": "a3", "type": "image", "x": 0, "y": 5, "w": 12, "h": 6, "caption": "Image" }
+    {
+     "id": "a1",
+     "type": "text",
+     "x": 0,
+     "y": 0,
+     "w": 4,
+     "h": 3,
+     "size": "m",
+     "html": "<p>Describe the project — the site, the question, the process and what you learned.</p>"
+    },
+    {
+     "id": "a2",
+     "type": "image",
+     "x": 5,
+     "y": 0,
+     "w": 7,
+     "h": 5,
+     "caption": "Image"
+    },
+    {
+     "id": "a3",
+     "type": "image",
+     "x": 0,
+     "y": 5,
+     "w": 12,
+     "h": 6,
+     "caption": "Image"
+    }
    ]
   },
   "pressure": {
    "items": [
-    { "id": "p1", "type": "image", "x": 0, "y": 0, "w": 12, "h": 6, "caption": "Image" },
-    { "id": "p2", "type": "text", "x": 0, "y": 6, "w": 5, "h": 2, "size": "l", "html": "<p>A short statement about the project.</p>" },
-    { "id": "p3", "type": "image", "x": 6, "y": 6, "w": 6, "h": 4, "caption": "Image" }
+    {
+     "id": "p1",
+     "type": "image",
+     "x": 0,
+     "y": 0,
+     "w": 12,
+     "h": 6,
+     "caption": "Image"
+    },
+    {
+     "id": "p2",
+     "type": "text",
+     "x": 0,
+     "y": 6,
+     "w": 5,
+     "h": 2,
+     "size": "l",
+     "html": "<p>A short statement about the project.</p>"
+    },
+    {
+     "id": "p3",
+     "type": "image",
+     "x": 6,
+     "y": 6,
+     "w": 6,
+     "h": 4,
+     "caption": "Image"
+    }
    ]
   }
  }
