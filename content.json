@@ -193,23 +193,63 @@
      "caption": ""
     },
     {
-     "id": "rxk3sqc2",
-     "type": "text",
-     "x": 0,
-     "y": 10,
-     "w": 5,
-     "h": 1,
-     "size": "xl",
-     "html": "Drawings"
-    },
-    {
      "id": "vu4hawp2",
      "type": "image",
      "x": 0,
-     "y": 19,
+     "y": 25,
+     "w": 6,
+     "h": 5,
+     "src": "/uploads/20261009-vm1sk7qr.webp",
+     "caption": ""
+    },
+    {
+     "id": "9s6wrs8y",
+     "type": "image",
+     "x": 6,
+     "y": 25,
+     "w": 6,
+     "h": 5,
+     "src": "/uploads/20261009-3w0zx4zk.png",
+     "caption": ""
+    },
+    {
+     "id": "reyw5zyn",
+     "type": "image",
+     "x": 0,
+     "y": 31,
+     "w": 6,
+     "h": 3,
+     "src": "/uploads/20261009-uf6fdamu.jpg",
+     "caption": ""
+    },
+    {
+     "id": "1aqxtc3m",
+     "type": "image",
+     "x": 6,
+     "y": 34,
      "w": 6,
      "h": 4,
-     "src": "/uploads/20261009-vm1sk7qr.webp",
+     "src": "/uploads/20261009-ve3mhh26.jpg",
+     "caption": ""
+    },
+    {
+     "id": "j9ih8f5g",
+     "type": "image",
+     "x": 6,
+     "y": 31,
+     "w": 6,
+     "h": 3,
+     "src": "/uploads/20261009-5t92w6yh.jpg",
+     "caption": ""
+    },
+    {
+     "id": "6bomvyu2",
+     "type": "image",
+     "x": 0,
+     "y": 34,
+     "w": 6,
+     "h": 4,
+     "src": "/uploads/20261009-8sjzcr8y.jpg",
      "caption": ""
     }
    ]
