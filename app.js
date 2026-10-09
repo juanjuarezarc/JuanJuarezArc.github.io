@@ -69,6 +69,31 @@ function linkHref(link) {
 const safeSrc = s => (/^\/uploads\/[\w.-]+$/.test(s || '') || /^https:\/\//.test(s || '') ? s : '');
 const isVideo = s => /\.(mp4|webm)(\?|$)/i.test(s || '');
 
+/* YouTube / Vimeo blocks — stored as 'yt:<id>' or 'vimeo:<id>[:<private hash>]' */
+function parseVideoLink(url) {
+  const u = (url || '').trim();
+  let m = u.match(/(?:youtube(?:-nocookie)?\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([\w-]{11})/i);
+  if (m) return 'yt:' + m[1];
+  m = u.match(/vimeo\.com\/(?:.*\/)?(?:video\/)?(\d+)(?:\/([\da-f]{6,}))?/i) || u.match(/vimeo\.com\/.*[?&]h=([\da-f]+)/i);
+  if (m && /^\d+$/.test(m[1])) {
+    const h = m[2] || ((u.match(/[?&]h=([\da-f]+)/i) || [])[1]);
+    return 'vimeo:' + m[1] + (h ? ':' + h : '');
+  }
+  return null;
+}
+function embedSrc(embed, auto) {
+  const [kind, id, hash] = String(embed || '').split(':');
+  if (kind === 'yt' && /^[\w-]{11}$/.test(id)) {
+    return `https://www.youtube-nocookie.com/embed/${id}?rel=0&modestbranding=1&playsinline=1` +
+      (auto ? `&autoplay=1&mute=1&loop=1&playlist=${id}&controls=0&disablekb=1` : '');
+  }
+  if (kind === 'vimeo' && /^\d+$/.test(id)) {
+    return `https://player.vimeo.com/video/${id}?dnt=1&title=0&byline=0&portrait=0` +
+      (hash && /^[\da-f]+$/i.test(hash) ? `&h=${hash}` : '') + (auto ? '&background=1' : '');
+  }
+  return '';
+}
+
 /* =========================================================
    Boot
    ========================================================= */
@@ -276,7 +301,19 @@ function itemEl(it, i) {
     inner.appendChild(t);
   } else {
     const src = safeSrc(it.src);
-    if (src) {
+    const frame = it.embed ? embedSrc(it.embed, it.auto) : '';
+    if (frame) {
+      const f = document.createElement('iframe');
+      f.src = frame;
+      f.title = it.caption || 'Video';
+      f.loading = 'lazy';
+      f.allow = 'autoplay; fullscreen; picture-in-picture; encrypted-media';
+      f.allowFullscreen = true;
+      f.referrerPolicy = 'strict-origin-when-cross-origin';
+      if (it.auto) inner.classList.add('bg-video');
+      inner.classList.add('embed');
+      inner.appendChild(f);
+    } else if (src) {
       const m = document.createElement(isVideo(src) ? 'video' : 'img');
       if (m.tagName === 'VIDEO') {
         m.muted = true; m.loop = true; m.autoplay = true; m.playsInline = true;
@@ -369,7 +406,9 @@ function toolsHTML(it) {
   return `<div class="tools">${
     it.type === 'text'
       ? b('size', 'Aa', 'Text size') + b('edit', 'Edit', 'Edit text')
-      : b('replace', 'Replace', 'Replace image or video') + b('fit', 'Fit', 'Fill frame / show whole image') + b('caption', 'Caption')
+      : it.embed
+        ? b('video', 'Video link', 'Change the YouTube / Vimeo link') + b('auto', it.auto ? 'Player' : 'Loop', it.auto ? 'Show a normal player with sound and controls' : 'Play silently on a loop, like a moving image') + b('caption', 'Caption')
+        : b('replace', 'Replace', 'Replace image or video') + b('video', 'Video link', 'Use a YouTube / Vimeo video instead') + b('fit', 'Fit', 'Fill frame / show whole image') + b('caption', 'Caption')
   }${b('link', 'Link', 'Link to a project or website')}${
     it.link && it.link.startsWith('p:') ? b('open', 'Open ↗', 'Open the linked project page') : ''
   }${b('front', '↑', 'Bring to front')}${b('dup', '⧉', 'Duplicate')}${b('del', '✕', 'Delete')}</div><div class="handle" title="Drag to resize"></div>`;
@@ -454,8 +493,19 @@ async function onTool(e, boardEl) {
       const up = await upload(f);
       if (!up) return;
       it.src = up.url;
+      delete it.embed; delete it.auto;
       break;
     }
+    case 'video': {
+      const v = await askVideoLink(it.embed ? 'Change video link' : 'Use a YouTube or Vimeo video');
+      if (!v) return;
+      it.embed = v;
+      break;
+    }
+    case 'auto':
+      it.auto = !it.auto;
+      toast(it.auto ? 'Plays silently on a loop' : 'Normal player with sound and controls');
+      break;
     case 'fit': it.fit = it.fit === 'contain' ? 'cover' : 'contain'; break;
     case 'caption': {
       const v = await ask('Caption', it.caption || '', 'text', 'Shown when hovering the image. Leave empty for none.');
@@ -559,7 +609,7 @@ function bindDrop(boardEl) {
     if (target && files.length === 1) {                  // drop on an image = replace it
       const it = findItem(boardEl, target.dataset.id);
       const up = await upload(files[0]);
-      if (up) { it.src = up.url; markDirty(); renderBoard(boardEl, true); }
+      if (up) { it.src = up.url; delete it.embed; delete it.auto; markDirty(); renderBoard(boardEl, true); }
       return;
     }
     const m = metrics(boardEl), r = boardEl.getBoundingClientRect();
@@ -712,6 +762,7 @@ function showDock() {
     <button data-dock="mode"></button>
     <span class="sep edit-only"></span>
     <button class="edit-only" data-dock="image" title="Upload images or videos">+ Image</button>
+    <button class="edit-only" data-dock="video" title="Add a YouTube or Vimeo video — any size">+ Video link</button>
     <button class="edit-only" data-dock="text">+ Text</button>
     ${proj
       ? '<button class="edit-only" data-dock="delproject">Delete project</button>'
@@ -744,6 +795,21 @@ async function onDock(e) {
       if (!boardEl) return;
       const files = await pickFiles(true);
       if (files.length) await addMedia(boardEl, files);
+      break;
+    }
+    case 'video': {
+      if (!boardEl) return;
+      const v = await askVideoLink('Add a YouTube or Vimeo video');
+      if (!v) return;
+      const b = boardOf(boardEl);
+      const it = { id: uid(), type: 'image', x: 0, y: bottomOf(b), w: 8, h: 5, embed: v, caption: '' };
+      b.items.push(it);
+      markDirty();
+      renderBoard(boardEl, true);
+      const el = $(`.item[data-id="${it.id}"]`, boardEl);
+      select(el);
+      el.scrollIntoView({ block: 'center', behavior: reduceMotion ? 'auto' : 'smooth' });
+      toast('Video added — drag to place it, then Save');
       break;
     }
     case 'text': {
@@ -1008,7 +1074,7 @@ async function upload(file) {
   }
   toast(`Uploading ${file.name}…`, 120000);
   file = await shrink(file);
-  if (file.size > MAX_UPLOAD) { toast('That file is over 25 MB — compress it first (videos especially)', 6000); return null; }
+  if (file.size > MAX_UPLOAD) { toast('That file is over 25 MB (GitHub’s upload limit). For big videos use “+ Video link” with YouTube or Vimeo.', 8000); return null; }
   const name = new Date().toISOString().slice(0, 10).replace(/-/g, '') + '-' + uid() + UPLOAD_TYPES[file.type];
   let r = null;
   try {
@@ -1024,6 +1090,17 @@ async function upload(file) {
   localPreview.set(url, URL.createObjectURL(file));
   toast('Uploaded — remember to Save');
   return { url };
+}
+
+async function askVideoLink(title) {
+  for (let hint = 'Paste a link to the video on YouTube or Vimeo — any length or size. ' +
+       'Tip: on YouTube, set it to “Unlisted” if you only want it seen on your site.';;) {
+    const url = await ask(title, '', 'text', hint);
+    if (url === null || !url.trim()) return null;
+    const v = parseVideoLink(url);
+    if (v) return v;
+    hint = '<b>That doesn’t look like a YouTube or Vimeo link.</b> Copy the address from the video’s page (or its Share button) and try again.';
+  }
 }
 
 function pickFiles(multiple, accept = MEDIA_TYPES) {
