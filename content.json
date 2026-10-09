@@ -251,6 +251,16 @@
      "h": 4,
      "src": "/uploads/20261009-8sjzcr8y.jpg",
      "caption": ""
+    },
+    {
+     "id": "2cv8ckqw",
+     "type": "image",
+     "x": 0,
+     "y": 6,
+     "w": 6,
+     "h": 4,
+     "embed": "vimeo:1234494556",
+     "caption": ""
     }
    ]
   }
