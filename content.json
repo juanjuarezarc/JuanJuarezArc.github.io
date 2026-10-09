@@ -18,7 +18,7 @@
  },
  "projects": {
   "air": {
-   "title": "AIR",
+   "title": "PRESSURE",
    "sub": "Spatial systems driven by airflow"
   },
   "pressure": {
@@ -36,7 +36,7 @@
      "y": 0,
      "w": 4,
      "h": 5,
-     "caption": "AIR",
+     "caption": "PRESSURE",
      "link": "p:air"
     },
     {
