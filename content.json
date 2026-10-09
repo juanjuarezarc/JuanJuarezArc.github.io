@@ -22,8 +22,8 @@
    "sub": "Spatial systems driven by airflow"
   },
   "pressure": {
-   "title": "Air",
-   "sub": "Form under environmental load"
+   "title": "AIR",
+   "sub": "Spatial systems driven by airflow"
   }
  },
  "boards": {
@@ -46,7 +46,7 @@
      "y": 0,
      "w": 4,
      "h": 5,
-     "caption": "Air",
+     "caption": "AIR",
      "link": "p:pressure",
      "z": 1
     },
