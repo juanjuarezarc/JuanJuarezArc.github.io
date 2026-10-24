@@ -115,9 +115,60 @@
      "type": "image",
      "x": 0,
      "y": 11,
+     "w": 12,
+     "h": 8,
+     "caption": "Image",
+     "src": "/uploads/20261024-6khpee2h.webp"
+    },
+    {
+     "id": "u60msflt",
+     "type": "image",
+     "x": 8,
+     "y": 22,
      "w": 4,
-     "h": 5,
-     "caption": "Image"
+     "h": 3,
+     "src": "/uploads/20261024-7y4lfj7s.webp",
+     "caption": ""
+    },
+    {
+     "id": "a8bb94go",
+     "type": "image",
+     "x": 8,
+     "y": 19,
+     "w": 4,
+     "h": 3,
+     "src": "/uploads/20261024-ln9aqask.webp",
+     "caption": ""
+    },
+    {
+     "id": "62yy84it",
+     "type": "image",
+     "x": 0,
+     "y": 19,
+     "w": 8,
+     "h": 6,
+     "src": "/uploads/20261024-14x0cy76.webp",
+     "caption": ""
+    },
+    {
+     "id": "ys34kvi2",
+     "type": "image",
+     "x": 0,
+     "y": 26,
+     "w": 3,
+     "h": 2,
+     "src": "/uploads/20261024-s7259jov.webp",
+     "caption": ""
+    },
+    {
+     "id": "4utreuun",
+     "type": "image",
+     "x": 3,
+     "y": 26,
+     "w": 3,
+     "h": 2,
+     "src": "/uploads/20261024-jbogt509.png",
+     "caption": ""
     }
    ]
   },
