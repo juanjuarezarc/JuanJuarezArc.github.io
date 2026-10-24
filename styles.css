@@ -12,7 +12,9 @@
           "Helvetica Neue", Helvetica, Arial, sans-serif;
   --radius: 4px;            /* corner rounding on images */
   --gap: 12px;              /* space between grid blocks */
-  --max: 880px;             /* magazine column width — raise to make everything bigger, lower for smaller */
+  /* magazine column width — raise 800px to make everything bigger, lower for smaller.
+     On short screens it narrows further so tall images still fit in the window. */
+  --max: min(800px, calc((100vh - 100px) * 1.15));
   --pad: clamp(20px, 8vw, 140px);  /* the invisible margins on the left and right edges */
   --ease: cubic-bezier(.2, .8, .2, 1);
 }
