@@ -11,9 +11,9 @@
   --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
           "Helvetica Neue", Helvetica, Arial, sans-serif;
   --radius: 4px;            /* corner rounding on images */
-  --gap: 16px;              /* space between grid blocks */
-  --max: 1280px;            /* max content width */
-  --pad: clamp(16px, 4vw, 48px);
+  --gap: 12px;              /* space between grid blocks */
+  --max: 880px;             /* magazine column width — raise to make everything bigger, lower for smaller */
+  --pad: clamp(20px, 8vw, 140px);  /* the invisible margins on the left and right edges */
   --ease: cubic-bezier(.2, .8, .2, 1);
 }
 
@@ -39,7 +39,7 @@ img, video { display: block; max-width: 100%; }
 /* ---------- NAV ---------- */
 .nav {
   position: fixed; inset: 0 0 auto; z-index: 50;
-  height: 52px; padding: 0 var(--pad);
+  height: 52px; padding: 0 max(var(--pad), calc((100% - var(--max)) / 2));  /* lines up with the column */
   display: flex; justify-content: space-between; align-items: center;
   font-size: 13px;
   transition: background-color .4s var(--ease), border-color .4s var(--ease);
@@ -58,18 +58,18 @@ img, video { display: block; max-width: 100%; }
 
 /* ---------- TYPE ---------- */
 .display {
-  font-size: clamp(52px, 11vw, 168px);
+  font-size: clamp(44px, 7.5vw, 112px);
   font-weight: 600; letter-spacing: -.045em; line-height: .95;
 }
 .lede {
   margin: 22px auto 0; max-width: 36ch;
-  font-size: clamp(17px, 2vw, 24px); line-height: 1.35;
+  font-size: clamp(16px, 1.5vw, 20px); line-height: 1.4;
   letter-spacing: -.01em; color: var(--muted);
 }
-h2 { font-size: clamp(38px, 6vw, 84px); font-weight: 600; letter-spacing: -.04em; line-height: 1; }
+h2 { font-size: clamp(32px, 4.2vw, 58px); font-weight: 600; letter-spacing: -.04em; line-height: 1; }
 .prose {
   margin-top: 28px;
-  font-size: clamp(19px, 2.1vw, 28px); line-height: 1.4; letter-spacing: -.015em; color: var(--text);
+  font-size: clamp(17px, 1.6vw, 22px); line-height: 1.45; letter-spacing: -.015em; color: var(--text);
 }
 .prose p + p, .txt p + p { margin-top: .8em; }
 .prose a, .txt a { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
@@ -102,14 +102,14 @@ h2 { font-size: clamp(38px, 6vw, 84px); font-weight: 600; letter-spacing: -.04em
 }
 
 /* ---------- SECTIONS ---------- */
-.zone { max-width: var(--max); margin: 0 auto; padding: clamp(90px, 16vh, 180px) var(--pad); }
-.zone.narrow { max-width: 880px; text-align: center; }
+.zone { max-width: calc(var(--max) + 2 * var(--pad)); margin: 0 auto; padding: clamp(70px, 12vh, 140px) var(--pad); }
+.zone.narrow { max-width: calc(640px + 2 * var(--pad)); text-align: center; }
 .zone.tight { padding-top: 0; }
 .zone-head { text-align: center; margin-bottom: clamp(40px, 8vh, 90px); }
-.zone-head p { margin-top: 14px; color: var(--muted); font-size: clamp(17px, 1.6vw, 21px); }
+.zone-head p { margin-top: 14px; color: var(--muted); font-size: clamp(15px, 1.3vw, 18px); }
 .mail {
   display: inline-block; margin-top: 30px; padding-bottom: 4px;
-  font-size: clamp(22px, 3.2vw, 40px); letter-spacing: -.02em;
+  font-size: clamp(20px, 2.4vw, 30px); letter-spacing: -.02em;
   border-bottom: 1px solid currentColor;
 }
 .prose + .mail, .mail + .prose { margin-top: 28px; }
@@ -124,18 +124,18 @@ h2 { font-size: clamp(38px, 6vw, 84px); font-weight: 600; letter-spacing: -.04em
 
 /* ---------- PROJECT PAGE ---------- */
 .project-head {
-  max-width: var(--max); margin: 0 auto; text-align: center;
-  padding: clamp(140px, 24vh, 240px) var(--pad) clamp(50px, 9vh, 100px);
+  max-width: calc(var(--max) + 2 * var(--pad)); margin: 0 auto; text-align: center;
+  padding: clamp(120px, 20vh, 200px) var(--pad) clamp(40px, 7vh, 80px);
 }
 .back { display: inline-block; margin-bottom: 26px; font-size: 13px; color: var(--muted); transition: color .2s; }
 .back:hover { color: var(--fg); }
 .next {
-  display: block; max-width: var(--max); margin: 0 auto; text-align: center;
-  padding: clamp(90px, 18vh, 200px) var(--pad);
-  border-top: 1px solid var(--line);
+  display: block; max-width: calc(var(--max) + 2 * var(--pad)); margin: 0 auto; text-align: center;
+  padding: clamp(70px, 14vh, 160px) var(--pad);
+  background: linear-gradient(var(--line), var(--line)) top center / min(var(--max), 100% - 2 * var(--pad)) 1px no-repeat;
 }
 .next span { display: block; margin-bottom: 12px; font-size: 13px; color: var(--muted); }
-.next strong { font-size: clamp(38px, 7vw, 100px); font-weight: 600; letter-spacing: -.04em; transition: opacity .3s; }
+.next strong { font-size: clamp(30px, 5vw, 72px); font-weight: 600; letter-spacing: -.04em; transition: opacity .3s; }
 .next:hover strong { opacity: .45; }
 
 .foot { padding: 50px var(--pad) 70px; text-align: center; font-size: 12px; color: var(--muted); }
