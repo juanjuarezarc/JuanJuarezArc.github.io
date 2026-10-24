@@ -1,6 +1,6 @@
 {
  "site": {
-  "name": "",
+  "name": "HOME",
   "title": "Juan Juarez — Portfolio",
   "email": "juanjuarezarc@email.com",
   "footer": "© 2026 Juan Juarez",
@@ -106,16 +106,17 @@
      "x": 5,
      "y": 0,
      "w": 7,
-     "h": 5,
-     "caption": "Image"
+     "h": 10,
+     "caption": "Image",
+     "src": "/uploads/20261024-7h2bbrs1.webp"
     },
     {
      "id": "a3",
      "type": "image",
      "x": 0,
-     "y": 5,
-     "w": 12,
-     "h": 6,
+     "y": 11,
+     "w": 4,
+     "h": 5,
      "caption": "Image"
     }
    ]
