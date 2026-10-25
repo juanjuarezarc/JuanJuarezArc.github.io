@@ -173,8 +173,8 @@
     {
      "id": "4bwprcam",
      "type": "image",
-     "x": 0,
-     "y": 43,
+     "x": 8,
+     "y": 45,
      "w": 4,
      "h": 5,
      "src": "/uploads/20261025-qu19oexu.jpg",
@@ -183,7 +183,7 @@
     {
      "id": "krj9imqu",
      "type": "image",
-     "x": 4,
+     "x": 0,
      "y": 38,
      "w": 4,
      "h": 5,
@@ -193,7 +193,7 @@
     {
      "id": "wo5g4l0n",
      "type": "image",
-     "x": 0,
+     "x": 4,
      "y": 38,
      "w": 4,
      "h": 5,
@@ -213,11 +213,31 @@
     {
      "id": "sj3d4e9r",
      "type": "image",
-     "x": 8,
-     "y": 43,
+     "x": 0,
+     "y": 45,
      "w": 4,
      "h": 5,
      "src": "/uploads/20261025-rjuvsh9d.jpg",
+     "caption": ""
+    },
+    {
+     "id": "e3mgetko",
+     "type": "image",
+     "x": 4,
+     "y": 45,
+     "w": 4,
+     "h": 5,
+     "src": "/uploads/20261025-zgbzpzte.jpg",
+     "caption": ""
+    },
+    {
+     "id": "uhcweimw",
+     "type": "image",
+     "x": 0,
+     "y": 30,
+     "w": 12,
+     "h": 7,
+     "src": "/uploads/20261025-8wxwjify.webp",
      "caption": ""
     }
    ]
