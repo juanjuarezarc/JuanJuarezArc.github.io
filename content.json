@@ -19,7 +19,7 @@
  "projects": {
   "air": {
    "title": "PRESSURE",
-   "sub": "Floor & Ground studies"
+   "sub": "Floor & Ground"
   },
   "pressure": {
    "title": "AIR",
@@ -153,7 +153,7 @@
     {
      "id": "ys34kvi2",
      "type": "image",
-     "x": 0,
+     "x": 6,
      "y": 26,
      "w": 3,
      "h": 2,
@@ -163,11 +163,61 @@
     {
      "id": "4utreuun",
      "type": "image",
-     "x": 3,
+     "x": 9,
      "y": 26,
      "w": 3,
      "h": 2,
      "src": "/uploads/20261024-jbogt509.png",
+     "caption": ""
+    },
+    {
+     "id": "4bwprcam",
+     "type": "image",
+     "x": 0,
+     "y": 43,
+     "w": 4,
+     "h": 5,
+     "src": "/uploads/20261025-qu19oexu.jpg",
+     "caption": ""
+    },
+    {
+     "id": "krj9imqu",
+     "type": "image",
+     "x": 4,
+     "y": 38,
+     "w": 4,
+     "h": 5,
+     "src": "/uploads/20261025-e0dsd7o5.jpg",
+     "caption": ""
+    },
+    {
+     "id": "wo5g4l0n",
+     "type": "image",
+     "x": 0,
+     "y": 38,
+     "w": 4,
+     "h": 5,
+     "src": "/uploads/20261025-n7abub7k.jpg",
+     "caption": ""
+    },
+    {
+     "id": "dy3o8wws",
+     "type": "image",
+     "x": 8,
+     "y": 38,
+     "w": 4,
+     "h": 5,
+     "src": "/uploads/20261025-v2i8wg9w.jpg",
+     "caption": ""
+    },
+    {
+     "id": "sj3d4e9r",
+     "type": "image",
+     "x": 8,
+     "y": 43,
+     "w": 4,
+     "h": 5,
+     "src": "/uploads/20261025-rjuvsh9d.jpg",
      "caption": ""
     }
    ]
