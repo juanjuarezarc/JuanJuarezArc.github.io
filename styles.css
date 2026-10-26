@@ -188,6 +188,7 @@ body:not(.editing) .inner.zoomable:hover img, body:not(.editing) .inner.zoomable
 .zoom { position: fixed; inset: 0; z-index: 500; cursor: zoom-out; overscroll-behavior: contain; }
 .zoom-bg, .zoom-grain { position: absolute; inset: 0; opacity: 0; transition: opacity .4s var(--ease); pointer-events: none; }
 .zoom-bg {   /* soft frosted glass — subtle */
+  will-change: opacity;
   background: rgba(255, 255, 255, .4);
   -webkit-backdrop-filter: blur(8px) saturate(.85);
   backdrop-filter: blur(8px) saturate(.85);
@@ -198,12 +199,13 @@ body:not(.editing) .inner.zoomable:hover img, body:not(.editing) .inner.zoomable
 }
 .zoom.open .zoom-bg { opacity: 1; }
 .zoom.open .zoom-grain { opacity: .06; }
-.zoom-media {
-  position: fixed; object-fit: cover; cursor: default;
-  transform-origin: 50% 50%; will-change: transform, clip-path; backface-visibility: hidden;
+.zoom-frame {
+  position: fixed; overflow: hidden; border-radius: var(--radius); cursor: default;
+  transform-origin: 50% 50%; will-change: transform;
 }
-.zoom-media.anim {
-  transition: transform .5s cubic-bezier(.32, .72, 0, 1), clip-path .5s cubic-bezier(.32, .72, 0, 1);
+.zoom-frame img, .zoom-frame video {
+  display: block; width: 100%; height: 100%; object-fit: cover;
+  transform-origin: 50% 50%; will-change: transform;
 }
 .zoom-cap {
   position: fixed; left: 0; right: 0; text-align: center; pointer-events: none;

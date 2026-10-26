@@ -410,35 +410,85 @@ function bindBoard(boardEl) {
 /* =========================================================
    Click-to-zoom: the image lifts out of the grid to the centre of
    the screen over a soft frosted blur. Click outside (or Esc) to return.
-   Animated with transform + clip-path only, so it runs on the GPU
-   (no layout or image resizing per frame).
+
+   Smoothness: the picture is drawn once at full size, then only moved
+   and scaled (transform), which the graphics chip does without redrawing.
+   The crop from grid-shape to full picture is done by scaling an outer
+   frame while counter-scaling the picture inside it, with every frame
+   precomputed so the two always match exactly.
    ========================================================= */
 let zoomState = null;
-const ZOOM_RADIUS = 4;
+const ZOOM_OPEN_MS = 480, ZOOM_CLOSE_MS = 400;
+
+// iOS-style ease-out curve: cubic-bezier(.32, .72, 0, 1)
+const zoomEase = (() => {
+  const x1 = 0.32, y1 = 0.72, x2 = 0, y2 = 1;
+  const bez = (t, a, b) => ((1 - 3 * b + 3 * a) * t + (3 * b - 6 * a)) * t * t + 3 * a * t;
+  const slope = (t, a, b) => 3 * (1 - 3 * b + 3 * a) * t * t + 2 * (3 * b - 6 * a) * t + 3 * a;
+  return x => {
+    if (x <= 0) return 0;
+    if (x >= 1) return 1;
+    let t = x;
+    for (let i = 0; i < 8; i++) t = Math.min(1, Math.max(0, t - (bez(t, x1, x2) - x) / slope(t, x1, x2)));
+    return bez(t, y1, y2);
+  };
+})();
 
 const naturalSize = m => (m.tagName === 'VIDEO' ? [m.videoWidth, m.videoHeight] : [m.naturalWidth, m.naturalHeight]);
 
-// The transform + crop that make the big copy sit exactly over the picture in the grid
-function zoomStart(media, box) {
+// How the picture sits in the grid right now (accounts for cropping, "Fit" and the hover zoom)
+function zoomGeometry(media) {
   const tile = media.closest('.inner').getBoundingClientRect();
   const [nw, nh] = naturalSize(media);
   const cs = getComputedStyle(media);
   const hover = cs.transform && cs.transform !== 'none' ? new DOMMatrixReadOnly(cs.transform).a : 1;
   const fit = cs.objectFit === 'contain' ? Math.min : Math.max;
   const k = fit(tile.width / nw, tile.height / nh) * hover;
-  const dw = nw * k, dh = nh * k;                                   // picture size as shown in the grid
-  const vw = Math.min(dw, tile.width), vh = Math.min(dh, tile.height); // the part you can see
-  const s = dw / box.width;
-  const dx = tile.left + tile.width / 2 - (box.left + box.width / 2);
-  const dy = tile.top + tile.height / 2 - (box.top + box.height / 2);
-  const ix = (box.width - vw / s) / 2, iy = (box.height - vh / s) / 2;
+  const dw = nw * k, dh = nh * k;
   return {
-    transform: `translate3d(${dx}px, ${dy}px, 0) scale(${s})`,
-    clip: `inset(${iy}px ${ix}px round ${ZOOM_RADIUS / s}px)`,
+    dw,                                            // picture width as shown in the grid
+    cw: Math.min(dw, tile.width),                  // visible (cropped) width
+    ch: Math.min(dh, tile.height),                 // visible (cropped) height
+    cx: tile.left + tile.width / 2, cy: tile.top + tile.height / 2,
   };
 }
-const ZOOM_END = { transform: 'translate3d(0, 0, 0) scale(1)', clip: `inset(0px 0px round ${ZOOM_RADIUS}px)` };
-const applyZoom = (el, st) => { el.style.transform = st.transform; el.style.clipPath = st.clip; };
+
+// Frames from progress p0 to p1 (0 = in the grid, 1 = zoomed), eased
+function zoomFrames(z, p0, p1) {
+  const { g, box } = z;
+  const fx = box.left + box.width / 2, fy = box.top + box.height / 2;
+  const outer = [], inner = [], N = 40;
+  for (let i = 0; i <= N; i++) {
+    const p = p0 + (p1 - p0) * zoomEase(i / N);
+    const sx = (g.cw + (box.width - g.cw) * p) / box.width;      // frame (crop) scale
+    const sy = (g.ch + (box.height - g.ch) * p) / box.height;
+    const S = (g.dw + (box.width - g.dw) * p) / box.width;       // picture scale
+    outer.push({ transform: `translate3d(${(g.cx - fx) * (1 - p)}px, ${(g.cy - fy) * (1 - p)}px, 0) scale(${sx}, ${sy})` });
+    inner.push({ transform: `scale(${S / sx}, ${S / sy})` });
+  }
+  return { outer, inner };
+}
+
+function zoomRun(z, p0, p1, ms) {
+  const { outer, inner } = zoomFrames(z, p0, p1);
+  const opts = { duration: reduceMotion ? 1 : ms, easing: 'linear', fill: 'forwards' };
+  const prev = z.anims || [];
+  z.anims = [z.frame.animate(outer, opts), z.media2.animate(inner, opts)];
+  prev.forEach(a => a.cancel());
+  z.p0 = p0; z.p1 = p1;
+  return z.anims[0].finished.catch(() => {});
+}
+
+// Where an in-flight animation currently is (so closing mid-open is seamless)
+function zoomProgress(z) {
+  const a = z.anims && z.anims[0];
+  if (!a) return 0;
+  const d = a.effect.getTiming().duration;
+  const t = Math.min(1, (a.currentTime || 0) / d);
+  return z.p0 + (z.p1 - z.p0) * zoomEase(t);
+}
+
+const nextFrame = () => new Promise(r => { requestAnimationFrame(() => r()); setTimeout(r, 50); });
 
 async function openZoom(media, capEl) {
   if (zoomState) return;
@@ -454,67 +504,73 @@ async function openZoom(media, capEl) {
 
   const wrap = document.createElement('div');
   wrap.className = 'zoom';
-  wrap.innerHTML = '<div class="zoom-bg"></div><div class="zoom-grain"></div>';
+  wrap.innerHTML = '<div class="zoom-bg"></div><div class="zoom-grain"></div><div class="zoom-frame"></div>';
+  const frame = wrap.querySelector('.zoom-frame');
+  Object.assign(frame.style, { left: `${box.left}px`, top: `${box.top}px`, width: `${box.width}px`, height: `${box.height}px` });
   const isVid = media.tagName === 'VIDEO';
-  const clone = document.createElement(isVid ? 'video' : 'img');
-  clone.className = 'zoom-media';
+  const media2 = document.createElement(isVid ? 'video' : 'img');
   if (isVid) {
-    clone.muted = true; clone.loop = true; clone.autoplay = true; clone.playsInline = true;
-    clone.setAttribute('muted', ''); clone.setAttribute('playsinline', '');
+    media2.muted = true; media2.loop = true; media2.autoplay = true; media2.playsInline = true;
+    media2.setAttribute('muted', ''); media2.setAttribute('playsinline', '');
   } else {
-    clone.alt = media.alt || '';
-    clone.decoding = 'async';
+    media2.alt = media.alt || '';
   }
-  clone.src = media.currentSrc || media.src;
-  if (isVid) clone.currentTime = media.currentTime;
-  Object.assign(clone.style, { left: `${box.left}px`, top: `${box.top}px`, width: `${box.width}px`, height: `${box.height}px` });
-  applyZoom(clone, zoomStart(media, box));                  // starts exactly over the grid picture
-  wrap.appendChild(clone);
-  let cap = null;
+  media2.src = media.currentSrc || media.src;
+  if (isVid) media2.currentTime = media.currentTime;
+  frame.appendChild(media2);
   if (capEl && capEl.textContent.trim()) {
-    cap = document.createElement('div');
+    const cap = document.createElement('div');
     cap.className = 'zoom-cap';
     cap.textContent = capEl.textContent;
     cap.style.top = `${box.top + box.height + 16}px`;
     wrap.appendChild(cap);
   }
-  const inner = media.closest('.inner');
-  zoomState = { wrap, clone, media, inner, box, w: innerWidth };
-  // scrolling is blocked inside the zoom view (cheaper than locking the whole page)
-  const stop = e => e.preventDefault();
+
+  const z = zoomState = { wrap, frame, media2, media, inner: media.closest('.inner'), box, w: innerWidth };
+  z.g = zoomGeometry(media);
+  const first = zoomFrames(z, 0, 0);                        // sits exactly over the grid picture
+  frame.style.transform = first.outer[0].transform;
+  media2.style.transform = first.inner[0].transform;
+
+  const stop = e => e.preventDefault();                     // no scrolling while zoomed
   wrap.addEventListener('wheel', stop, { passive: false });
   wrap.addEventListener('touchmove', stop, { passive: false });
-  wrap.addEventListener('click', e => { if (e.target !== clone) closeZoom(); });
+  wrap.addEventListener('click', e => { if (!frame.contains(e.target)) closeZoom(); });
   document.body.appendChild(wrap);
-  inner.classList.add('zoom-src');                          // the original "lifts out"
+  z.inner.classList.add('zoom-src');                        // the original "lifts out"
 
-  // make sure the big picture is decoded before it moves, so the first frames don't stutter
-  if (!isVid && clone.decode) await Promise.race([clone.decode().catch(() => {}), new Promise(r => setTimeout(r, 150))]);
-  if (zoomState?.clone !== clone || zoomState.closing) return;
-  void clone.offsetWidth;
-  clone.classList.add('anim');
+  // Let the full picture decode and get drawn once before anything moves
+  if (!isVid && media2.decode) await Promise.race([media2.decode().catch(() => {}), new Promise(r => setTimeout(r, 400))]);
+  await nextFrame();
+  await nextFrame();
+  if (zoomState !== z || z.closing) return;
   wrap.classList.add('open');
-  applyZoom(clone, ZOOM_END);
+  zoomRun(z, 0, 1, ZOOM_OPEN_MS);
 }
 
-function closeZoom() {
-  if (!zoomState || zoomState.closing) return;
+async function closeZoom() {
   const z = zoomState;
+  if (!z || z.closing) return;
   z.closing = true;
-  z.clone.classList.add('anim');
   z.wrap.classList.remove('open');
-  applyZoom(z.clone, zoomStart(z.media, z.box));
-  let done = false;
-  const finish = () => {
-    if (done) return;
-    done = true;
-    z.inner.classList.remove('zoom-src');
-    z.wrap.remove();
-    zoomState = null;
-  };
-  z.clone.addEventListener('transitionend', e => { if (e.propertyName === 'transform') finish(); });
-  setTimeout(finish, reduceMotion ? 0 : 700);               // safety net
+  const p = zoomProgress(z);
+  if (p > 0) await zoomRun(z, p, 0, Math.max(200, ZOOM_CLOSE_MS * p));
+  z.inner.classList.remove('zoom-src');
+  z.wrap.remove();
+  if (zoomState === z) zoomState = null;
 }
+
+// Start decoding the full picture as soon as the pointer is over it, so the click is instant
+document.addEventListener('pointerover', e => {
+  const inner = e.target.closest && e.target.closest('.inner.zoomable');
+  const img = inner && inner.querySelector('img');
+  if (!img || img._predecoded || !img.complete) return;
+  img._predecoded = true;
+  const pre = new Image();
+  pre.src = img.currentSrc || img.src;
+  if (pre.decode) pre.decode().catch(() => {});
+}, { passive: true });
+
 document.addEventListener('keydown', e => {
   if (!zoomState) return;
   if (e.key === 'Escape') closeZoom();
