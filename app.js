@@ -360,9 +360,40 @@ function place(el, it, m) {
   el.style.zIndex = it.z || '';
 }
 
-function sizeBoard(boardEl, m) {
+function sizeBoard(boardEl, m, minPx = 0) {
   const rows = bottomOf(boardOf(boardEl)) + (editing ? 3 : 0);
-  boardEl.style.height = `${Math.max(rows * m.cell - m.gap, 0)}px`;
+  boardEl.style.height = `${Math.max(rows * m.cell - m.gap, minPx, 0)}px`;
+}
+
+/* Text keeps a readable size on small screens, so it can need more room than its box.
+   Give it that room: the text block grows to fit, and everything that starts below it
+   moves down by the same amount (like adding a little height to the grid at that line),
+   so rows stay aligned the way they are on a big screen. Only when not editing, so
+   owner mode always shows the true grid positions. Returns the board's bottom in px. */
+function fitText(boardEl, b, m) {
+  const grow = [];
+  if (!editing) {
+    for (const el of $$('.item.text', boardEl)) {
+      const it = b.items.find(x => x.id === el.dataset.id);
+      if (!it) continue;
+      const box = it.h * m.cell - m.gap;
+      const need = $('.txt', el).scrollHeight;
+      if (need > box + 1) grow.push({ it, line: it.y + it.h, extra: need - box + m.gap });
+    }
+  }
+  if (!grow.length) return 0;
+  let bottom = 0;
+  for (const el of $$('.item', boardEl)) {
+    const it = b.items.find(x => x.id === el.dataset.id);
+    if (!it) continue;
+    const dy = grow.reduce((sum, g) => sum + (it.y >= g.line ? g.extra : 0), 0);
+    const own = grow.find(g => g.it === it);
+    const h = it.h * m.cell - m.gap + (own ? own.extra : 0);
+    if (dy) el.style.transform = `translate(${it.x * m.cell}px, ${it.y * m.cell + dy}px)`;
+    if (own) el.style.height = `${h}px`;
+    bottom = Math.max(bottom, it.y * m.cell + dy + h);
+  }
+  return bottom;
 }
 
 function layoutBoard(boardEl) {
@@ -383,7 +414,8 @@ function layoutBoard(boardEl) {
       place(el, it, m);
     }
   }
-  if (stack) boardEl.style.height = ''; else sizeBoard(boardEl, m);
+  if (stack) boardEl.style.height = '';
+  else sizeBoard(boardEl, m, fitText(boardEl, b, m));
 }
 
 function bindBoard(boardEl) {
