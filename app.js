@@ -409,37 +409,48 @@ function bindBoard(boardEl) {
 
 /* =========================================================
    Click-to-zoom: the image lifts out of the grid to the centre of
-   the screen over a matte, grainy blur. Click outside (or Esc) to return.
+   the screen over a soft frosted blur. Click outside (or Esc) to return.
+   Animated with transform + clip-path only, so it runs on the GPU
+   (no layout or image resizing per frame).
    ========================================================= */
 let zoomState = null;
+const ZOOM_RADIUS = 4;
 
-const setRect = (el, r) => {
-  el.style.left = `${r.left}px`; el.style.top = `${r.top}px`;
-  el.style.width = `${r.width}px`; el.style.height = `${r.height}px`;
-};
 const naturalSize = m => (m.tagName === 'VIDEO' ? [m.videoWidth, m.videoHeight] : [m.naturalWidth, m.naturalHeight]);
 
-// Where the picture actually is on screen (accounts for "Fit" letterboxing)
-function shownRect(media) {
-  const r = media.getBoundingClientRect();
+// The transform + crop that make the big copy sit exactly over the picture in the grid
+function zoomStart(media, box) {
+  const tile = media.closest('.inner').getBoundingClientRect();
   const [nw, nh] = naturalSize(media);
-  if (getComputedStyle(media).objectFit !== 'contain' || !nw || !nh) return r;
-  const s = Math.min(r.width / nw, r.height / nh);
-  const w = nw * s, h = nh * s;
-  return { left: r.left + (r.width - w) / 2, top: r.top + (r.height - h) / 2, width: w, height: h };
+  const cs = getComputedStyle(media);
+  const hover = cs.transform && cs.transform !== 'none' ? new DOMMatrixReadOnly(cs.transform).a : 1;
+  const fit = cs.objectFit === 'contain' ? Math.min : Math.max;
+  const k = fit(tile.width / nw, tile.height / nh) * hover;
+  const dw = nw * k, dh = nh * k;                                   // picture size as shown in the grid
+  const vw = Math.min(dw, tile.width), vh = Math.min(dh, tile.height); // the part you can see
+  const s = dw / box.width;
+  const dx = tile.left + tile.width / 2 - (box.left + box.width / 2);
+  const dy = tile.top + tile.height / 2 - (box.top + box.height / 2);
+  const ix = (box.width - vw / s) / 2, iy = (box.height - vh / s) / 2;
+  return {
+    transform: `translate3d(${dx}px, ${dy}px, 0) scale(${s})`,
+    clip: `inset(${iy}px ${ix}px round ${ZOOM_RADIUS / s}px)`,
+  };
 }
+const ZOOM_END = { transform: 'translate3d(0, 0, 0) scale(1)', clip: `inset(0px 0px round ${ZOOM_RADIUS}px)` };
+const applyZoom = (el, st) => { el.style.transform = st.transform; el.style.clipPath = st.clip; };
 
-function openZoom(media, capEl) {
+async function openZoom(media, capEl) {
   if (zoomState) return;
   const [nw, nh] = naturalSize(media);
   if (!nw || !nh) return;                                   // not loaded yet
   const phone = innerWidth < 640;
   const maxW = innerWidth * (phone ? 0.94 : 0.9);
   const maxH = innerHeight * (phone ? 0.78 : 0.84);
-  const s = Math.min(maxW / nw, maxH / nh);
-  const to = { width: nw * s, height: nh * s };
-  to.left = (innerWidth - to.width) / 2;
-  to.top = (innerHeight - to.height) / 2 - (capEl ? 12 : 0);
+  const k = Math.min(maxW / nw, maxH / nh);
+  const box = { width: nw * k, height: nh * k };
+  box.left = (innerWidth - box.width) / 2;
+  box.top = (innerHeight - box.height) / 2 - (capEl ? 12 : 0);
 
   const wrap = document.createElement('div');
   wrap.className = 'zoom';
@@ -452,45 +463,64 @@ function openZoom(media, capEl) {
     clone.setAttribute('muted', ''); clone.setAttribute('playsinline', '');
   } else {
     clone.alt = media.alt || '';
+    clone.decoding = 'async';
   }
   clone.src = media.currentSrc || media.src;
   if (isVid) clone.currentTime = media.currentTime;
-  setRect(clone, shownRect(media));
+  Object.assign(clone.style, { left: `${box.left}px`, top: `${box.top}px`, width: `${box.width}px`, height: `${box.height}px` });
+  applyZoom(clone, zoomStart(media, box));                  // starts exactly over the grid picture
   wrap.appendChild(clone);
   let cap = null;
   if (capEl && capEl.textContent.trim()) {
     cap = document.createElement('div');
     cap.className = 'zoom-cap';
     cap.textContent = capEl.textContent;
-    cap.style.top = `${to.top + to.height + 16}px`;
+    cap.style.top = `${box.top + box.height + 16}px`;
     wrap.appendChild(cap);
   }
-  document.body.appendChild(wrap);
   const inner = media.closest('.inner');
-  inner.classList.add('zoom-src');                          // the original "lifts out"
-  document.documentElement.classList.add('zoomed');         // no scrolling while open
+  zoomState = { wrap, clone, media, inner, box, w: innerWidth };
+  // scrolling is blocked inside the zoom view (cheaper than locking the whole page)
+  const stop = e => e.preventDefault();
+  wrap.addEventListener('wheel', stop, { passive: false });
+  wrap.addEventListener('touchmove', stop, { passive: false });
   wrap.addEventListener('click', e => { if (e.target !== clone) closeZoom(); });
-  zoomState = { wrap, clone, media, inner };
-  void clone.offsetWidth;                                   // lock in the start position, then animate
+  document.body.appendChild(wrap);
+  inner.classList.add('zoom-src');                          // the original "lifts out"
+
+  // make sure the big picture is decoded before it moves, so the first frames don't stutter
+  if (!isVid && clone.decode) await Promise.race([clone.decode().catch(() => {}), new Promise(r => setTimeout(r, 150))]);
+  if (zoomState?.clone !== clone || zoomState.closing) return;
+  void clone.offsetWidth;
+  clone.classList.add('anim');
   wrap.classList.add('open');
-  setRect(clone, to);
+  applyZoom(clone, ZOOM_END);
 }
 
 function closeZoom() {
   if (!zoomState || zoomState.closing) return;
   const z = zoomState;
   z.closing = true;
+  z.clone.classList.add('anim');
   z.wrap.classList.remove('open');
-  setRect(z.clone, shownRect(z.media));
-  setTimeout(() => {
+  applyZoom(z.clone, zoomStart(z.media, z.box));
+  let done = false;
+  const finish = () => {
+    if (done) return;
+    done = true;
     z.inner.classList.remove('zoom-src');
-    document.documentElement.classList.remove('zoomed');
     z.wrap.remove();
     zoomState = null;
-  }, reduceMotion ? 0 : 560);
+  };
+  z.clone.addEventListener('transitionend', e => { if (e.propertyName === 'transform') finish(); });
+  setTimeout(finish, reduceMotion ? 0 : 700);               // safety net
 }
-document.addEventListener('keydown', e => { if (zoomState && e.key === 'Escape') closeZoom(); });
-addEventListener('resize', () => closeZoom());
+document.addEventListener('keydown', e => {
+  if (!zoomState) return;
+  if (e.key === 'Escape') closeZoom();
+  else if ([' ', 'PageUp', 'PageDown', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(e.key)) e.preventDefault();
+});
+addEventListener('resize', () => { if (zoomState && innerWidth !== zoomState.w) closeZoom(); });
 
 /* =========================================================
    Owner mode — dragging, resizing, tools

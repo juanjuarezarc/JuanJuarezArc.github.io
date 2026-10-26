@@ -185,31 +185,32 @@ body.editing .inner iframe { pointer-events: none; }  /* so blocks can be dragge
 body:not(.editing) .inner.zoomable { cursor: zoom-in; }
 body:not(.editing) .inner.zoomable:hover img, body:not(.editing) .inner.zoomable:hover video { transform: scale(1.03); }
 .inner.zoom-src img, .inner.zoom-src video { visibility: hidden; }
-html.zoomed { overflow: hidden; }
-.zoom { position: fixed; inset: 0; z-index: 500; cursor: zoom-out; }
-.zoom-bg, .zoom-grain { position: absolute; inset: 0; opacity: 0; transition: opacity .55s var(--ease); pointer-events: none; }
-.zoom-bg {   /* matte frosted glass, like iPhone's Control Center */
-  background: rgba(238, 238, 238, .5);
-  -webkit-backdrop-filter: blur(34px) saturate(.55) contrast(.88) brightness(1.08);
-  backdrop-filter: blur(34px) saturate(.55) contrast(.88) brightness(1.08);
+.zoom { position: fixed; inset: 0; z-index: 500; cursor: zoom-out; overscroll-behavior: contain; }
+.zoom-bg, .zoom-grain { position: absolute; inset: 0; opacity: 0; transition: opacity .4s var(--ease); pointer-events: none; }
+.zoom-bg {   /* soft frosted glass — subtle */
+  background: rgba(255, 255, 255, .4);
+  -webkit-backdrop-filter: blur(8px) saturate(.85);
+  backdrop-filter: blur(8px) saturate(.85);
 }
-.zoom-grain {  /* film grain */
+.zoom-grain {  /* a whisper of film grain */
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -1.2 1.1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 200px 200px;
 }
 .zoom.open .zoom-bg { opacity: 1; }
-.zoom.open .zoom-grain { opacity: .22; }
+.zoom.open .zoom-grain { opacity: .06; }
 .zoom-media {
-  position: fixed; object-fit: cover; border-radius: var(--radius); cursor: default;
-  box-shadow: 0 30px 90px rgba(0, 0, 0, .16);
-  transition: left .55s var(--ease), top .55s var(--ease), width .55s var(--ease), height .55s var(--ease);
+  position: fixed; object-fit: cover; cursor: default;
+  transform-origin: 50% 50%; will-change: transform, clip-path; backface-visibility: hidden;
+}
+.zoom-media.anim {
+  transition: transform .5s cubic-bezier(.32, .72, 0, 1), clip-path .5s cubic-bezier(.32, .72, 0, 1);
 }
 .zoom-cap {
   position: fixed; left: 0; right: 0; text-align: center; pointer-events: none;
   font-size: 13px; letter-spacing: .02em; color: var(--muted);
-  opacity: 0; transform: translateY(6px); transition: opacity .4s var(--ease), transform .4s var(--ease);
+  opacity: 0; transform: translateY(6px); transition: opacity .35s var(--ease), transform .35s var(--ease);
 }
-.zoom.open .zoom-cap { opacity: 1; transform: none; transition-delay: .25s; }
+.zoom.open .zoom-cap { opacity: 1; transform: none; transition-delay: .2s; }
 
 /* linked tiles: zoom inside the frame + dim the others (like a desktop focus) */
 a.inner:hover img, a.inner:hover video { transform: scale(1.04); }
