@@ -327,6 +327,15 @@ body:not(.editing) .dock .edit-only { display: none; }
 @media (max-width: 640px) {
   .hero { height: 135vh; }
   .nav { font-size: 12px; }
+  /* Phones show the same grid as a laptop, scaled to the screen width:
+     thinner margins and gaps in proportion, and text kept at a readable minimum. */
+  :root { --pad: 14px; --gap: 4px; }
+  .txt { font-size: max(10px, calc(var(--cell) * .16)); line-height: 1.35; }
+  .txt.size-s { font-size: max(9px, calc(var(--cell) * .13)); }
+  .txt.size-l { font-size: max(13px, calc(var(--cell) * .3)); }
+  .txt.size-xl { font-size: max(18px, calc(var(--cell) * .6)); }
+  .cap { left: 8px; bottom: 6px; font-size: 10px; }
+  body.editing .item { touch-action: none; }   /* drag blocks with a finger in owner mode */
 }
 
 @media (prefers-reduced-motion: reduce) {

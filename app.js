@@ -10,7 +10,7 @@ const GH = { owner: 'juanjuarezarc', repo: 'JuanJuarezArc.github.io', branch: 'm
    Basics
    ========================================================= */
 const COLS = 12;                       // grid columns on desktop
-const STACK_BELOW = 640;               // px — below this the grid becomes one column
+const STACK_BELOW = 0;                 // px — below this the grid becomes one column (0 = never: phones show the same grid, scaled down)
 const MEDIA_TYPES = 'image/jpeg,image/png,image/webp,image/gif,image/avif,video/mp4,video/webm';
 
 const $ = (s, r = document) => r.querySelector(s);
