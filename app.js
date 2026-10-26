@@ -481,6 +481,7 @@ function zoomRun(z, p0, p1, ms) {
 
 // Where an in-flight animation currently is (so closing mid-open is seamless)
 function zoomProgress(z) {
+  if (z.settled) return 1;
   const a = z.anims && z.anims[0];
   if (!a) return 0;
   const d = a.effect.getTiming().duration;
@@ -517,7 +518,11 @@ async function openZoom(media, capEl) {
   }
   media2.src = media.currentSrc || media.src;
   if (isVid) media2.currentTime = media.currentTime;
-  frame.appendChild(media2);
+  media2.draggable = false;
+  const pzEl = document.createElement('div');               // holds the viewer's own zoom & pan
+  pzEl.className = 'zoom-pz';
+  pzEl.appendChild(media2);
+  frame.appendChild(pzEl);
   if (capEl && capEl.textContent.trim()) {
     const cap = document.createElement('div');
     cap.className = 'zoom-cap';
@@ -526,16 +531,18 @@ async function openZoom(media, capEl) {
     wrap.appendChild(cap);
   }
 
-  const z = zoomState = { wrap, frame, media2, media, inner: media.closest('.inner'), box, w: innerWidth };
+  const z = zoomState = { wrap, frame, media2, pzEl, media, inner: media.closest('.inner'), box, w: innerWidth, pz: { s: 1, x: 0, y: 0 } };
   z.g = zoomGeometry(media);
   const first = zoomFrames(z, 0, 0);                        // sits exactly over the grid picture
   frame.style.transform = first.outer[0].transform;
   media2.style.transform = first.inner[0].transform;
 
-  const stop = e => e.preventDefault();                     // no scrolling while zoomed
-  wrap.addEventListener('wheel', stop, { passive: false });
-  wrap.addEventListener('touchmove', stop, { passive: false });
-  wrap.addEventListener('click', e => { if (!frame.contains(e.target)) closeZoom(); });
+  wrap.addEventListener('touchmove', e => e.preventDefault(), { passive: false });   // no page scrolling while zoomed
+  wrap.addEventListener('click', e => {
+    if (z.moved) { z.moved = false; return; }               // that was a drag or pinch, not a click
+    if (!frame.contains(e.target)) closeZoom();
+  });
+  bindPanZoom(z);
   document.body.appendChild(wrap);
   z.inner.classList.add('zoom-src');                        // the original "lifts out"
 
@@ -545,13 +552,137 @@ async function openZoom(media, capEl) {
   await nextFrame();
   if (zoomState !== z || z.closing) return;
   wrap.classList.add('open');
-  zoomRun(z, 0, 1, ZOOM_OPEN_MS);
+  zoomRun(z, 0, 1, ZOOM_OPEN_MS).then(() => {
+    if (zoomState !== z || z.closing) return;
+    // Settle: keep the final position as plain styles and drop the animation layers,
+    // so zooming in further redraws the picture sharply instead of stretching it.
+    frame.style.transform = 'none';
+    media2.style.transform = 'none';
+    (z.anims || []).forEach(a => a.cancel());
+    z.anims = null;
+    frame.style.willChange = 'auto';
+    media2.style.willChange = 'auto';
+    z.settled = true;
+    z.ready = true;
+  });
+}
+
+/* ---------- zooming in further inside the zoom view ----------
+   Click/tap the photo: zoom 2.5x on that spot (again to zoom back out).
+   Pinch (trackpad or two fingers) to zoom freely; drag or two-finger scroll to move around. */
+const PZ_MAX = 4;
+
+function pzClamp(z) {
+  const t = z.pz, W = z.box.width, H = z.box.height;
+  t.s = Math.min(PZ_MAX, Math.max(1, t.s));
+  t.x = Math.min(0, Math.max(W - W * t.s, t.x));
+  t.y = Math.min(0, Math.max(H - H * t.s, t.y));
+}
+function pzZoomAt(z, s2, px, py) {                          // keeps the point (px, py) under the finger/cursor
+  const t = z.pz, s1 = t.s;
+  s2 = Math.min(PZ_MAX, Math.max(1, s2));
+  t.x = px - (px - t.x) * (s2 / s1);
+  t.y = py - (py - t.y) * (s2 / s1);
+  t.s = s2;
+  pzClamp(z);
+}
+function pzApply(z, animate) {
+  const t = z.pz;
+  z.pzEl.style.transition = animate ? 'transform .4s cubic-bezier(.32, .72, 0, 1)' : 'none';
+  z.pzEl.style.transform = `translate3d(${t.x}px, ${t.y}px, 0) scale(${t.s})`;
+  z.wrap.classList.toggle('zoomed-in', t.s > 1.01);
+  // While moving: fast GPU scaling. Once still: redraw crisply at the new size.
+  z.pzEl.style.willChange = 'transform';
+  clearTimeout(z.sharpT);
+  z.sharpT = setTimeout(() => { z.pzEl.style.willChange = 'auto'; }, animate ? 450 : 180);
+}
+
+function bindPanZoom(z) {
+  const { wrap, frame } = z;
+  const pts = new Map();
+  let base = null;
+  const local = e => { const r = frame.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+  const snapshot = () => ({ s: z.pz.s, x: z.pz.x, y: z.pz.y, p: [...pts.values()].map(v => v.slice()) });
+
+  wrap.addEventListener('pointerdown', e => {
+    if (!z.ready || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    pts.set(e.pointerId, local(e));
+    if (pts.size === 1) z.moved = false;
+    base = snapshot();
+  });
+  wrap.addEventListener('pointermove', e => {
+    if (!pts.has(e.pointerId) || !base) return;
+    pts.set(e.pointerId, local(e));
+    const p = [...pts.values()];
+    if (p.length === 1 && base.p.length === 1) {            // drag to move around
+      if (z.pz.s <= 1.01) return;
+      const dx = p[0][0] - base.p[0][0], dy = p[0][1] - base.p[0][1];
+      if (!z.moved && Math.hypot(dx, dy) < 5) return;
+      z.moved = true;
+      wrap.classList.add('dragging');
+      z.pz.x = base.x + dx; z.pz.y = base.y + dy;
+      pzClamp(z);
+    } else if (p.length >= 2 && base.p.length >= 2) {      // two-finger pinch
+      const d0 = Math.hypot(base.p[1][0] - base.p[0][0], base.p[1][1] - base.p[0][1]) || 1;
+      const d1 = Math.hypot(p[1][0] - p[0][0], p[1][1] - p[0][1]);
+      const m0 = [(base.p[0][0] + base.p[1][0]) / 2, (base.p[0][1] + base.p[1][1]) / 2];
+      const m1 = [(p[0][0] + p[1][0]) / 2, (p[0][1] + p[1][1]) / 2];
+      const s2 = Math.min(PZ_MAX, Math.max(1, base.s * d1 / d0));
+      z.moved = true;
+      z.pz.x = m0[0] - (m0[0] - base.x) * (s2 / base.s) + (m1[0] - m0[0]);
+      z.pz.y = m0[1] - (m0[1] - base.y) * (s2 / base.s) + (m1[1] - m0[1]);
+      z.pz.s = s2;
+      pzClamp(z);
+    } else return;
+    pzApply(z, false);
+  });
+  const lift = e => {
+    if (!pts.delete(e.pointerId)) return;
+    base = pts.size ? snapshot() : null;                    // re-anchor when one finger lifts
+    if (!pts.size) wrap.classList.remove('dragging');
+  };
+  wrap.addEventListener('pointerup', lift);
+  wrap.addEventListener('pointercancel', lift);
+
+  frame.addEventListener('click', e => {                    // click / tap the photo: zoom in on that spot, or back out
+    if (!z.ready || z.moved) return;
+    const [px, py] = local(e);
+    if (z.pz.s > 1.01) z.pz = { s: 1, x: 0, y: 0 };
+    else pzZoomAt(z, 2.5, px, py);
+    pzApply(z, true);
+  });
+
+  wrap.addEventListener('wheel', e => {
+    e.preventDefault();                                     // never scroll the page behind
+    if (!z.ready) return;
+    if (e.ctrlKey) {                                        // trackpad pinch (Chrome, Firefox) or ctrl + wheel
+      const [px, py] = local(e);
+      pzZoomAt(z, z.pz.s * Math.exp(-e.deltaY * 0.01), px, py);
+    } else if (z.pz.s > 1.01) {                             // two-finger scroll moves around
+      z.pz.x -= e.deltaX; z.pz.y -= e.deltaY;
+      pzClamp(z);
+    } else return;
+    pzApply(z, false);
+  }, { passive: false });
+
+  // Safari on Mac reports trackpad pinch as "gesture" events (on iPhone the touch code above handles it)
+  let g0 = 1;
+  wrap.addEventListener('gesturestart', e => { e.preventDefault(); g0 = z.pz.s; });
+  wrap.addEventListener('gesturechange', e => {
+    e.preventDefault();
+    if (!z.ready || pts.size >= 2) return;
+    const [px, py] = local(e);
+    pzZoomAt(z, g0 * e.scale, px, py);
+    pzApply(z, false);
+  });
 }
 
 async function closeZoom() {
   const z = zoomState;
   if (!z || z.closing) return;
   z.closing = true;
+  z.ready = false;
+  if (z.pz.s > 1.01) { z.pz = { s: 1, x: 0, y: 0 }; pzApply(z, true); }   // zoom back out as it closes
   z.wrap.classList.remove('open');
   const p = zoomProgress(z);
   if (p > 0) await zoomRun(z, p, 0, Math.max(200, ZOOM_CLOSE_MS * p));
