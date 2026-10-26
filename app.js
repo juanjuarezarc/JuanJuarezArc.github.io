@@ -68,6 +68,8 @@ function linkHref(link) {
 }
 const safeSrc = s => (/^\/uploads\/[\w.-]+$/.test(s || '') || /^https:\/\//.test(s || '') ? s : '');
 const isVideo = s => /\.(mp4|webm)(\?|$)/i.test(s || '');
+// The starter layout labelled empty boxes "Image" — that label is hidden once a picture is added
+const isPlaceholderCaption = c => /^\s*image\s*$/i.test(c || '');
 
 /* YouTube / Vimeo blocks — stored as 'yt:<id>' or 'vimeo:<id>[:<private hash>]' */
 function parseVideoLink(url) {
@@ -329,10 +331,11 @@ function itemEl(it, i) {
       }
       m.src = localPreview.get(src) || src;
       inner.appendChild(m);
+      if (!href) inner.classList.add('zoomable');   // click to view it large
     } else {
       inner.classList.add('ph');
     }
-    if (it.caption) {
+    if (it.caption && !(isPlaceholderCaption(it.caption) && (src || frame))) {
       const c = document.createElement('span');
       c.className = 'cap';
       c.textContent = it.caption;
@@ -395,8 +398,99 @@ function bindBoard(boardEl) {
     if (el) editText(el, boardEl);
   });
   boardEl.addEventListener('click', e => onTool(e, boardEl));
+  boardEl.addEventListener('click', e => {
+    if (editing) return;
+    const inner = e.target.closest('.inner.zoomable');
+    const media = inner && inner.querySelector('img, video');
+    if (media) openZoom(media, inner.querySelector('.cap'));
+  });
   bindDrop(boardEl);
 }
+
+/* =========================================================
+   Click-to-zoom: the image lifts out of the grid to the centre of
+   the screen over a matte, grainy blur. Click outside (or Esc) to return.
+   ========================================================= */
+let zoomState = null;
+
+const setRect = (el, r) => {
+  el.style.left = `${r.left}px`; el.style.top = `${r.top}px`;
+  el.style.width = `${r.width}px`; el.style.height = `${r.height}px`;
+};
+const naturalSize = m => (m.tagName === 'VIDEO' ? [m.videoWidth, m.videoHeight] : [m.naturalWidth, m.naturalHeight]);
+
+// Where the picture actually is on screen (accounts for "Fit" letterboxing)
+function shownRect(media) {
+  const r = media.getBoundingClientRect();
+  const [nw, nh] = naturalSize(media);
+  if (getComputedStyle(media).objectFit !== 'contain' || !nw || !nh) return r;
+  const s = Math.min(r.width / nw, r.height / nh);
+  const w = nw * s, h = nh * s;
+  return { left: r.left + (r.width - w) / 2, top: r.top + (r.height - h) / 2, width: w, height: h };
+}
+
+function openZoom(media, capEl) {
+  if (zoomState) return;
+  const [nw, nh] = naturalSize(media);
+  if (!nw || !nh) return;                                   // not loaded yet
+  const phone = innerWidth < 640;
+  const maxW = innerWidth * (phone ? 0.94 : 0.9);
+  const maxH = innerHeight * (phone ? 0.78 : 0.84);
+  const s = Math.min(maxW / nw, maxH / nh);
+  const to = { width: nw * s, height: nh * s };
+  to.left = (innerWidth - to.width) / 2;
+  to.top = (innerHeight - to.height) / 2 - (capEl ? 12 : 0);
+
+  const wrap = document.createElement('div');
+  wrap.className = 'zoom';
+  wrap.innerHTML = '<div class="zoom-bg"></div><div class="zoom-grain"></div>';
+  const isVid = media.tagName === 'VIDEO';
+  const clone = document.createElement(isVid ? 'video' : 'img');
+  clone.className = 'zoom-media';
+  if (isVid) {
+    clone.muted = true; clone.loop = true; clone.autoplay = true; clone.playsInline = true;
+    clone.setAttribute('muted', ''); clone.setAttribute('playsinline', '');
+  } else {
+    clone.alt = media.alt || '';
+  }
+  clone.src = media.currentSrc || media.src;
+  if (isVid) clone.currentTime = media.currentTime;
+  setRect(clone, shownRect(media));
+  wrap.appendChild(clone);
+  let cap = null;
+  if (capEl && capEl.textContent.trim()) {
+    cap = document.createElement('div');
+    cap.className = 'zoom-cap';
+    cap.textContent = capEl.textContent;
+    cap.style.top = `${to.top + to.height + 16}px`;
+    wrap.appendChild(cap);
+  }
+  document.body.appendChild(wrap);
+  const inner = media.closest('.inner');
+  inner.classList.add('zoom-src');                          // the original "lifts out"
+  document.documentElement.classList.add('zoomed');         // no scrolling while open
+  wrap.addEventListener('click', e => { if (e.target !== clone) closeZoom(); });
+  zoomState = { wrap, clone, media, inner };
+  void clone.offsetWidth;                                   // lock in the start position, then animate
+  wrap.classList.add('open');
+  setRect(clone, to);
+}
+
+function closeZoom() {
+  if (!zoomState || zoomState.closing) return;
+  const z = zoomState;
+  z.closing = true;
+  z.wrap.classList.remove('open');
+  setRect(z.clone, shownRect(z.media));
+  setTimeout(() => {
+    z.inner.classList.remove('zoom-src');
+    document.documentElement.classList.remove('zoomed');
+    z.wrap.remove();
+    zoomState = null;
+  }, reduceMotion ? 0 : 560);
+}
+document.addEventListener('keydown', e => { if (zoomState && e.key === 'Escape') closeZoom(); });
+addEventListener('resize', () => closeZoom());
 
 /* =========================================================
    Owner mode — dragging, resizing, tools
@@ -508,7 +602,8 @@ async function onTool(e, boardEl) {
       break;
     case 'fit': it.fit = it.fit === 'contain' ? 'cover' : 'contain'; break;
     case 'caption': {
-      const v = await ask('Caption', it.caption || '', 'text', 'Shown when hovering the image. Leave empty for none.');
+      const cur = isPlaceholderCaption(it.caption) ? '' : (it.caption || '');
+      const v = await ask('Caption', cur, 'text', 'Shown when hovering the image. Leave empty for none.');
       if (v === null) return;
       it.caption = v.trim();
       break;
