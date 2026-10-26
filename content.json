@@ -106,10 +106,10 @@
      "type": "text",
      "x": 0,
      "y": 0,
-     "w": 4,
-     "h": 3,
+     "w": 5,
+     "h": 10,
      "size": "m",
-     "html": "<p>Describe the project — the site, the question, the process and what you learned.</p>"
+     "html": "<p>This project investigates the relationship between roof and ground as two opposing yet interdependent conditions. Their displacement creates a field of pressure, producing moments of compression and release across the building.</p><p>The ground steps, while the roof folds and lifts into a complex butterfly geometry. Between these two surfaces, the substructure becomes an intermediary, negotiating the space between ground and roof while producing varying conditions of enclosure, scale, and light.</p><p>Skylights puncture the roof as moments of release, bringing light into spaces of compression and further articulating the relationship between the two surfaces.</p><p>Conceived as a K–5 elementary school, the classrooms extend this condition outward through large garage-style openings, dissolving the threshold between interior and exterior.</p>"
     },
     {
      "id": "a2",
