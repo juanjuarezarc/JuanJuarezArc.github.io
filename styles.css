@@ -10,6 +10,11 @@
   --soft: #f5f5f7;          /* empty image tiles */
   --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
           "Helvetica Neue", Helvetica, Arial, sans-serif;
+  /* fonts per type of text — chosen in owner mode (dock → Fonts); these are the defaults */
+  --font-title: var(--font);
+  --font-subtitle: var(--font);
+  --font-body: var(--font);
+  --font-small: var(--font);
   --radius: 4px;            /* corner rounding on images */
   --gap: 12px;              /* space between grid blocks */
   /* magazine column width — sized from the window HEIGHT so a block 10 grid rows tall
@@ -62,14 +67,14 @@ img, video { display: block; max-width: 100%; }
 /* ---------- TYPE ---------- */
 .display {
   font-size: clamp(44px, 7.5vw, 112px);
-  font-weight: 600; letter-spacing: -.045em; line-height: .95;
+  font-weight: var(--title-weight, 600); letter-spacing: -.045em; line-height: .95;
 }
 .lede {
   margin: 22px auto 0; max-width: 36ch;
   font-size: clamp(16px, 1.5vw, 20px); line-height: 1.4;
   letter-spacing: -.01em; color: var(--muted);
 }
-h2 { font-size: clamp(32px, 4.2vw, 58px); font-weight: 600; letter-spacing: -.04em; line-height: 1; }
+h2 { font-size: clamp(32px, 4.2vw, 58px); font-weight: var(--title-weight, 600); letter-spacing: -.04em; line-height: 1; }
 .prose {
   margin-top: 28px;
   font-size: clamp(17px, 1.6vw, 22px); line-height: 1.45; letter-spacing: -.015em; color: var(--text);
@@ -138,7 +143,7 @@ h2 { font-size: clamp(32px, 4.2vw, 58px); font-weight: 600; letter-spacing: -.04
   background: linear-gradient(var(--line), var(--line)) top center / min(var(--max), 100% - 2 * var(--pad)) 1px no-repeat;
 }
 .next span { display: block; margin-bottom: 12px; font-size: 13px; color: var(--muted); }
-.next strong { font-size: clamp(30px, 5vw, 72px); font-weight: 600; letter-spacing: -.04em; transition: opacity .3s; }
+.next strong { font-size: clamp(30px, 5vw, 72px); font-weight: var(--title-weight, 600); letter-spacing: -.04em; transition: opacity .3s; }
 .next:hover strong { opacity: .45; }
 
 .foot { padding: 50px var(--pad) 70px; text-align: center; font-size: 12px; color: var(--muted); }
@@ -228,8 +233,8 @@ body:not(.editing) .board.dim:has(a.inner:hover) .item:not(:hover) { opacity: .3
 /* text blocks — size scales with the grid so layouts hold at any width */
 .txt { font-size: clamp(14px, calc(var(--cell) * .16), 19px); line-height: 1.45; color: var(--text); }
 .txt.size-s { font-size: clamp(12px, calc(var(--cell) * .13), 15px); color: var(--muted); }
-.txt.size-l { font-size: clamp(20px, calc(var(--cell) * .3), 36px); line-height: 1.15; letter-spacing: -.02em; font-weight: 500; }
-.txt.size-xl { font-size: clamp(32px, calc(var(--cell) * .6), 84px); line-height: 1; letter-spacing: -.04em; font-weight: 600; }
+.txt.size-l { font-size: clamp(20px, calc(var(--cell) * .3), 36px); line-height: 1.15; letter-spacing: -.02em; font-weight: var(--title-weight-l, 500); }
+.txt.size-xl { font-size: clamp(32px, calc(var(--cell) * .6), 84px); line-height: 1; letter-spacing: -.04em; font-weight: var(--title-weight, 600); }
 
 /* phones: the grid becomes one clean column */
 .board.stack { display: flex; flex-direction: column; gap: var(--gap); height: auto !important; --cell: 100px !important; }
@@ -375,6 +380,36 @@ body:not(.editing) .dock .edit-only { display: none; }
   .cap { left: 8px; bottom: 6px; font-size: 10px; }
   body.editing .item { touch-action: none; }   /* drag blocks with a finger in owner mode */
 }
+
+/* =========================================================
+   FONTS PER TYPE OF TEXT
+   ========================================================= */
+.display, h2, .next strong, .txt.size-l, .txt.size-xl { font-family: var(--font-title); }
+.lede, .zone-head p { font-family: var(--font-subtitle); }
+.prose, .txt, .mail { font-family: var(--font-body); }
+.txt.size-l, .txt.size-xl { font-family: var(--font-title); }
+.nav, .cap, .foot, .back, .next span, .zoom-cap { font-family: var(--font-small); }
+/* tight tracking suits sans-serif titles; serif and mono titles need a little more air */
+html[data-title-kind="serif"] .display, html[data-title-kind="serif"] h2, html[data-title-kind="serif"] .next strong,
+html[data-title-kind="serif"] .txt.size-xl { letter-spacing: -.015em; }
+html[data-title-kind="mono"] .display, html[data-title-kind="mono"] h2, html[data-title-kind="mono"] .next strong,
+html[data-title-kind="mono"] .txt.size-xl { letter-spacing: -.03em; }
+
+/* owner-mode font panel */
+.fontpanel {
+  position: fixed; left: 50%; bottom: 84px; z-index: 210; transform: translateX(-50%);
+  width: min(440px, calc(100vw - 24px)); max-height: calc(100vh - 120px); overflow: auto;
+  padding: 20px; background: #fff; border: 1px solid var(--line); border-radius: 18px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, .14); font-family: var(--font); font-size: 14px;
+  animation: dockIn .5s var(--ease) both;
+}
+.fontpanel h3 { margin-bottom: 10px; font-size: 17px; font-weight: 600; }
+.fontrow { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 10px 0; border-top: 1px solid var(--line); }
+.fontrow span { display: flex; flex-direction: column; gap: 2px; }
+.fontrow small { color: var(--muted); font-size: 12px; }
+.fontrow select { flex: none; width: 190px; font: inherit; font-size: 14px; padding: 8px 10px; border: 1px solid #d2d2d7; border-radius: 10px; background: #fff; color: var(--fg); }
+.fontpanel .row { display: flex; justify-content: space-between; margin-top: 14px; }
+html.lite .fontpanel { animation: none; }
 
 /* =========================================================
    LITE MODE — used automatically when the browser has no graphics

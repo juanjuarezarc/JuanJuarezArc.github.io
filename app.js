@@ -156,6 +156,7 @@ async function boot() {
     return;
   }
   for (const k of ['site', 'home', 'projects', 'boards']) C[k] = C[k] || {};
+  applyFonts();
 
   render();
   document.body.classList.add('ready');
@@ -1051,6 +1052,7 @@ async function addMedia(boardEl, files, x0 = 0, y0 = null) {
    Owner mode — page text, format bar, dock
    ========================================================= */
 function setEditing(on) {
+  if (!on) { const fp = $('#fontPanel'); if (fp) fp.remove(); }
   if (!on) finishText();
   editing = on;
   document.body.classList.toggle('editing', on);
@@ -1149,6 +1151,7 @@ function showDock() {
     <button class="edit-only" data-dock="image" title="Upload images or videos">+ Image</button>
     <button class="edit-only" data-dock="video" title="Add a YouTube or Vimeo video — any size">+ Video link</button>
     <button class="edit-only" data-dock="text">+ Text</button>
+    <button class="edit-only" data-dock="fonts" title="Choose fonts for titles, subtitles, body and small text">Fonts</button>
     ${proj
       ? '<button class="edit-only" data-dock="delproject">Delete project</button>'
       : '<button class="edit-only" data-dock="project">+ Project</button><button class="edit-only" data-dock="resume">Résumé</button>'}
@@ -1197,6 +1200,7 @@ async function onDock(e) {
       toast('Video added — drag to place it, then Save');
       break;
     }
+    case 'fonts': toggleFontPanel(); break;
     case 'text': {
       if (!boardEl) return;
       const b = boardOf(boardEl);
@@ -1281,6 +1285,108 @@ async function editResume() {
   renderNav();
   markDirty();
   toast('Résumé linked in the top menu');
+}
+
+/* =========================================================
+   Fonts — one per type of text, chosen in owner mode (dock → Fonts).
+   Stored in content.json as site.fonts; Google Fonts load on demand.
+   ========================================================= */
+const FONT_ROLES = [
+  { key: 'title', label: 'Titles', hint: 'Big headings and project names' },
+  { key: 'subtitle', label: 'Subtitles', hint: 'The lines under headings' },
+  { key: 'body', label: 'Body text', hint: 'About, Contact and text blocks' },
+  { key: 'small', label: 'Small text', hint: 'Menu, captions and footer' },
+];
+const SYSTEM_FONT = 'System (SF Pro)';
+// g = Google Fonts family spec (only weights that font really has); bold = has a bold weight
+const FONTS = [
+  { name: SYSTEM_FONT, kind: 'sans', css: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif' },
+  { name: 'Helvetica', kind: 'sans', css: '"Helvetica Neue", Helvetica, Arial, sans-serif' },
+  { name: 'Inter', kind: 'sans', g: 'Inter:wght@300;400;500;600;700' },
+  { name: 'Instrument Sans', kind: 'sans', g: 'Instrument+Sans:wght@400;500;600;700' },
+  { name: 'DM Sans', kind: 'sans', g: 'DM+Sans:wght@300;400;500;600;700' },
+  { name: 'Manrope', kind: 'sans', g: 'Manrope:wght@300;400;500;600;700' },
+  { name: 'Space Grotesk', kind: 'sans', g: 'Space+Grotesk:wght@300;400;500;600;700' },
+  { name: 'IBM Plex Sans', kind: 'sans', g: 'IBM+Plex+Sans:wght@300;400;500;600;700' },
+  { name: 'Archivo', kind: 'sans', g: 'Archivo:wght@300;400;500;600;700' },
+  { name: 'Syne', kind: 'sans', g: 'Syne:wght@400;500;600;700' },
+  { name: 'Instrument Serif', kind: 'serif', g: 'Instrument+Serif:ital@0;1', bold: false },
+  { name: 'Playfair Display', kind: 'serif', g: 'Playfair+Display:wght@400;500;600;700' },
+  { name: 'Cormorant Garamond', kind: 'serif', g: 'Cormorant+Garamond:wght@300;400;500;600;700' },
+  { name: 'EB Garamond', kind: 'serif', g: 'EB+Garamond:wght@400;500;600;700' },
+  { name: 'Fraunces', kind: 'serif', g: 'Fraunces:wght@300;400;500;600;700' },
+  { name: 'Libre Baskerville', kind: 'serif', g: 'Libre+Baskerville:wght@400;700' },
+  { name: 'DM Serif Display', kind: 'serif', g: 'DM+Serif+Display', bold: false },
+  { name: 'Space Mono', kind: 'mono', g: 'Space+Mono:wght@400;700' },
+  { name: 'IBM Plex Mono', kind: 'mono', g: 'IBM+Plex+Mono:wght@300;400;500;600;700' },
+  { name: 'JetBrains Mono', kind: 'mono', g: 'JetBrains+Mono:wght@300;400;500;600;700' },
+];
+const FALLBACK = { sans: '-apple-system, Helvetica, Arial, sans-serif', serif: 'Georgia, "Times New Roman", serif', mono: 'ui-monospace, Menlo, monospace' };
+const fontByName = n => FONTS.find(f => f.name === n) || FONTS[0];
+const fontCss = f => f.css || `"${f.name}", ${FALLBACK[f.kind]}`;
+
+function applyFonts() {
+  const chosen = (C.site && C.site.fonts) || {};
+  const root = document.documentElement;
+  const families = new Set();
+  for (const r of FONT_ROLES) {
+    const f = fontByName(chosen[r.key]);
+    root.style.setProperty(`--font-${r.key}`, fontCss(f));
+    if (f.g) families.add(f.g);
+    if (r.key === 'title') {
+      root.dataset.titleKind = f.kind;                         // serif/mono titles get looser spacing
+      root.style.setProperty('--title-weight', f.bold === false ? '400' : '600');
+      root.style.setProperty('--title-weight-l', f.bold === false ? '400' : '500');
+    }
+  }
+  let link = $('#gfonts');
+  if (!families.size) { if (link) link.remove(); return; }
+  const href = 'https://fonts.googleapis.com/css2?' + [...families].map(g => 'family=' + g).join('&') + '&display=swap';
+  if (link && link.getAttribute('href') === href) return;
+  if (!link) { link = document.createElement('link'); link.id = 'gfonts'; link.rel = 'stylesheet'; document.head.appendChild(link); }
+  link.onload = () => { if (document.fonts) document.fonts.ready.then(relayoutBoards); };
+  link.href = href;
+}
+// Text can change height with a new font, so re-fit the grids
+const relayoutBoards = () => $$('#view .board').forEach(layoutBoard);
+
+function toggleFontPanel() {
+  let panel = $('#fontPanel');
+  if (panel) { panel.remove(); return; }
+  const chosen = C.site.fonts = C.site.fonts || {};
+  const groups = [['sans', 'Sans-serif'], ['serif', 'Serif'], ['mono', 'Monospace']];
+  const options = cur => groups.map(([k, label]) =>
+    `<optgroup label="${label}">${FONTS.filter(f => f.kind === k).map(f =>
+      `<option${f.name === cur ? ' selected' : ''}>${esc(f.name)}</option>`).join('')}</optgroup>`).join('');
+  panel = document.createElement('div');
+  panel.id = 'fontPanel';
+  panel.className = 'fontpanel';
+  panel.innerHTML = '<h3>Fonts</h3>' + FONT_ROLES.map(r => `
+    <label class="fontrow">
+      <span><b>${r.label}</b><small>${r.hint}</small></span>
+      <select data-role="${r.key}">${options(fontByName(chosen[r.key]).name)}</select>
+    </label>`).join('') +
+    '<div class="row"><button type="button" class="btn plain" data-f="reset">Reset all</button><button type="button" class="btn solid" data-f="done">Done</button></div>';
+  panel.addEventListener('change', e => {
+    const sel = e.target.closest('select');
+    if (!sel) return;
+    if (sel.value === SYSTEM_FONT) delete chosen[sel.dataset.role]; else chosen[sel.dataset.role] = sel.value;
+    applyFonts();
+    relayoutBoards();
+    markDirty();
+  });
+  panel.addEventListener('click', e => {
+    const b = e.target.closest('[data-f]');
+    if (!b) return;
+    if (b.dataset.f === 'done') { panel.remove(); return; }
+    C.site.fonts = {};
+    panel.remove();
+    applyFonts();
+    relayoutBoards();
+    markDirty();
+    toggleFontPanel();
+  });
+  document.body.appendChild(panel);
 }
 
 /* =========================================================
