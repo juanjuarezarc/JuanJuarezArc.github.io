@@ -1299,27 +1299,105 @@ const FONT_ROLES = [
 ];
 const SYSTEM_FONT = 'System (SF Pro)';
 // g = Google Fonts family spec (only weights that font really has); bold = has a bold weight
+// group = which section of the menu it appears in. "classic" fonts are built into Macs,
+// iPhones and most computers, so nothing is downloaded (other devices use the closest match).
+// g = Google Fonts family spec (only weights that font really has); bold: false = single weight.
 const FONTS = [
-  { name: SYSTEM_FONT, kind: 'sans', css: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif' },
-  { name: 'Helvetica', kind: 'sans', css: '"Helvetica Neue", Helvetica, Arial, sans-serif' },
+  // Classic — built in, no download
+  { name: SYSTEM_FONT, kind: 'sans', group: 'classic', css: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif' },
+  { name: 'Helvetica', kind: 'sans', group: 'classic', css: '"Helvetica Neue", Helvetica, Arial, sans-serif' },
+  { name: 'Arial', kind: 'sans', group: 'classic', css: 'Arial, "Helvetica Neue", Helvetica, sans-serif' },
+  { name: 'Avenir Next', kind: 'sans', group: 'classic', css: '"Avenir Next", Avenir, "Helvetica Neue", Arial, sans-serif' },
+  { name: 'Futura', kind: 'sans', group: 'classic', css: 'Futura, "Century Gothic", "Avenir Next", sans-serif' },
+  { name: 'Gill Sans', kind: 'sans', group: 'classic', css: '"Gill Sans", "Gill Sans MT", Calibri, sans-serif' },
+  { name: 'Optima', kind: 'sans', group: 'classic', css: 'Optima, Candara, "Segoe UI", sans-serif' },
+  { name: 'Verdana', kind: 'sans', group: 'classic', css: 'Verdana, Geneva, sans-serif' },
+  { name: 'Trebuchet MS', kind: 'sans', group: 'classic', css: '"Trebuchet MS", "Lucida Grande", sans-serif' },
+  { name: 'Times New Roman', kind: 'serif', group: 'classic', css: '"Times New Roman", Times, serif' },
+  { name: 'Georgia', kind: 'serif', group: 'classic', css: 'Georgia, "Times New Roman", serif' },
+  { name: 'Baskerville', kind: 'serif', group: 'classic', css: 'Baskerville, "Baskerville Old Face", "Times New Roman", serif' },
+  { name: 'Didot', kind: 'serif', group: 'classic', css: 'Didot, "Bodoni MT", "Times New Roman", serif' },
+  { name: 'Palatino', kind: 'serif', group: 'classic', css: 'Palatino, "Palatino Linotype", "Book Antiqua", serif' },
+  { name: 'American Typewriter', kind: 'mono', group: 'classic', css: '"American Typewriter", "Courier New", Courier, monospace' },
+  { name: 'Courier New', kind: 'mono', group: 'classic', css: '"Courier New", Courier, monospace' },
+
+  // Sans-serif
   { name: 'Inter', kind: 'sans', g: 'Inter:wght@300;400;500;600;700' },
+  { name: 'Geist', kind: 'sans', g: 'Geist:wght@300;400;500;600;700' },
   { name: 'Instrument Sans', kind: 'sans', g: 'Instrument+Sans:wght@400;500;600;700' },
   { name: 'DM Sans', kind: 'sans', g: 'DM+Sans:wght@300;400;500;600;700' },
   { name: 'Manrope', kind: 'sans', g: 'Manrope:wght@300;400;500;600;700' },
   { name: 'Space Grotesk', kind: 'sans', g: 'Space+Grotesk:wght@300;400;500;600;700' },
+  { name: 'Hanken Grotesk', kind: 'sans', g: 'Hanken+Grotesk:wght@300;400;500;600;700' },
+  { name: 'Schibsted Grotesk', kind: 'sans', g: 'Schibsted+Grotesk:wght@400;500;600;700' },
+  { name: 'Familjen Grotesk', kind: 'sans', g: 'Familjen+Grotesk:wght@400;500;600;700' },
+  { name: 'Bricolage Grotesque', kind: 'sans', g: 'Bricolage+Grotesque:wght@300;400;500;600;700' },
   { name: 'IBM Plex Sans', kind: 'sans', g: 'IBM+Plex+Sans:wght@300;400;500;600;700' },
   { name: 'Archivo', kind: 'sans', g: 'Archivo:wght@300;400;500;600;700' },
+  { name: 'Work Sans', kind: 'sans', g: 'Work+Sans:wght@300;400;500;600;700' },
+  { name: 'Public Sans', kind: 'sans', g: 'Public+Sans:wght@300;400;500;600;700' },
+  { name: 'Plus Jakarta Sans', kind: 'sans', g: 'Plus+Jakarta+Sans:wght@300;400;500;600;700' },
+  { name: 'Figtree', kind: 'sans', g: 'Figtree:wght@300;400;500;600;700' },
+  { name: 'Outfit', kind: 'sans', g: 'Outfit:wght@300;400;500;600;700' },
+  { name: 'Sora', kind: 'sans', g: 'Sora:wght@300;400;500;600;700' },
+  { name: 'Urbanist', kind: 'sans', g: 'Urbanist:wght@300;400;500;600;700' },
+  { name: 'Lexend', kind: 'sans', g: 'Lexend:wght@300;400;500;600;700' },
+  { name: 'Epilogue', kind: 'sans', g: 'Epilogue:wght@300;400;500;600;700' },
+  { name: 'Karla', kind: 'sans', g: 'Karla:wght@300;400;500;600;700' },
+  { name: 'Rubik', kind: 'sans', g: 'Rubik:wght@300;400;500;600;700' },
+  { name: 'Barlow', kind: 'sans', g: 'Barlow:wght@300;400;500;600;700' },
+  { name: 'Montserrat', kind: 'sans', g: 'Montserrat:wght@300;400;500;600;700' },
+  { name: 'Poppins', kind: 'sans', g: 'Poppins:wght@300;400;500;600;700' },
+  { name: 'Raleway', kind: 'sans', g: 'Raleway:wght@300;400;500;600;700' },
+  { name: 'Josefin Sans', kind: 'sans', g: 'Josefin+Sans:wght@300;400;500;600;700' },
+  { name: 'Roboto', kind: 'sans', g: 'Roboto:wght@300;400;500;600;700' },
   { name: 'Syne', kind: 'sans', g: 'Syne:wght@400;500;600;700' },
+
+  // Serif
   { name: 'Instrument Serif', kind: 'serif', g: 'Instrument+Serif:ital@0;1', bold: false },
   { name: 'Playfair Display', kind: 'serif', g: 'Playfair+Display:wght@400;500;600;700' },
+  { name: 'Cormorant', kind: 'serif', g: 'Cormorant:wght@300;400;500;600;700' },
   { name: 'Cormorant Garamond', kind: 'serif', g: 'Cormorant+Garamond:wght@300;400;500;600;700' },
   { name: 'EB Garamond', kind: 'serif', g: 'EB+Garamond:wght@400;500;600;700' },
-  { name: 'Fraunces', kind: 'serif', g: 'Fraunces:wght@300;400;500;600;700' },
+  { name: 'Libre Caslon Text', kind: 'serif', g: 'Libre+Caslon+Text:wght@400;500;600;700' },
   { name: 'Libre Baskerville', kind: 'serif', g: 'Libre+Baskerville:wght@400;700' },
-  { name: 'DM Serif Display', kind: 'serif', g: 'DM+Serif+Display', bold: false },
+  { name: 'Fraunces', kind: 'serif', g: 'Fraunces:wght@300;400;500;600;700' },
+  { name: 'Newsreader', kind: 'serif', g: 'Newsreader:wght@300;400;500;600;700' },
+  { name: 'Source Serif 4', kind: 'serif', g: 'Source+Serif+4:wght@300;400;500;600;700' },
+  { name: 'Lora', kind: 'serif', g: 'Lora:wght@400;500;600;700' },
+  { name: 'Merriweather', kind: 'serif', g: 'Merriweather:wght@300;400;500;600;700' },
+  { name: 'Crimson Pro', kind: 'serif', g: 'Crimson+Pro:wght@300;400;500;600;700' },
+  { name: 'Spectral', kind: 'serif', g: 'Spectral:wght@300;400;500;600;700' },
+  { name: 'Literata', kind: 'serif', g: 'Literata:wght@300;400;500;600;700' },
+  { name: 'PT Serif', kind: 'serif', g: 'PT+Serif:wght@400;700' },
+  { name: 'Noto Serif Display', kind: 'serif', g: 'Noto+Serif+Display:wght@300;400;500;600;700' },
+
+  // Display — for big titles
+  { name: 'DM Serif Display', kind: 'serif', group: 'display', g: 'DM+Serif+Display', bold: false },
+  { name: 'Bodoni Moda', kind: 'serif', group: 'display', g: 'Bodoni+Moda:wght@400;500;600;700' },
+  { name: 'Abril Fatface', kind: 'serif', group: 'display', g: 'Abril+Fatface', bold: false },
+  { name: 'Gloock', kind: 'serif', group: 'display', g: 'Gloock', bold: false },
+  { name: 'Young Serif', kind: 'serif', group: 'display', g: 'Young+Serif', bold: false },
+  { name: 'Prata', kind: 'serif', group: 'display', g: 'Prata', bold: false },
+  { name: 'Cinzel', kind: 'serif', group: 'display', g: 'Cinzel:wght@400;500;600;700' },
+  { name: 'Marcellus', kind: 'serif', group: 'display', g: 'Marcellus', bold: false },
+  { name: 'Bebas Neue', kind: 'sans', group: 'display', g: 'Bebas+Neue', bold: false },
+  { name: 'Anton', kind: 'sans', group: 'display', g: 'Anton', bold: false },
+  { name: 'Archivo Black', kind: 'sans', group: 'display', g: 'Archivo+Black', bold: false },
+  { name: 'Oswald', kind: 'sans', group: 'display', g: 'Oswald:wght@300;400;500;600;700' },
+  { name: 'Unbounded', kind: 'sans', group: 'display', g: 'Unbounded:wght@300;400;500;600;700' },
+
+  // Monospace
   { name: 'Space Mono', kind: 'mono', g: 'Space+Mono:wght@400;700' },
   { name: 'IBM Plex Mono', kind: 'mono', g: 'IBM+Plex+Mono:wght@300;400;500;600;700' },
   { name: 'JetBrains Mono', kind: 'mono', g: 'JetBrains+Mono:wght@300;400;500;600;700' },
+  { name: 'Geist Mono', kind: 'mono', g: 'Geist+Mono:wght@300;400;500;600;700' },
+  { name: 'Roboto Mono', kind: 'mono', g: 'Roboto+Mono:wght@300;400;500;600;700' },
+  { name: 'Source Code Pro', kind: 'mono', g: 'Source+Code+Pro:wght@300;400;500;600;700' },
+  { name: 'Fira Code', kind: 'mono', g: 'Fira+Code:wght@300;400;500;600;700' },
+  { name: 'DM Mono', kind: 'mono', g: 'DM+Mono:wght@300;400;500', bold: false },
+  { name: 'Martian Mono', kind: 'mono', g: 'Martian+Mono:wght@300;400;500;600;700' },
+  { name: 'Courier Prime', kind: 'mono', g: 'Courier+Prime:wght@400;700' },
 ];
 const FALLBACK = { sans: '-apple-system, Helvetica, Arial, sans-serif', serif: 'Georgia, "Times New Roman", serif', mono: 'ui-monospace, Menlo, monospace' };
 const fontByName = n => FONTS.find(f => f.name === n) || FONTS[0];
@@ -1354,9 +1432,9 @@ function toggleFontPanel() {
   let panel = $('#fontPanel');
   if (panel) { panel.remove(); return; }
   const chosen = C.site.fonts = C.site.fonts || {};
-  const groups = [['sans', 'Sans-serif'], ['serif', 'Serif'], ['mono', 'Monospace']];
+  const groups = [['classic', 'Classic — built in'], ['sans', 'Sans-serif'], ['serif', 'Serif'], ['display', 'Display (big titles)'], ['mono', 'Monospace']];
   const options = cur => groups.map(([k, label]) =>
-    `<optgroup label="${label}">${FONTS.filter(f => f.kind === k).map(f =>
+    `<optgroup label="${label}">${FONTS.filter(f => (f.group || f.kind) === k).map(f =>
       `<option${f.name === cur ? ' selected' : ''}>${esc(f.name)}</option>`).join('')}</optgroup>`).join('');
   panel = document.createElement('div');
   panel.id = 'fontPanel';
