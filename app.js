@@ -20,6 +20,46 @@ const uid = () => Math.random().toString(36).slice(2, 10);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+/* ---------- "Lite" mode ----------
+   When a browser draws without the graphics chip (e.g. Chrome with "Use graphics
+   acceleration" turned off), blur effects become very slow. In that case the page adds
+   class "lite" to <html>, which swaps every blur for a plain, solid version (see the end
+   of styles.css). Add ?lite to any address to preview it. */
+const LITE_KEY = 'portfolio-lite';
+const forceLite = new URLSearchParams(location.search).has('lite');
+function setLite(on, remember = true) {
+  document.documentElement.classList.toggle('lite', on);
+  if (remember && !forceLite) { try { localStorage.setItem(LITE_KEY, on ? '1' : '0'); } catch { /* private mode */ } }
+}
+// A standard check: asking for 3D graphics that "fail if only slow software drawing is available"
+function noGraphicsAcceleration() {
+  try {
+    const gl = document.createElement('canvas').getContext('webgl', { failIfMajorPerformanceCaveat: true });
+    if (!gl) return true;
+    const lose = gl.getExtension('WEBGL_lose_context');
+    if (lose) lose.loseContext();
+    return false;
+  } catch { return false; }
+}
+try { if (forceLite || localStorage.getItem(LITE_KEY) === '1') setLite(true, false); } catch { /* ignore */ }
+(window.requestIdleCallback || (f => setTimeout(f, 1200)))(() => { if (!forceLite) setLite(noGraphicsAcceleration()); });
+const isLite = () => document.documentElement.classList.contains('lite');
+
+// Backup: if an animation actually draws slowly (under ~33 frames a second), use lite mode too
+function watchSmoothness(ms) {
+  if (isLite()) return;
+  const gaps = [];
+  let last = 0;
+  const end = performance.now() + ms;
+  const tick = now => {
+    if (last) gaps.push(now - last);
+    last = now;
+    if (now < end) return requestAnimationFrame(tick);
+    if (gaps.length >= 5 && gaps.reduce((a, b) => a + b, 0) / gaps.length > 30) setLite(true);
+  };
+  requestAnimationFrame(tick);
+}
+
 let C = null;            // site content
 let owner = false;       // logged in?
 let editing = false;
@@ -250,7 +290,7 @@ function onScroll() {
     const p = clamp(-r.top / Math.max(1, r.height - innerHeight), 0, 1);
     inner.style.transform = `scale(${1 - p * 0.14}) translateY(${-p * 40}px)`;
     inner.style.opacity = String(clamp(1 - p * 1.15, 0, 1));
-    inner.style.filter = p > 0.01 ? `blur(${p * 10}px)` : '';
+    inner.style.filter = p > 0.01 && !isLite() ? `blur(${p * 10}px)` : '';
   });
 }
 addEventListener('scroll', onScroll, { passive: true });
@@ -584,6 +624,7 @@ async function openZoom(media, capEl) {
   await nextFrame();
   if (zoomState !== z || z.closing) return;
   wrap.classList.add('open');
+  watchSmoothness(ZOOM_OPEN_MS);
   zoomRun(z, 0, 1, ZOOM_OPEN_MS).then(() => {
     if (zoomState !== z || z.closing) return;
     // Settle: keep the final position as plain styles and drop the animation layers,

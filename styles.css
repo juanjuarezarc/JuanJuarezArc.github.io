@@ -376,6 +376,19 @@ body:not(.editing) .dock .edit-only { display: none; }
   body.editing .item { touch-action: none; }   /* drag blocks with a finger in owner mode */
 }
 
+/* =========================================================
+   LITE MODE — used automatically when the browser has no graphics
+   acceleration: every blur becomes a plain, solid version so motion stays smooth.
+   ========================================================= */
+html.lite .reveal { filter: none !important; }
+html.lite .hero .display, html.lite .hero .lede { animation-name: riseLite; }
+@keyframes riseLite { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: none; } }
+html.lite .nav.scrolled { background: rgba(255, 255, 255, .97); -webkit-backdrop-filter: none; backdrop-filter: none; }
+html.lite .dock, html.lite .tools { background: #111; -webkit-backdrop-filter: none; backdrop-filter: none; }
+html.lite .modal { background: rgba(255, 255, 255, .92); -webkit-backdrop-filter: none; backdrop-filter: none; }
+html.lite .zoom-bg { background: rgba(250, 250, 250, .95); -webkit-backdrop-filter: none; backdrop-filter: none; will-change: auto; }
+html.lite .zoom-grain { display: none; }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
   .reveal { opacity: 1; transform: none; filter: none; }
