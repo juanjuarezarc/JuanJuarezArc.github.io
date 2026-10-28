@@ -4,7 +4,10 @@
   "title": "Juan Juarez — Portfolio",
   "email": "juanjuarezarc@email.com",
   "footer": "© 2026 Juan Juarez",
-  "resume": ""
+  "resume": "",
+  "fonts": {
+   "title": "DM Serif Display"
+  }
  },
  "home": {
   "heroTitle": "Juan Juarez Jr.",
