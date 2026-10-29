@@ -6,10 +6,10 @@
   "footer": "© 2026 Juan Juarez",
   "resume": "",
   "fonts": {
-   "subtitle": "Helvetica",
-   "body": "Helvetica",
+   "subtitle": "Archivo",
+   "body": "Arial",
    "small": "Helvetica",
-   "title": "Times New Roman"
+   "title": "Archivo Black"
   }
  },
  "home": {
