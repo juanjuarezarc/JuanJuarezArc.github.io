@@ -7,9 +7,9 @@
   "resume": "",
   "fonts": {
    "subtitle": "Archivo",
-   "body": "Arial",
-   "small": "Helvetica",
-   "title": "Archivo Black"
+   "small": "Archivo",
+   "title": "Archivo Black",
+   "body": "Arial"
   }
  },
  "home": {
