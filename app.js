@@ -376,13 +376,10 @@ function itemEl(it, i) {
       if (!href) inner.classList.add('zoomable');   // click to view it large
       if (it.blur) {                                  // atmospheric: heavy blur + film grain, title centred on top
         inner.classList.add('blurred');
-        const grain = document.createElement('span');
-        grain.className = 'grain';
-        inner.appendChild(grain);
-        // dust drifting through an angled ray (two depths)
+        // the grain *is* the dust: three depths of particles drifting through an angled ray
         const dust = document.createElement('span');
         dust.className = 'dust';
-        dust.innerHTML = '<span class="motes far"></span><span class="motes near"></span>';
+        dust.innerHTML = '<span class="specks fine"></span><span class="specks dark"></span><span class="specks near"></span>';
         inner.appendChild(dust);
         if (m.tagName === 'IMG') {
           if (m.complete && m.naturalWidth) captionTone(inner, m);
@@ -533,26 +530,33 @@ const grainFx = (() => {
     requestAnimationFrame(step);
   }
   const wrap = (v, size) => ((v % size) + size) % size;
+  // one entry per particle layer (matches the order in the markup): pattern size, rise speed (px/ms),
+  // sway amount and period, and how strongly the stirred air moves it (depth)
+  const LAYERS = [
+    { size: 200, rise: 0.004, sway: 8, period: 7800, phase: 0.0, depth: 0.45 },   // fine, far
+    { size: 230, rise: 0.006, sway: 10, period: 6100, phase: 2.1, depth: 0.7 },   // dark, middle
+    { size: 260, rise: 0.009, sway: 14, period: 5300, phase: 4.0, depth: 1.0 },   // larger, near
+  ];
   function step(t) {
     if (!visible.size || !enabled()) { running = false; return; }
     const dt = lastT ? Math.min(40, t - lastT) : 16;
     lastT = t;
     const d = scrollY - lastY;
     lastY = scrollY;
-    // stirred air: a push against the scroll, with a sideways swirl that depends on direction
+    // stirred air: a soft push against the scroll, with a sideways swirl that depends on direction
     airVY -= d * 0.0006;
     airVX += Math.abs(d) * (d > 0 ? 0.0002 : -0.0002);
     const drag = Math.pow(0.9965, dt);                // the air slowly calms down (~1 s glide)
     airVX *= drag; airVY *= drag;
     airX += airVX * dt; airY += airVY * dt;
-    // near dust: rises ~10px a second and sways; far dust: slower and smaller
-    const nY = wrap(-t * 0.010 + airY, 300), nX = wrap(Math.sin(t / 5200) * 14 + airX, 300);
-    const fY = wrap(-t * 0.005 + airY * 0.5, 220), fX = wrap(Math.sin(t / 7300 + 1.7) * 9 + airX * 0.5, 220);
-    const near = `translate3d(${(nX - 300).toFixed(1)}px, ${(nY - 300).toFixed(1)}px, 0)`;
-    const far = `translate3d(${(fX - 220).toFixed(1)}px, ${(fY - 220).toFixed(1)}px, 0)`;
+    const tfs = LAYERS.map(L => {
+      const y = wrap(-t * L.rise + airY * L.depth, L.size);
+      const x = wrap(Math.sin(t / L.period + L.phase) * L.sway + t * L.rise * 0.35 + airX * L.depth, L.size);
+      return `translate3d(${(x - L.size).toFixed(1)}px, ${(y - L.size).toFixed(1)}px, 0)`;
+    });
     for (const e of visible) {
-      e.firstElementChild.style.transform = far;
-      e.lastElementChild.style.transform = near;
+      const kids = e.children;
+      for (let i = 0; i < kids.length && i < tfs.length; i++) kids[i].style.transform = tfs[i];
     }
     requestAnimationFrame(step);
   }
