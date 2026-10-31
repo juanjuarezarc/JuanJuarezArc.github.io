@@ -245,8 +245,9 @@ a.inner:hover img, a.inner:hover video { transform: scale(1.04); }
   transition: transform 1.4s var(--ease), filter .9s var(--ease);
 }
 a.inner.blurred:hover img, a.inner.blurred:hover video { filter: blur(calc(var(--cell) * .17)) saturate(.9); transform: scale(1.2); }
-.inner.blurred .grain {
-  position: absolute; inset: 0; pointer-events: none; opacity: .42; mix-blend-mode: overlay;
+.inner.blurred .grain {   /* oversized so it can flicker and drift without showing an edge */
+  position: absolute; inset: -120px; pointer-events: none; opacity: .42; mix-blend-mode: overlay;
+  will-change: transform, opacity; transform-origin: 50% 50%;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.95' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='linear' slope='2' intercept='-.5'/%3E%3CfeFuncG type='linear' slope='2' intercept='-.5'/%3E%3CfeFuncB type='linear' slope='2' intercept='-.5'/%3E%3CfeFuncA type='table' tableValues='1 1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
   background-size: 160px 160px;
 }
@@ -455,6 +456,7 @@ html.lite .modal { background: rgba(255, 255, 255, .92); -webkit-backdrop-filter
 html.lite .zoom-bg { background: rgba(250, 250, 250, .95); -webkit-backdrop-filter: none; backdrop-filter: none; will-change: auto; }
 html.lite .zoom-grain { display: none; }
 html.lite .inner.blurred img, html.lite .inner.blurred video { transition: none; }
+html.lite .inner.blurred .grain { will-change: auto; }
 html.lite a.inner.blurred:hover img { filter: blur(calc(var(--cell) * .26)) saturate(.85); transform: scale(1.15); }
 
 @media (prefers-reduced-motion: reduce) {

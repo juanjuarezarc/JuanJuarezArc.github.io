@@ -320,6 +320,7 @@ function renderBoard(boardEl, instant = false) {
   $$('.item.fresh', boardEl).forEach(el => el.classList.remove('fresh'));
   if (sel) $(`.item[data-id="${sel}"]`, boardEl)?.classList.add('sel');
   if (!instant) observeReveals(boardEl);
+  grainFx.refresh();
 }
 
 function itemEl(it, i) {
@@ -495,6 +496,63 @@ function bindBoard(boardEl) {
   });
   bindDrop(boardEl);
 }
+
+/* ---------- Living grain on blurred photos ----------
+   Flicker: the grain jumps to a new random spot ~9 times a second, like film.
+   Scroll physics: the grain has "weight" on a spring. Scrolling pulls it the opposite
+   way and stretches it slightly (like motion blur); faster scrolling pulls harder and
+   shows a touch more grain; when scrolling stops it springs back with a small settle.
+   Runs only while a blurred tile is on screen; off for reduced motion and lite mode. */
+const grainFx = (() => {
+  let els = [];
+  const visible = new Set();
+  let running = false, lastT = 0, lastY = scrollY, lastTf = '';
+  let y = 0, vel = 0, speed = 0, stretch = 1, flickT = 0, fx = 0, fy = 0;
+  const enabled = () => !reduceMotion && !isLite();
+  const seen = new IntersectionObserver(entries => {
+    for (const e of entries) { if (e.isIntersecting) visible.add(e.target); else visible.delete(e.target); }
+    kick();
+  });
+  function refresh() {
+    els.forEach(e => seen.unobserve(e));
+    visible.clear();
+    els = $$('.inner.blurred .grain');
+    els.forEach(e => seen.observe(e));
+  }
+  function kick() {
+    if (running || !visible.size || !enabled()) return;
+    running = true;
+    lastT = 0;
+    lastY = scrollY;
+    requestAnimationFrame(step);
+  }
+  function step(t) {
+    if (!visible.size || !enabled()) {
+      running = false;
+      for (const e of els) { e.style.transform = ''; e.style.opacity = ''; }
+      return;
+    }
+    const dt = lastT ? Math.min(32, t - lastT) : 16;
+    lastT = t;
+    const d = scrollY - lastY;
+    lastY = scrollY;
+    speed += (d / dt - speed) * 0.3;                                   // smoothed scroll speed, px per ms
+    const pull = Math.max(-28, Math.min(28, -speed * 11));             // lags opposite to the scroll
+    vel += (0.0006 * (pull - y) - 0.026 * vel) * dt;                   // spring + damping (slightly bouncy)
+    y += vel * dt;
+    stretch += (1 + Math.min(Math.abs(speed) * 0.12, 0.35) - stretch) * 0.15;
+    if (t - flickT > 110) { flickT = t; fx = (Math.random() - 0.5) * 120; fy = (Math.random() - 0.5) * 120; }
+    const tf = `translate3d(${fx.toFixed(1)}px, ${(fy + y).toFixed(1)}px, 0) scaleY(${stretch.toFixed(3)})`;
+    if (tf !== lastTf) {
+      lastTf = tf;
+      const op = (0.42 + Math.min(Math.abs(speed) * 0.08, 0.14)).toFixed(3);
+      for (const e of visible) { e.style.transform = tf; e.style.opacity = op; }
+    }
+    requestAnimationFrame(step);
+  }
+  addEventListener('scroll', kick, { passive: true });
+  return { refresh };
+})();
 
 // Blurred tiles: dark title on light photos, white title on dark ones
 function captionTone(inner, img) {
