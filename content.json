@@ -10,7 +10,17 @@
    "small": "Archivo",
    "title": "Oswald",
    "body": "Archivo"
-  }
+  },
+  "links": [
+   {
+    "label": "",
+    "url": "https://www.instagram.com/jjjxarchive/"
+   },
+   {
+    "label": "",
+    "url": "https://www.linkedin.com/in/juan-juarez-b808b3403"
+   }
+  ]
  },
  "home": {
   "heroTitle": "JUAN JUAREZ JR.",
@@ -476,6 +486,12 @@
      "caption": ""
     }
    ]
+  },
+  "about": {
+   "items": []
+  },
+  "contact": {
+   "items": []
   }
  }
 }
