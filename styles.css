@@ -193,7 +193,7 @@ body.editing .inner iframe { pointer-events: none; }  /* so blocks can be dragge
 }
 .inner:hover .cap { opacity: 1; transform: none; }
 .ph .cap {
-  position: relative; z-index: 1; opacity: .45; transform: none; mix-blend-mode: normal;
+  position: relative; z-index: 1; left: 0; right: 0; top: 0; bottom: 0; text-align: center; opacity: .45; transform: none; mix-blend-mode: normal;
   color: var(--fg); font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
 }
 
