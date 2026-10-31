@@ -170,7 +170,18 @@ h2 { font-size: clamp(32px, 4.2vw, 58px); font-weight: var(--title-weight, 600);
 .inner.bg-video iframe { pointer-events: none; }       /* looping clips behave like images */
 body.editing .inner iframe { pointer-events: none; }  /* so blocks can be dragged */
 .cap { pointer-events: none; }
-.ph { background: var(--soft); display: grid; place-items: center; }
+.ph {   /* empty tiles: soft, blurred white light with film grain */
+  display: grid; place-items: center;
+  background:
+    radial-gradient(55% 50% at var(--ph-x, 30%) var(--ph-y, 35%), #fff 0%, rgba(255, 255, 255, 0) 70%),
+    radial-gradient(60% 65% at var(--ph-x2, 72%) var(--ph-y2, 70%), rgba(205, 205, 210, .75) 0%, rgba(205, 205, 210, 0) 72%),
+    linear-gradient(160deg, #f7f7f8, #e9e9ec);
+}
+.ph::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .14; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.95' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='linear' slope='2' intercept='-.5'/%3E%3CfeFuncG type='linear' slope='2' intercept='-.5'/%3E%3CfeFuncB type='linear' slope='2' intercept='-.5'/%3E%3CfeFuncA type='table' tableValues='1 1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+}
 
 /* captions */
 .cap {
@@ -182,7 +193,7 @@ body.editing .inner iframe { pointer-events: none; }  /* so blocks can be dragge
 }
 .inner:hover .cap { opacity: 1; transform: none; }
 .ph .cap {
-  position: static; opacity: .45; transform: none; mix-blend-mode: normal;
+  position: relative; z-index: 1; opacity: .45; transform: none; mix-blend-mode: normal;
   color: var(--fg); font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
 }
 
@@ -246,8 +257,8 @@ a.inner.blurred:hover img, a.inner.blurred:hover video { filter: blur(calc(var(-
   text-shadow: 0 0 24px rgba(0, 0, 0, .25);
 }
 .inner.blurred.light-bg .cap { color: #000; text-shadow: 0 0 24px rgba(255, 255, 255, .3); }
-a.inner.ph { transition: background-color .4s var(--ease); }
-a.inner.ph:hover { background: #ececef; }
+a.inner.ph { transition: filter .4s var(--ease); }
+a.inner.ph:hover { filter: brightness(.97); }
 body:not(.editing) .board.dim:has(a.inner:hover) .item:not(:hover) { opacity: .3; }
 
 /* text blocks — size scales with the grid so layouts hold at any width */

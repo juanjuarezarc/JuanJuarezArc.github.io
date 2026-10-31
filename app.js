@@ -385,6 +385,12 @@ function itemEl(it, i) {
       }
     } else {
       inner.classList.add('ph');
+      // each empty tile gets its own soft light pattern (stable per block)
+      let hsh = 2166136261;
+      for (const ch of String(it.id)) hsh = Math.imul(hsh ^ ch.charCodeAt(0), 16777619) >>> 0;
+      const r = n => ((Math.imul(hsh ^ (n * 0x9e3779b9), 2246822519) >>> 0) >>> 7) % 60 + 20;
+      inner.style.setProperty('--ph-x', r(0) + '%'); inner.style.setProperty('--ph-y', r(5) + '%');
+      inner.style.setProperty('--ph-x2', (100 - r(10)) + '%'); inner.style.setProperty('--ph-y2', (100 - r(15)) + '%');
     }
     if (it.caption && !(isPlaceholderCaption(it.caption) && (src || frame))) {
       const c = document.createElement('span');
