@@ -43,7 +43,9 @@
      "w": 4,
      "h": 5,
      "caption": "PRESSURE",
-     "link": "p:air"
+     "link": "p:air",
+     "blur": false,
+     "fit": "contain"
     },
     {
      "id": "w2",
