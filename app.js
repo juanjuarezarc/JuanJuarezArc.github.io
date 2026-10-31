@@ -373,6 +373,16 @@ function itemEl(it, i) {
       m.src = localPreview.get(src) || src;
       inner.appendChild(m);
       if (!href) inner.classList.add('zoomable');   // click to view it large
+      if (it.blur) {                                  // atmospheric: heavy blur + film grain, title centred on top
+        inner.classList.add('blurred');
+        const grain = document.createElement('span');
+        grain.className = 'grain';
+        inner.appendChild(grain);
+        if (m.tagName === 'IMG') {
+          if (m.complete && m.naturalWidth) captionTone(inner, m);
+          else m.addEventListener('load', () => captionTone(inner, m), { once: true });
+        }
+      }
     } else {
       inner.classList.add('ph');
     }
@@ -478,6 +488,22 @@ function bindBoard(boardEl) {
     if (media) openZoom(media, inner.querySelector('.cap'));
   });
   bindDrop(boardEl);
+}
+
+// Blurred tiles: dark title on light photos, white title on dark ones
+function captionTone(inner, img) {
+  try {
+    const c = document.createElement('canvas');
+    c.width = c.height = 8;
+    const x = c.getContext('2d');
+    const w = img.naturalWidth, h = img.naturalHeight;
+    x.drawImage(img, w * 0.25, h * 0.35, w * 0.5, h * 0.3, 0, 0, 8, 8);   // the middle, where the title sits
+    const d = x.getImageData(0, 0, 8, 8).data;
+    let sum = 0;
+    for (let i = 0; i < d.length; i += 4) sum += 0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2];
+    // above ~118 (of 255) black text has more contrast than white
+    inner.classList.toggle('light-bg', sum / (d.length / 4) > 118);
+  } catch { /* image from another site can't be read — keep white text */ }
 }
 
 /* =========================================================
@@ -793,7 +819,7 @@ function toolsHTML(it) {
       ? b('size', 'Aa', 'Text size') + b('edit', 'Edit', 'Edit text')
       : it.embed
         ? b('video', 'Video link', 'Change the YouTube / Vimeo link') + b('auto', it.auto ? 'Player' : 'Loop', it.auto ? 'Show a normal player with sound and controls' : 'Play silently on a loop, like a moving image') + b('caption', 'Caption')
-        : b('replace', 'Replace', 'Replace image or video') + b('video', 'Video link', 'Use a YouTube / Vimeo video instead') + b('fit', 'Fit', 'Fill frame / show whole image') + b('caption', 'Caption')
+        : b('replace', 'Replace', 'Replace image or video') + b('blur', it.blur ? 'Sharp' : 'Blur', it.blur ? 'Show the photo sharp' : 'Heavily blur the photo and add grain, with the caption on top') + b('video', 'Video link', 'Use a YouTube / Vimeo video instead') + b('fit', 'Fit', 'Fill frame / show whole image') + b('caption', 'Caption')
   }${b('link', 'Link', 'Link to a project or website')}${
     it.link && it.link.startsWith('p:') ? b('open', 'Open ↗', 'Open the linked project page') : ''
   }${b('front', '↑', 'Bring to front')}${b('dup', '⧉', 'Duplicate')}${b('del', '✕', 'Delete')}</div><div class="handle" title="Drag to resize"></div>`;
@@ -892,6 +918,10 @@ async function onTool(e, boardEl) {
       toast(it.auto ? 'Plays silently on a loop' : 'Normal player with sound and controls');
       break;
     case 'fit': it.fit = it.fit === 'contain' ? 'cover' : 'contain'; break;
+    case 'blur':
+      it.blur = !it.blur;
+      if (it.blur && !it.caption) toast('Blurred — add a Caption to show a title on top');
+      break;
     case 'caption': {
       const cur = isPlaceholderCaption(it.caption) ? '' : (it.caption || '');
       const v = await ask('Caption', cur, 'text', 'Shown when hovering the image. Leave empty for none.');
