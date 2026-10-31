@@ -379,6 +379,11 @@ function itemEl(it, i) {
         const grain = document.createElement('span');
         grain.className = 'grain';
         inner.appendChild(grain);
+        // dust drifting through an angled ray (two depths)
+        const dust = document.createElement('span');
+        dust.className = 'dust';
+        dust.innerHTML = '<span class="motes far"></span><span class="motes near"></span>';
+        inner.appendChild(dust);
         if (m.tagName === 'IMG') {
           if (m.complete && m.naturalWidth) captionTone(inner, m);
           else m.addEventListener('load', () => captionTone(inner, m), { once: true });
@@ -497,17 +502,18 @@ function bindBoard(boardEl) {
   bindDrop(boardEl);
 }
 
-/* ---------- Living grain on blurred photos ----------
-   Flicker: the grain jumps to a new random spot ~9 times a second, like film.
-   Scroll physics: the grain has "weight" on a spring. Scrolling pulls it the opposite
-   way and stretches it slightly (like motion blur); faster scrolling pulls harder and
-   shows a touch more grain; when scrolling stops it springs back with a small settle.
-   Runs only while a blurred tile is on screen; off for reduced motion and lite mode. */
+/* ---------- Dust on blurred photos ----------
+   Tiny specks drift slowly upward and sway, like dust in an angled ray of light
+   (visible only along a diagonal band; no glow). Two layers at different depths
+   move at different speeds. Scrolling stirs the air: the dust gets a soft push
+   against the scroll, swirling one way going down and the other going up, then
+   drifts to a stop. Runs only while a blurred tile is on screen; still for reduced
+   motion and lite mode. */
 const grainFx = (() => {
   let els = [];
   const visible = new Set();
-  let running = false, lastT = 0, lastY = scrollY, lastTf = '';
-  let y = 0, vel = 0, speed = 0, stretch = 1, flickT = 0, fx = 0, fy = 0;
+  let running = false, lastT = 0, lastY = scrollY;
+  let airX = 0, airY = 0, airVX = 0, airVY = 0;
   const enabled = () => !reduceMotion && !isLite();
   const seen = new IntersectionObserver(entries => {
     for (const e of entries) { if (e.isIntersecting) visible.add(e.target); else visible.delete(e.target); }
@@ -516,7 +522,7 @@ const grainFx = (() => {
   function refresh() {
     els.forEach(e => seen.unobserve(e));
     visible.clear();
-    els = $$('.inner.blurred .grain');
+    els = $$('.inner.blurred .dust');
     els.forEach(e => seen.observe(e));
   }
   function kick() {
@@ -526,27 +532,27 @@ const grainFx = (() => {
     lastY = scrollY;
     requestAnimationFrame(step);
   }
+  const wrap = (v, size) => ((v % size) + size) % size;
   function step(t) {
-    if (!visible.size || !enabled()) {
-      running = false;
-      for (const e of els) { e.style.transform = ''; e.style.opacity = ''; }
-      return;
-    }
-    const dt = lastT ? Math.min(32, t - lastT) : 16;
+    if (!visible.size || !enabled()) { running = false; return; }
+    const dt = lastT ? Math.min(40, t - lastT) : 16;
     lastT = t;
     const d = scrollY - lastY;
     lastY = scrollY;
-    speed += (d / dt - speed) * 0.3;                                   // smoothed scroll speed, px per ms
-    const pull = Math.max(-28, Math.min(28, -speed * 11));             // lags opposite to the scroll
-    vel += (0.0006 * (pull - y) - 0.026 * vel) * dt;                   // spring + damping (slightly bouncy)
-    y += vel * dt;
-    stretch += (1 + Math.min(Math.abs(speed) * 0.12, 0.35) - stretch) * 0.15;
-    if (t - flickT > 110) { flickT = t; fx = (Math.random() - 0.5) * 120; fy = (Math.random() - 0.5) * 120; }
-    const tf = `translate3d(${fx.toFixed(1)}px, ${(fy + y).toFixed(1)}px, 0) scaleY(${stretch.toFixed(3)})`;
-    if (tf !== lastTf) {
-      lastTf = tf;
-      const op = (0.42 + Math.min(Math.abs(speed) * 0.08, 0.14)).toFixed(3);
-      for (const e of visible) { e.style.transform = tf; e.style.opacity = op; }
+    // stirred air: a push against the scroll, with a sideways swirl that depends on direction
+    airVY -= d * 0.0006;
+    airVX += Math.abs(d) * (d > 0 ? 0.0002 : -0.0002);
+    const drag = Math.pow(0.9965, dt);                // the air slowly calms down (~1 s glide)
+    airVX *= drag; airVY *= drag;
+    airX += airVX * dt; airY += airVY * dt;
+    // near dust: rises ~10px a second and sways; far dust: slower and smaller
+    const nY = wrap(-t * 0.010 + airY, 300), nX = wrap(Math.sin(t / 5200) * 14 + airX, 300);
+    const fY = wrap(-t * 0.005 + airY * 0.5, 220), fX = wrap(Math.sin(t / 7300 + 1.7) * 9 + airX * 0.5, 220);
+    const near = `translate3d(${(nX - 300).toFixed(1)}px, ${(nY - 300).toFixed(1)}px, 0)`;
+    const far = `translate3d(${(fX - 220).toFixed(1)}px, ${(fY - 220).toFixed(1)}px, 0)`;
+    for (const e of visible) {
+      e.firstElementChild.style.transform = far;
+      e.lastElementChild.style.transform = near;
     }
     requestAnimationFrame(step);
   }
