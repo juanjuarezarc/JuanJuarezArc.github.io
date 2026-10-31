@@ -29,6 +29,8 @@ Treat it like a password — anyone with it can change this repository.
 | Add a text block | **+ Text** (double-click a text block to edit; **Aa** cycles the size) |
 | Link a block to a project or website | Hover → **Link** |
 | Create a new project page | **+ Project** → its tile appears on the Work grid → hover → **Open ↗** |
+| Add Instagram, LinkedIn… links | Under Contact → **+ Link** → paste your profile address (click a link to change or remove it) |
+| Add photos or text to About / Contact | Scroll there, then **+ Image** / **+ Text** (the dock adds to whichever grid is on screen) |
 | Add your résumé | **Résumé** → choose a PDF (a link appears in the top menu) |
 | See it the way visitors do | **Preview** |
 | Save | **Save** or ⌘S |

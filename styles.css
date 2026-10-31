@@ -122,6 +122,16 @@ h2 { font-size: clamp(32px, 4.2vw, 58px); font-weight: var(--title-weight, 600);
 }
 .prose + .mail, .mail + .prose { margin-top: 28px; }
 
+/* social links + the photo/text grids under About and Contact */
+.socials { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 26px; margin-top: 26px; font-size: 15px; letter-spacing: .02em; }
+.socials[hidden] { display: none; }
+.socials a { border-bottom: 1px solid transparent; padding-bottom: 2px; transition: border-color .2s; }
+.socials a:hover { border-color: currentColor; }
+.add-social { font: inherit; color: inherit; background: none; border: 1px dashed var(--line); border-radius: 999px; padding: 3px 12px; cursor: pointer; }
+.add-social:hover { border-color: var(--fg); }
+.board.side { margin-top: 40px; text-align: left; }
+body:not(.editing) .board.side:not(:has(.item)) { margin-top: 0; }
+
 /* scroll reveal */
 .reveal {
   opacity: 0; transform: translateY(48px); filter: blur(10px);

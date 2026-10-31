@@ -182,6 +182,7 @@ function render() {
   $('#view').innerHTML = route.type === 'project' ? projectHTML(route.slug) : homeHTML();
   bindText(document);
   renderNav();
+  renderSocials();
   $$('#view .board').forEach(b => renderBoard(b));
   observeReveals();
   if (editing) setEditing(true);
@@ -210,12 +211,15 @@ function homeHTML() {
   <section class="zone narrow" id="about">
     <h2 class="reveal" data-edit="home.aboutTitle"></h2>
     <div class="prose reveal" data-edit="home.aboutText" data-rich></div>
+    <div class="board side" data-board="about"></div>
   </section>
 
   <section class="zone narrow" id="contact">
     <h2 class="reveal" data-edit="home.contactTitle"></h2>
     <div class="prose reveal" data-edit="home.contactText" data-rich></div>
     <a class="mail reveal" data-edit="site.email" data-mail></a>
+    <div class="socials reveal" id="socials"></div>
+    <div class="board side" data-board="contact"></div>
   </section>`;
 }
 
@@ -263,6 +267,78 @@ function bindText(root) {
   });
 }
 
+/* ---------- social links (Instagram, LinkedIn…) under Contact ---------- */
+const SOCIAL_NAMES = { 'instagram.com': 'Instagram', 'linkedin.com': 'LinkedIn', 'behance.net': 'Behance', 'github.com': 'GitHub',
+  'x.com': 'X', 'twitter.com': 'X', 'tiktok.com': 'TikTok', 'youtube.com': 'YouTube', 'vimeo.com': 'Vimeo',
+  'pinterest.com': 'Pinterest', 'issuu.com': 'Issuu', 'facebook.com': 'Facebook', 'threads.net': 'Threads', 'dribbble.com': 'Dribbble' };
+function normLink(u) {
+  u = (u || '').trim();
+  if (!u) return '';
+  if (/^[^\s@/]+@[^\s@/]+\.[a-z]{2,}$/i.test(u)) return 'mailto:' + u;
+  if (!/^(https?:\/\/|mailto:)/i.test(u)) u = 'https://' + u.replace(/^\/+/, '');
+  return /^(https?:\/\/|mailto:)[^\s<>"]+$/i.test(u) ? u : '';
+}
+function guessLabel(u) {
+  if (u.startsWith('mailto:')) return 'Email';
+  try {
+    const h = new URL(u).hostname.replace(/^www\./, '');
+    return SOCIAL_NAMES[h] || h.split('.')[0].replace(/^./, c => c.toUpperCase());
+  } catch { return 'Link'; }
+}
+function renderSocials() {
+  const box = $('#socials');
+  if (!box) return;
+  const links = C.site.links || [];
+  box.innerHTML = '';
+  links.forEach((l, i) => {
+    const a = document.createElement('a');
+    a.textContent = l.label || guessLabel(l.url);
+    a.href = linkHref(l.url) || '#';
+    if (/^https?:/i.test(l.url)) { a.target = '_blank'; a.rel = 'noopener'; }
+    if (editing) {
+      a.title = 'Click to edit';
+      a.onclick = e => { e.preventDefault(); editSocial(i); };
+    }
+    box.appendChild(a);
+  });
+  if (editing) {
+    const add = document.createElement('button');
+    add.className = 'add-social';
+    add.textContent = '+ Link';
+    add.title = 'Add Instagram, LinkedIn, Behance…';
+    add.onclick = () => editSocial(-1);
+    box.appendChild(add);
+  }
+  box.hidden = !links.length && !editing;
+}
+async function editSocial(i) {
+  const links = C.site.links = C.site.links || [];
+  const cur = links[i] || { label: '', url: '' };
+  const v = await modal((card, done) => {
+    card.innerHTML = `<h3>${i < 0 ? 'Add a link' : 'Edit link'}</h3><p class="hint" style="margin-bottom:14px">Paste the address of your profile — e.g. instagram.com/yourname. The name fills in by itself; change it if you like.</p>
+      <form><input name="url" placeholder="instagram.com/yourname" autocomplete="off"><input name="label" placeholder="Name shown (optional)" autocomplete="off" style="margin-top:8px">
+      <div class="row">${i < 0 ? '' : '<button type="button" class="btn plain del">Remove</button>'}<button type="button" class="btn plain cancel">Cancel</button><button class="btn solid">${i < 0 ? 'Add' : 'OK'}</button></div></form>`;
+    const f = card.querySelector('form');
+    f.url.value = cur.url.replace(/^mailto:/, ''); f.label.value = cur.label || '';
+    f.url.oninput = () => { const n = normLink(f.url.value); f.label.placeholder = n ? guessLabel(n) : 'Name shown (optional)'; };
+    f.url.oninput();
+    f.onsubmit = e => { e.preventDefault(); done({ url: f.url.value, label: f.label.value }); };
+    card.querySelector('.cancel').onclick = () => done(null);
+    const del = card.querySelector('.del');
+    if (del) del.onclick = () => done('remove');
+  });
+  if (v === null) return;
+  if (v === 'remove') links.splice(i, 1);
+  else {
+    const url = normLink(v.url);
+    if (!url) { toast('That doesn’t look like a web address'); return; }
+    const item = { label: v.label.trim(), url };
+    if (i < 0) links.push(item); else links[i] = item;
+  }
+  markDirty();
+  renderSocials();
+}
+
 function renderNav() {
   const a = $('#resumeLink');
   a.hidden = !C.site.resume;
@@ -302,7 +378,16 @@ addEventListener('scroll', onScroll, { passive: true });
 const boardOf = el => (C.boards[el.dataset.board] = C.boards[el.dataset.board] || { items: [] });
 const findItem = (boardEl, id) => boardOf(boardEl).items.find(i => i.id === id);
 const bottomOf = b => b.items.reduce((m, i) => Math.max(m, i.y + i.h), 0);
-const mainBoard = () => $('#view .board');
+// The board the dock adds to: whichever one is most on screen (Work, About or Contact)
+function mainBoard() {
+  let best = null, most = -1;
+  for (const b of $$('#view .board')) {
+    const r = b.getBoundingClientRect();
+    const seen = Math.min(r.bottom, innerHeight) - Math.max(r.top, 0);
+    if (seen > most) { most = seen; best = b; }
+  }
+  return best;
+}
 
 function renderBoard(boardEl, instant = false) {
   const b = boardOf(boardEl);
@@ -1172,6 +1257,7 @@ function setEditing(on) {
   });
   if (!on) { select(null); hideFmt(); bindText(document); }
   $$('#view .board').forEach(layoutBoard);
+  renderSocials();
   updateDock();
 }
 
