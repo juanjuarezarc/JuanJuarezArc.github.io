@@ -417,6 +417,11 @@ body:not(.editing) .dock .edit-only { display: none; }
   .txt.size-xl { font-size: max(18px, calc(var(--cell) * .6)); }
   .cap { left: 8px; bottom: 6px; font-size: 10px; }
   body.editing .item { touch-action: none; }   /* drag blocks with a finger in owner mode */
+  /* finer grain and dust on small tiles (same drawing cost) */
+  .inner.blurred .specks.fine { background-size: 110px 110px; }
+  .inner.blurred .specks.dark { background-size: 126.5px 126.5px; }
+  .inner.blurred .specks.near { background-size: 143px 143px; }
+  .ph::after { background-size: 90px 90px; }
 }
 
 /* =========================================================
