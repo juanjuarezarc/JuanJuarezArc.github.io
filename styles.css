@@ -7,7 +7,7 @@
   --text: #111111;
   --muted: #6e6e73;
   --line: #e8e8ed;
-  --soft: #f5f5f7;          /* empty image tiles */
+  --soft: #f5f5f7;          /* light grey for hovers and code */
   --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
           "Helvetica Neue", Helvetica, Arial, sans-serif;
   /* fonts per type of text — chosen in owner mode (dock → Fonts); these are the defaults */
@@ -124,7 +124,6 @@ h2 { font-size: clamp(32px, 4.2vw, 58px); font-weight: var(--title-weight, 600);
 
 /* social links + the photo/text grids under About and Contact */
 .socials { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 26px; margin-top: 26px; font-size: 15px; letter-spacing: .02em; }
-.socials[hidden] { display: none; }
 .socials a { border-bottom: 1px solid transparent; padding-bottom: 2px; transition: border-color .2s; }
 .socials a:hover { border-color: currentColor; }
 .add-social { font: inherit; color: inherit; background: none; border: 1px dashed var(--line); border-radius: 999px; padding: 3px 12px; cursor: pointer; }
@@ -179,7 +178,6 @@ body:not(.editing) .board.side:not(:has(.item)) { margin-top: 0; }
 .inner iframe { display: block; width: 100%; height: 100%; border: 0; background: #000; }
 .inner.bg-video iframe { pointer-events: none; }       /* looping clips behave like images */
 body.editing .inner iframe { pointer-events: none; }  /* so blocks can be dragged */
-.cap { pointer-events: none; }
 .ph {   /* empty tiles: soft, blurred white light with film grain */
   display: grid; place-items: center;
   background:
@@ -195,7 +193,7 @@ body.editing .inner iframe { pointer-events: none; }  /* so blocks can be dragge
 
 /* captions */
 .cap {
-  position: absolute; left: 14px; bottom: 12px;
+  position: absolute; left: 14px; bottom: 12px; pointer-events: none;
   font-size: 12px; letter-spacing: .04em; color: #fff;
   mix-blend-mode: difference;
   opacity: 0; transform: translateY(6px);
@@ -247,6 +245,9 @@ body:not(.editing) .inner.zoomable:hover img, body:not(.editing) .inner.zoomable
 
 /* linked tiles: zoom inside the frame + dim the others (like a desktop focus) */
 a.inner:hover img, a.inner:hover video { transform: scale(1.04); }
+a.inner.ph { transition: filter .4s var(--ease); }
+a.inner.ph:hover { filter: brightness(.97); }
+body:not(.editing) .board.dim:has(a.inner:hover) .item:not(:hover) { opacity: .3; }
 
 /* blurred + grainy photo tiles (owner mode: hover a photo → Blur) */
 .inner.blurred img, .inner.blurred video {
@@ -274,20 +275,12 @@ a.inner.blurred:hover img, a.inner.blurred:hover video { filter: blur(calc(var(-
   text-shadow: 0 0 24px rgba(0, 0, 0, .25);
 }
 .inner.blurred.light-bg .cap { color: #000; text-shadow: 0 0 24px rgba(255, 255, 255, .3); }
-a.inner.ph { transition: filter .4s var(--ease); }
-a.inner.ph:hover { filter: brightness(.97); }
-body:not(.editing) .board.dim:has(a.inner:hover) .item:not(:hover) { opacity: .3; }
 
 /* text blocks — size scales with the grid so layouts hold at any width */
 .txt { font-size: clamp(14px, calc(var(--cell) * .16), 19px); line-height: 1.45; color: var(--text); }
 .txt.size-s { font-size: clamp(12px, calc(var(--cell) * .13), 15px); color: var(--muted); }
 .txt.size-l { font-size: clamp(20px, calc(var(--cell) * .3), 36px); line-height: 1.15; letter-spacing: -.02em; font-weight: var(--title-weight-l, 500); }
 .txt.size-xl { font-size: clamp(32px, calc(var(--cell) * .6), 84px); line-height: 1; letter-spacing: -.04em; font-weight: var(--title-weight, 600); }
-
-/* phones: the grid becomes one clean column */
-.board.stack { display: flex; flex-direction: column; gap: var(--gap); height: auto !important; --cell: 100px !important; }
-.board.stack .item { position: relative; transform: none !important; width: 100% !important; height: auto !important; }
-.board.stack .item.text { aspect-ratio: auto !important; padding: 8px 0; }
 
 @media (hover: none) { .cap { opacity: 1; transform: none; } }
 
@@ -337,7 +330,6 @@ body.editing .item:hover .tools, body.editing .item.sel .tools { display: flex; 
   background: #fff; border: 1px solid #000; cursor: nwse-resize;
 }
 body.editing .item:hover .handle, body.editing .item.sel .handle { display: block; }
-body.editing .board.stack .handle { display: none !important; }
 
 /* editable text */
 body:not(.editing) .is-empty { display: none; }
@@ -440,7 +432,6 @@ body:not(.editing) .dock .edit-only { display: none; }
 .display, h2, .next strong, .txt.size-l, .txt.size-xl { font-family: var(--font-title); }
 .lede, .zone-head p { font-family: var(--font-subtitle); }
 .prose, .txt, .mail { font-family: var(--font-body); }
-.txt.size-l, .txt.size-xl { font-family: var(--font-title); }
 .nav, .cap, .foot, .back, .next span, .zoom-cap { font-family: var(--font-small); }
 /* tight tracking suits sans-serif titles; serif and mono titles need a little more air */
 html[data-title-kind="serif"] .display, html[data-title-kind="serif"] h2, html[data-title-kind="serif"] .next strong,

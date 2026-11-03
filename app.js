@@ -1,6 +1,13 @@
 (() => {
 'use strict';
 
+/* Contents
+   1. Basics, lite mode, content helpers      6. Click-to-zoom
+   2. Boot + page rendering                   7. Owner mode: blocks, tools, dock
+   3. Socials, nav, scroll effects            8. Fonts
+   4. Grid boards + text fitting               9. Saving to GitHub, login, uploads
+   5. Dust on blurred photos                 10. Navigation, keyboard, dialogs */
+
 /* =========================================================
    Where the site lives on GitHub — owner mode saves here
    ========================================================= */
@@ -10,7 +17,6 @@ const GH = { owner: 'juanjuarezarc', repo: 'JuanJuarezArc.github.io', branch: 'm
    Basics
    ========================================================= */
 const COLS = 12;                       // grid columns on desktop
-const STACK_BELOW = 0;                 // px — below this the grid becomes one column (0 = never: phones show the same grid, scaled down)
 const MEDIA_TYPES = 'image/jpeg,image/png,image/webp,image/gif,image/avif,video/mp4,video/webm';
 
 const $ = (s, r = document) => r.querySelector(s);
@@ -19,6 +25,13 @@ const clamp = (v, a, b) => Math.min(Math.max(v, a), b);
 const uid = () => Math.random().toString(36).slice(2, 10);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const scrollToCenter = el => el.scrollIntoView({ block: 'center', behavior: reduceMotion ? 'auto' : 'smooth' });
+// Muted, looping, inline video (grid tiles and the zoom view)
+function loopVideo(v) {
+  v.muted = v.loop = v.autoplay = v.playsInline = true;
+  v.setAttribute('muted', ''); v.setAttribute('playsinline', '');
+  return v;
+}
 
 /* ---------- "Lite" mode ----------
    When a browser draws without the graphics chip (e.g. Chrome with "Use graphics
@@ -443,13 +456,8 @@ function itemEl(it, i) {
       inner.classList.add('embed');
       inner.appendChild(f);
     } else if (src) {
-      const m = document.createElement(isVideo(src) ? 'video' : 'img');
-      if (m.tagName === 'VIDEO') {
-        m.muted = true; m.loop = true; m.autoplay = true; m.playsInline = true;
-        m.setAttribute('muted', ''); m.setAttribute('playsinline', '');
-      } else {
-        m.loading = 'lazy'; m.decoding = 'async'; m.alt = it.caption || '';
-      }
+      const m = isVideo(src) ? loopVideo(document.createElement('video')) : document.createElement('img');
+      if (m.tagName === 'IMG') { m.loading = 'lazy'; m.decoding = 'async'; m.alt = it.caption || ''; }
       m.draggable = false;
       if (it.fit === 'contain') m.classList.add('contain');
       // Fresh uploads take ~1 min to appear on GitHub Pages: show the local copy, or GitHub's raw file meanwhile
@@ -541,26 +549,16 @@ function fitText(boardEl, b, m) {
   return bottom;
 }
 
+// Phones show the same grid as a laptop, just scaled to the screen width
 function layoutBoard(boardEl) {
   const b = boardOf(boardEl);
-  const stack = boardEl.clientWidth < STACK_BELOW;
-  boardEl.classList.toggle('stack', stack);
   const m = metrics(boardEl);
   boardEl.style.setProperty('--cell', `${m.cell}px`);
   for (const el of $$('.item', boardEl)) {
     const it = b.items.find(x => x.id === el.dataset.id);
-    if (!it) continue;
-    if (stack) {
-      el.style.cssText = '';
-      el.style.order = String(it.y * COLS + it.x);
-      if (it.type !== 'text') el.style.aspectRatio = String(it.w / it.h);
-    } else {
-      el.style.order = ''; el.style.aspectRatio = '';
-      place(el, it, m);
-    }
+    if (it) place(el, it, m);
   }
-  if (stack) boardEl.style.height = '';
-  else sizeBoard(boardEl, m, fitText(boardEl, b, m));
+  sizeBoard(boardEl, m, fitText(boardEl, b, m));
 }
 
 function bindBoard(boardEl) {
@@ -771,13 +769,8 @@ async function openZoom(media, capEl) {
   const frame = wrap.querySelector('.zoom-frame');
   Object.assign(frame.style, { left: `${box.left}px`, top: `${box.top}px`, width: `${box.width}px`, height: `${box.height}px` });
   const isVid = media.tagName === 'VIDEO';
-  const media2 = document.createElement(isVid ? 'video' : 'img');
-  if (isVid) {
-    media2.muted = true; media2.loop = true; media2.autoplay = true; media2.playsInline = true;
-    media2.setAttribute('muted', ''); media2.setAttribute('playsinline', '');
-  } else {
-    media2.alt = media.alt || '';
-  }
+  const media2 = isVid ? loopVideo(document.createElement('video')) : document.createElement('img');
+  if (!isVid) media2.alt = media.alt || '';
   media2.src = media.currentSrc || media.src;
   if (isVid) media2.currentTime = media.currentTime;
   media2.draggable = false;
@@ -837,13 +830,13 @@ const PZ_MAX = 4;
 
 function pzClamp(z) {
   const t = z.pz, W = z.box.width, H = z.box.height;
-  t.s = Math.min(PZ_MAX, Math.max(1, t.s));
-  t.x = Math.min(0, Math.max(W - W * t.s, t.x));
-  t.y = Math.min(0, Math.max(H - H * t.s, t.y));
+  t.s = clamp(t.s, 1, PZ_MAX);
+  t.x = clamp(t.x, W - W * t.s, 0);
+  t.y = clamp(t.y, H - H * t.s, 0);
 }
 function pzZoomAt(z, s2, px, py) {                          // keeps the point (px, py) under the finger/cursor
   const t = z.pz, s1 = t.s;
-  s2 = Math.min(PZ_MAX, Math.max(1, s2));
+  s2 = clamp(s2, 1, PZ_MAX);
   t.x = px - (px - t.x) * (s2 / s1);
   t.y = py - (py - t.y) * (s2 / s1);
   t.s = s2;
@@ -890,7 +883,7 @@ function bindPanZoom(z) {
       const d1 = Math.hypot(p[1][0] - p[0][0], p[1][1] - p[0][1]);
       const m0 = [(base.p[0][0] + base.p[1][0]) / 2, (base.p[0][1] + base.p[1][1]) / 2];
       const m1 = [(p[0][0] + p[1][0]) / 2, (p[0][1] + p[1][1]) / 2];
-      const s2 = Math.min(PZ_MAX, Math.max(1, base.s * d1 / d0));
+      const s2 = clamp(base.s * d1 / d0, 1, PZ_MAX);
       z.moved = true;
       z.pz.x = m0[0] - (m0[0] - base.x) * (s2 / base.s) + (m1[0] - m0[0]);
       z.pz.y = m0[1] - (m0[1] - base.y) * (s2 / base.s) + (m1[1] - m0[1]);
@@ -992,6 +985,18 @@ function select(el) {
   $$('.item.sel').forEach(x => x !== el && x.classList.remove('sel'));
   if (el) el.classList.add('sel');
 }
+function focusBlock(boardEl, id) {
+  const el = $(`.item[data-id="${id}"]`, boardEl);
+  select(el);
+  scrollToCenter(el);
+  return el;
+}
+function addBlock(boardEl, it) {
+  boardOf(boardEl).items.push(it);
+  markDirty();
+  renderBoard(boardEl, true);
+  return focusBlock(boardEl, it.id);
+}
 
 function onBoardPointer(e, boardEl) {
   if (!editing || e.button !== 0) return;
@@ -999,7 +1004,6 @@ function onBoardPointer(e, boardEl) {
   if (!el) { select(null); return; }
   if (e.target.closest('.tools') || e.target.isContentEditable) return;
   select(el);
-  if (boardEl.classList.contains('stack')) return;
   drag(e, boardEl, el, findItem(boardEl, el.dataset.id), e.target.closest('.handle') ? 'resize' : 'move');
 }
 
@@ -1234,19 +1238,14 @@ async function addMedia(boardEl, files, x0 = 0, y0 = null) {
     markDirty();
     renderBoard(boardEl, true);
   }
-  if (last) {
-    const el = $(`.item[data-id="${last.id}"]`, boardEl);
-    select(el);
-    el.scrollIntoView({ block: 'center', behavior: reduceMotion ? 'auto' : 'smooth' });
-  }
+  if (last) focusBlock(boardEl, last.id);
 }
 
 /* =========================================================
    Owner mode — page text, format bar, dock
    ========================================================= */
 function setEditing(on) {
-  if (!on) { const fp = $('#fontPanel'); if (fp) fp.remove(); }
-  if (!on) finishText();
+  if (!on) { const fp = $('#fontPanel'); if (fp) fp.remove(); finishText(); }
   editing = on;
   document.body.classList.toggle('editing', on);
   $$('[data-edit]').forEach(el => {
@@ -1383,28 +1382,14 @@ async function onDock(e) {
       if (!boardEl) return;
       const v = await askVideoLink('Add a YouTube or Vimeo video');
       if (!v) return;
-      const b = boardOf(boardEl);
-      const it = { id: uid(), type: 'image', x: 0, y: bottomOf(b), w: 8, h: 5, embed: v, caption: '' };
-      b.items.push(it);
-      markDirty();
-      renderBoard(boardEl, true);
-      const el = $(`.item[data-id="${it.id}"]`, boardEl);
-      select(el);
-      el.scrollIntoView({ block: 'center', behavior: reduceMotion ? 'auto' : 'smooth' });
+      addBlock(boardEl, { id: uid(), type: 'image', x: 0, y: bottomOf(boardOf(boardEl)), w: 8, h: 5, embed: v, caption: '' });
       toast('Video added — drag to place it, then Save');
       break;
     }
     case 'fonts': toggleFontPanel(); break;
     case 'text': {
       if (!boardEl) return;
-      const b = boardOf(boardEl);
-      const it = { id: uid(), type: 'text', x: 0, y: bottomOf(b), w: 5, h: 2, size: 'm', html: '<p>New text</p>' };
-      b.items.push(it);
-      markDirty();
-      renderBoard(boardEl, true);
-      const el = $(`.item[data-id="${it.id}"]`, boardEl);
-      select(el);
-      el.scrollIntoView({ block: 'center', behavior: reduceMotion ? 'auto' : 'smooth' });
+      const el = addBlock(boardEl, { id: uid(), type: 'text', x: 0, y: bottomOf(boardOf(boardEl)), w: 5, h: 2, size: 'm', html: '<p>New text</p>' });
       editText(el, boardEl);
       document.execCommand('selectAll', false, null);
       break;
@@ -1435,15 +1420,9 @@ async function addProject() {
   ] };
   const wb = C.boards.work = C.boards.work || { items: [] };
   const tile = { id: uid(), type: 'image', x: 0, y: bottomOf(wb), w: 4, h: 3, caption: title.trim(), link: 'p:' + slug };
-  wb.items.push(tile);
-  markDirty();
   const boardEl = $('.board[data-board="work"]');
-  if (boardEl) {
-    renderBoard(boardEl, true);
-    const el = $(`.item[data-id="${tile.id}"]`, boardEl);
-    select(el);
-    el.scrollIntoView({ block: 'center', behavior: reduceMotion ? 'auto' : 'smooth' });
-  }
+  if (boardEl) addBlock(boardEl, tile);
+  else { wb.items.push(tile); markDirty(); }
   toast('Project added — drag it into place, then “Open ↗” to fill it in');
 }
 
@@ -1492,106 +1471,55 @@ const FONT_ROLES = [
   { key: 'small', label: 'Small text', hint: 'Menu, captions and footer' },
 ];
 const SYSTEM_FONT = 'System (SF Pro)';
-// g = Google Fonts family spec (only weights that font really has); bold = has a bold weight
-// group = which section of the menu it appears in. "classic" fonts are built into Macs,
-// iPhones and most computers, so nothing is downloaded (other devices use the closest match).
-// g = Google Fonts family spec (only weights that font really has); bold: false = single weight.
+// Classic fonts are built into Macs, iPhones and most computers: nothing is downloaded
+// (other devices use the closest match in the list). [name, kind, CSS font stack]
+const CLASSIC = [
+  [SYSTEM_FONT, 'sans', '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif'],
+  ['Helvetica', 'sans', '"Helvetica Neue", Helvetica, Arial, sans-serif'],
+  ['Arial', 'sans', 'Arial, "Helvetica Neue", Helvetica, sans-serif'],
+  ['Avenir Next', 'sans', '"Avenir Next", Avenir, "Helvetica Neue", Arial, sans-serif'],
+  ['Futura', 'sans', 'Futura, "Century Gothic", "Avenir Next", sans-serif'],
+  ['Gill Sans', 'sans', '"Gill Sans", "Gill Sans MT", Calibri, sans-serif'],
+  ['Optima', 'sans', 'Optima, Candara, "Segoe UI", sans-serif'],
+  ['Verdana', 'sans', 'Verdana, Geneva, sans-serif'],
+  ['Trebuchet MS', 'sans', '"Trebuchet MS", "Lucida Grande", sans-serif'],
+  ['Times New Roman', 'serif', '"Times New Roman", Times, serif'],
+  ['Georgia', 'serif', 'Georgia, "Times New Roman", serif'],
+  ['Baskerville', 'serif', 'Baskerville, "Baskerville Old Face", "Times New Roman", serif'],
+  ['Didot', 'serif', 'Didot, "Bodoni MT", "Times New Roman", serif'],
+  ['Palatino', 'serif', 'Palatino, "Palatino Linotype", "Book Antiqua", serif'],
+  ['American Typewriter', 'mono', '"American Typewriter", "Courier New", Courier, monospace'],
+  ['Courier New', 'mono', '"Courier New", Courier, monospace'],
+];
+// Google Fonts, in menu order. "Name" = weights 300–700 · "Name:4" = 400–700 ·
+// "Name:<axes>" = exactly those · a trailing "!" = only one weight (no bold).
+const GOOGLE = {
+  sans: ['Inter', 'Geist', 'Instrument Sans:4', 'DM Sans', 'Manrope', 'Space Grotesk', 'Hanken Grotesk', 'Schibsted Grotesk:4',
+    'Familjen Grotesk:4', 'Bricolage Grotesque', 'IBM Plex Sans', 'Archivo', 'Work Sans', 'Public Sans', 'Plus Jakarta Sans',
+    'Figtree', 'Outfit', 'Sora', 'Urbanist', 'Lexend', 'Epilogue', 'Karla', 'Rubik', 'Barlow', 'Montserrat', 'Poppins',
+    'Raleway', 'Josefin Sans', 'Roboto', 'Syne:4'],
+  serif: ['Instrument Serif:ital@0;1!', 'Playfair Display:4', 'Cormorant', 'Cormorant Garamond', 'EB Garamond:4',
+    'Libre Caslon Text:4', 'Libre Baskerville:wght@400;700', 'Fraunces', 'Newsreader', 'Source Serif 4', 'Lora:4',
+    'Merriweather', 'Crimson Pro', 'Spectral', 'Literata', 'PT Serif:wght@400;700', 'Noto Serif Display'],
+  display: ['DM Serif Display!', 'Bodoni Moda:4', 'Abril Fatface!', 'Gloock!', 'Young Serif!', 'Prata!', 'Cinzel:4',
+    'Marcellus!', 'Bebas Neue!|sans', 'Anton!|sans', 'Archivo Black!|sans', 'Oswald|sans', 'Unbounded|sans'],
+  mono: ['Space Mono:wght@400;700', 'IBM Plex Mono', 'JetBrains Mono', 'Geist Mono', 'Roboto Mono', 'Source Code Pro',
+    'Fira Code', 'DM Mono:wght@300;400;500!', 'Martian Mono', 'Courier Prime:wght@400;700'],
+};
+function googleFont(spec, group) {
+  let [rest, kind = group === 'display' ? 'serif' : group] = spec.split('|');
+  const single = rest.endsWith('!');
+  if (single) rest = rest.slice(0, -1);
+  let [name, axes] = rest.split(':');
+  if (axes === '4') axes = 'wght@400;500;600;700';
+  else if (!axes && !single) axes = 'wght@300;400;500;600;700';
+  return Object.assign({ name, kind }, group === 'display' ? { group } : {},
+    { g: name.replace(/ /g, '+') + (axes ? ':' + axes : '') }, single ? { bold: false } : {});
+}
+// Every font: { name, kind (sans/serif/mono), group (menu section, defaults to kind), css or g (Google spec), bold }
 const FONTS = [
-  // Classic — built in, no download
-  { name: SYSTEM_FONT, kind: 'sans', group: 'classic', css: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif' },
-  { name: 'Helvetica', kind: 'sans', group: 'classic', css: '"Helvetica Neue", Helvetica, Arial, sans-serif' },
-  { name: 'Arial', kind: 'sans', group: 'classic', css: 'Arial, "Helvetica Neue", Helvetica, sans-serif' },
-  { name: 'Avenir Next', kind: 'sans', group: 'classic', css: '"Avenir Next", Avenir, "Helvetica Neue", Arial, sans-serif' },
-  { name: 'Futura', kind: 'sans', group: 'classic', css: 'Futura, "Century Gothic", "Avenir Next", sans-serif' },
-  { name: 'Gill Sans', kind: 'sans', group: 'classic', css: '"Gill Sans", "Gill Sans MT", Calibri, sans-serif' },
-  { name: 'Optima', kind: 'sans', group: 'classic', css: 'Optima, Candara, "Segoe UI", sans-serif' },
-  { name: 'Verdana', kind: 'sans', group: 'classic', css: 'Verdana, Geneva, sans-serif' },
-  { name: 'Trebuchet MS', kind: 'sans', group: 'classic', css: '"Trebuchet MS", "Lucida Grande", sans-serif' },
-  { name: 'Times New Roman', kind: 'serif', group: 'classic', css: '"Times New Roman", Times, serif' },
-  { name: 'Georgia', kind: 'serif', group: 'classic', css: 'Georgia, "Times New Roman", serif' },
-  { name: 'Baskerville', kind: 'serif', group: 'classic', css: 'Baskerville, "Baskerville Old Face", "Times New Roman", serif' },
-  { name: 'Didot', kind: 'serif', group: 'classic', css: 'Didot, "Bodoni MT", "Times New Roman", serif' },
-  { name: 'Palatino', kind: 'serif', group: 'classic', css: 'Palatino, "Palatino Linotype", "Book Antiqua", serif' },
-  { name: 'American Typewriter', kind: 'mono', group: 'classic', css: '"American Typewriter", "Courier New", Courier, monospace' },
-  { name: 'Courier New', kind: 'mono', group: 'classic', css: '"Courier New", Courier, monospace' },
-
-  // Sans-serif
-  { name: 'Inter', kind: 'sans', g: 'Inter:wght@300;400;500;600;700' },
-  { name: 'Geist', kind: 'sans', g: 'Geist:wght@300;400;500;600;700' },
-  { name: 'Instrument Sans', kind: 'sans', g: 'Instrument+Sans:wght@400;500;600;700' },
-  { name: 'DM Sans', kind: 'sans', g: 'DM+Sans:wght@300;400;500;600;700' },
-  { name: 'Manrope', kind: 'sans', g: 'Manrope:wght@300;400;500;600;700' },
-  { name: 'Space Grotesk', kind: 'sans', g: 'Space+Grotesk:wght@300;400;500;600;700' },
-  { name: 'Hanken Grotesk', kind: 'sans', g: 'Hanken+Grotesk:wght@300;400;500;600;700' },
-  { name: 'Schibsted Grotesk', kind: 'sans', g: 'Schibsted+Grotesk:wght@400;500;600;700' },
-  { name: 'Familjen Grotesk', kind: 'sans', g: 'Familjen+Grotesk:wght@400;500;600;700' },
-  { name: 'Bricolage Grotesque', kind: 'sans', g: 'Bricolage+Grotesque:wght@300;400;500;600;700' },
-  { name: 'IBM Plex Sans', kind: 'sans', g: 'IBM+Plex+Sans:wght@300;400;500;600;700' },
-  { name: 'Archivo', kind: 'sans', g: 'Archivo:wght@300;400;500;600;700' },
-  { name: 'Work Sans', kind: 'sans', g: 'Work+Sans:wght@300;400;500;600;700' },
-  { name: 'Public Sans', kind: 'sans', g: 'Public+Sans:wght@300;400;500;600;700' },
-  { name: 'Plus Jakarta Sans', kind: 'sans', g: 'Plus+Jakarta+Sans:wght@300;400;500;600;700' },
-  { name: 'Figtree', kind: 'sans', g: 'Figtree:wght@300;400;500;600;700' },
-  { name: 'Outfit', kind: 'sans', g: 'Outfit:wght@300;400;500;600;700' },
-  { name: 'Sora', kind: 'sans', g: 'Sora:wght@300;400;500;600;700' },
-  { name: 'Urbanist', kind: 'sans', g: 'Urbanist:wght@300;400;500;600;700' },
-  { name: 'Lexend', kind: 'sans', g: 'Lexend:wght@300;400;500;600;700' },
-  { name: 'Epilogue', kind: 'sans', g: 'Epilogue:wght@300;400;500;600;700' },
-  { name: 'Karla', kind: 'sans', g: 'Karla:wght@300;400;500;600;700' },
-  { name: 'Rubik', kind: 'sans', g: 'Rubik:wght@300;400;500;600;700' },
-  { name: 'Barlow', kind: 'sans', g: 'Barlow:wght@300;400;500;600;700' },
-  { name: 'Montserrat', kind: 'sans', g: 'Montserrat:wght@300;400;500;600;700' },
-  { name: 'Poppins', kind: 'sans', g: 'Poppins:wght@300;400;500;600;700' },
-  { name: 'Raleway', kind: 'sans', g: 'Raleway:wght@300;400;500;600;700' },
-  { name: 'Josefin Sans', kind: 'sans', g: 'Josefin+Sans:wght@300;400;500;600;700' },
-  { name: 'Roboto', kind: 'sans', g: 'Roboto:wght@300;400;500;600;700' },
-  { name: 'Syne', kind: 'sans', g: 'Syne:wght@400;500;600;700' },
-
-  // Serif
-  { name: 'Instrument Serif', kind: 'serif', g: 'Instrument+Serif:ital@0;1', bold: false },
-  { name: 'Playfair Display', kind: 'serif', g: 'Playfair+Display:wght@400;500;600;700' },
-  { name: 'Cormorant', kind: 'serif', g: 'Cormorant:wght@300;400;500;600;700' },
-  { name: 'Cormorant Garamond', kind: 'serif', g: 'Cormorant+Garamond:wght@300;400;500;600;700' },
-  { name: 'EB Garamond', kind: 'serif', g: 'EB+Garamond:wght@400;500;600;700' },
-  { name: 'Libre Caslon Text', kind: 'serif', g: 'Libre+Caslon+Text:wght@400;500;600;700' },
-  { name: 'Libre Baskerville', kind: 'serif', g: 'Libre+Baskerville:wght@400;700' },
-  { name: 'Fraunces', kind: 'serif', g: 'Fraunces:wght@300;400;500;600;700' },
-  { name: 'Newsreader', kind: 'serif', g: 'Newsreader:wght@300;400;500;600;700' },
-  { name: 'Source Serif 4', kind: 'serif', g: 'Source+Serif+4:wght@300;400;500;600;700' },
-  { name: 'Lora', kind: 'serif', g: 'Lora:wght@400;500;600;700' },
-  { name: 'Merriweather', kind: 'serif', g: 'Merriweather:wght@300;400;500;600;700' },
-  { name: 'Crimson Pro', kind: 'serif', g: 'Crimson+Pro:wght@300;400;500;600;700' },
-  { name: 'Spectral', kind: 'serif', g: 'Spectral:wght@300;400;500;600;700' },
-  { name: 'Literata', kind: 'serif', g: 'Literata:wght@300;400;500;600;700' },
-  { name: 'PT Serif', kind: 'serif', g: 'PT+Serif:wght@400;700' },
-  { name: 'Noto Serif Display', kind: 'serif', g: 'Noto+Serif+Display:wght@300;400;500;600;700' },
-
-  // Display — for big titles
-  { name: 'DM Serif Display', kind: 'serif', group: 'display', g: 'DM+Serif+Display', bold: false },
-  { name: 'Bodoni Moda', kind: 'serif', group: 'display', g: 'Bodoni+Moda:wght@400;500;600;700' },
-  { name: 'Abril Fatface', kind: 'serif', group: 'display', g: 'Abril+Fatface', bold: false },
-  { name: 'Gloock', kind: 'serif', group: 'display', g: 'Gloock', bold: false },
-  { name: 'Young Serif', kind: 'serif', group: 'display', g: 'Young+Serif', bold: false },
-  { name: 'Prata', kind: 'serif', group: 'display', g: 'Prata', bold: false },
-  { name: 'Cinzel', kind: 'serif', group: 'display', g: 'Cinzel:wght@400;500;600;700' },
-  { name: 'Marcellus', kind: 'serif', group: 'display', g: 'Marcellus', bold: false },
-  { name: 'Bebas Neue', kind: 'sans', group: 'display', g: 'Bebas+Neue', bold: false },
-  { name: 'Anton', kind: 'sans', group: 'display', g: 'Anton', bold: false },
-  { name: 'Archivo Black', kind: 'sans', group: 'display', g: 'Archivo+Black', bold: false },
-  { name: 'Oswald', kind: 'sans', group: 'display', g: 'Oswald:wght@300;400;500;600;700' },
-  { name: 'Unbounded', kind: 'sans', group: 'display', g: 'Unbounded:wght@300;400;500;600;700' },
-
-  // Monospace
-  { name: 'Space Mono', kind: 'mono', g: 'Space+Mono:wght@400;700' },
-  { name: 'IBM Plex Mono', kind: 'mono', g: 'IBM+Plex+Mono:wght@300;400;500;600;700' },
-  { name: 'JetBrains Mono', kind: 'mono', g: 'JetBrains+Mono:wght@300;400;500;600;700' },
-  { name: 'Geist Mono', kind: 'mono', g: 'Geist+Mono:wght@300;400;500;600;700' },
-  { name: 'Roboto Mono', kind: 'mono', g: 'Roboto+Mono:wght@300;400;500;600;700' },
-  { name: 'Source Code Pro', kind: 'mono', g: 'Source+Code+Pro:wght@300;400;500;600;700' },
-  { name: 'Fira Code', kind: 'mono', g: 'Fira+Code:wght@300;400;500;600;700' },
-  { name: 'DM Mono', kind: 'mono', g: 'DM+Mono:wght@300;400;500', bold: false },
-  { name: 'Martian Mono', kind: 'mono', g: 'Martian+Mono:wght@300;400;500;600;700' },
-  { name: 'Courier Prime', kind: 'mono', g: 'Courier+Prime:wght@400;700' },
+  ...CLASSIC.map(([name, kind, css]) => ({ name, kind, group: 'classic', css })),
+  ...Object.entries(GOOGLE).flatMap(([group, list]) => list.map(spec => googleFont(spec, group))),
 ];
 const FALLBACK = { sans: '-apple-system, Helvetica, Arial, sans-serif', serif: 'Georgia, "Times New Roman", serif', mono: 'ui-monospace, Menlo, monospace' };
 const fontByName = n => FONTS.find(f => f.name === n) || FONTS[0];
@@ -1728,6 +1656,11 @@ function relogin() {
   token = null;
   login();
 }
+// Explain a failed write; a bad or expired token asks for a new one (unsaved edits stay on the page)
+async function ghFailed(r) {
+  toast(await ghProblem(r), 8000);
+  if (r && [401, 403, 404].includes(r.status)) relogin();
+}
 
 const b64ToText = s => new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\s/g, '')), c => c.charCodeAt(0)));
 function textToB64(str) {
@@ -1771,11 +1704,7 @@ async function save() {
     contentSha = (await r.json()).content.sha;
     dirty = false;
     toast('Saved — live on your site in about a minute', 3500);
-  } else {
-    toast(await ghProblem(r), 8000);
-    // Bad or expired token: ask for a new one. Your unsaved edits stay on the page — Save again after.
-    if (r && [401, 403, 404].includes(r.status)) relogin();
-  }
+  } else await ghFailed(r);
   updateDock();
 }
 
@@ -1844,11 +1773,7 @@ async function upload(file) {
     const b64 = await blobToB64(file);
     r = await queued(() => ghPut('uploads/' + name, b64, `Upload ${file.name}`));
   } catch { /* offline */ }
-  if (!r || !r.ok) {
-    toast(await ghProblem(r), 8000);
-    if (r && [401, 403, 404].includes(r.status)) relogin();
-    return null;
-  }
+  if (!r || !r.ok) { await ghFailed(r); return null; }
   const url = '/uploads/' + name;
   localPreview.set(url, URL.createObjectURL(file));
   toast('Uploaded — remember to Save');
@@ -1979,15 +1904,6 @@ function confirmBox(title, okLabel = 'OK') {
     ok.textContent = okLabel;
     ok.onclick = () => done(true);
     card.querySelector('.plain').onclick = () => done(null);
-  });
-}
-
-function info(title, html) {
-  return modal((card, done) => {
-    card.innerHTML = '<h3></h3><p></p><div class="row"><button class="btn solid">OK</button></div>';
-    card.querySelector('h3').textContent = title;
-    card.querySelector('p').innerHTML = html;
-    card.querySelector('.solid').onclick = () => done(true);
   });
 }
 
