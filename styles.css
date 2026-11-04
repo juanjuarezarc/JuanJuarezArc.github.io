@@ -12,6 +12,7 @@
           "Helvetica Neue", Helvetica, Arial, sans-serif;
   /* fonts per type of text — chosen in owner mode (dock → Fonts); these are the defaults */
   --font-title: var(--font);
+  --font-name: var(--font-title);   /* your name on the home page — follows Titles unless chosen */
   --font-subtitle: var(--font);
   --font-body: var(--font);
   --font-small: var(--font);
@@ -454,6 +455,12 @@ html[data-title-kind="script"] .txt.size-l, html[data-title-kind="script"] .txt.
 .lede, .zone-head p { font-weight: var(--weight-subtitle, 400); }
 .prose, .txt, .mail { font-weight: var(--weight-body, 400); }
 .nav, .cap, .foot, .back, .next span, .zoom-cap { font-weight: var(--weight-small, 400); }
+/* your name (the big headline on the home page) — its own font, or the Titles font by default */
+.hero .display { font-family: var(--font-name); font-weight: var(--weight-name, var(--title-weight, 600)); }
+html[data-name-kind="sans"] .hero .display { letter-spacing: -.045em; }
+html[data-name-kind="serif"] .hero .display { letter-spacing: -.015em; }
+html[data-name-kind="mono"] .hero .display { letter-spacing: -.03em; }
+html[data-name-kind="script"] .hero .display { letter-spacing: 0; }
 
 /* owner-mode font panel */
 .fontpanel {

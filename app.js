@@ -1610,6 +1610,7 @@ async function editResume() {
    Stored in content.json as site.fonts; Google Fonts load on demand.
    ========================================================= */
 const FONT_ROLES = [
+  { key: 'name', label: 'Your name', hint: 'The big name at the top of the home page', follows: 'title' },
   { key: 'title', label: 'Titles', hint: 'Big headings and project names' },
   { key: 'subtitle', label: 'Subtitles', hint: 'The lines under headings' },
   { key: 'body', label: 'Body text', hint: 'About, Contact and text blocks' },
@@ -1696,7 +1697,19 @@ function applyFonts() {
   const root = document.documentElement;
   const families = new Set();
   for (const r of FONT_ROLES) {
+    if (r.follows && !chosen[r.key]) {                          // "Same as titles": let the CSS fall back to that font
+      ['font', 'weight'].forEach(v => root.style.removeProperty(`--${v}-${r.key}`));
+      delete root.dataset[`${r.key}Kind`];
+      continue;
+    }
     const f = fontByName(chosen[r.key]);
+    if (r.follows) {                                            // its own choice: spacing and weight to match that font
+      root.dataset[`${r.key}Kind`] = f.kind;
+      root.style.setProperty(`--weight-${r.key}`, String(f.weight || (f.bold === false ? 400 : 600)));
+      root.style.setProperty(`--font-${r.key}`, fontCss(f));
+      if (f.g) families.add(f.g);
+      continue;
+    }
     root.style.setProperty(`--font-${r.key}`, fontCss(f));
     root.style.setProperty(`--weight-${r.key}`, f.weight ? String(f.weight) : '');   // thin cuts
     if (f.g) families.add(f.g);
@@ -1732,13 +1745,16 @@ function toggleFontPanel() {
   panel.innerHTML = '<h3>Fonts</h3>' + FONT_ROLES.map(r => `
     <label class="fontrow">
       <span><b>${r.label}</b><small>${r.hint}</small></span>
-      <select data-role="${r.key}">${options(fontByName(chosen[r.key]).name)}</select>
+      <select data-role="${r.key}">${r.follows ? `<option value=""${chosen[r.key] ? '' : ' selected'}>Same as ${esc(FONT_ROLES.find(x => x.key === r.follows).label.toLowerCase())}</option>` : ''}${
+        options(r.follows && !chosen[r.key] ? '' : fontByName(chosen[r.key]).name)}</select>
     </label>`).join('') +
     '<div class="row"><button type="button" class="btn plain" data-f="reset">Reset all</button><button type="button" class="btn solid" data-f="done">Done</button></div>';
   panel.addEventListener('change', e => {
     const sel = e.target.closest('select');
     if (!sel) return;
-    if (sel.value === SYSTEM_FONT) delete chosen[sel.dataset.role]; else chosen[sel.dataset.role] = sel.value;
+    const role = FONT_ROLES.find(r => r.key === sel.dataset.role);
+    // an empty choice means "same as titles"; elsewhere the system font is the default, so it isn't stored
+    if (!sel.value || (sel.value === SYSTEM_FONT && !role.follows)) delete chosen[role.key]; else chosen[role.key] = sel.value;
     applyFonts();
     relayoutBoards();
     markDirty();
