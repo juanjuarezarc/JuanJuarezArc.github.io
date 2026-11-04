@@ -58,10 +58,10 @@
      "fit": "contain",
      "src": "/uploads/20261031-f5zzq8vs.webp",
      "variants": {
-      "w": 2164,
       "800": "/uploads/sized/20261031-f5zzq8vs-800.jpg",
       "1200": "/uploads/sized/20261031-f5zzq8vs-1200.jpg",
-      "1600": "/uploads/sized/20261031-f5zzq8vs-1600.jpg"
+      "1600": "/uploads/sized/20261031-f5zzq8vs-1600.jpg",
+      "w": 2164
      }
     },
     {
@@ -77,10 +77,10 @@
      "src": "/uploads/20261031-4k5x5mv6.jpg",
      "blur": true,
      "variants": {
-      "w": 1867,
       "800": "/uploads/sized/20261031-4k5x5mv6-800.jpg",
       "1200": "/uploads/sized/20261031-4k5x5mv6-1200.jpg",
-      "1600": "/uploads/sized/20261031-4k5x5mv6-1600.jpg"
+      "1600": "/uploads/sized/20261031-4k5x5mv6-1600.jpg",
+      "w": 1867
      }
     },
     {
@@ -143,10 +143,10 @@
      "caption": "Image",
      "src": "/uploads/20261024-7h2bbrs1.webp",
      "variants": {
-      "w": 2164,
       "800": "/uploads/sized/20261024-7h2bbrs1-800.jpg",
       "1200": "/uploads/sized/20261024-7h2bbrs1-1200.jpg",
-      "1600": "/uploads/sized/20261024-7h2bbrs1-1600.jpg"
+      "1600": "/uploads/sized/20261024-7h2bbrs1-1600.jpg",
+      "w": 2164
      }
     },
     {
@@ -159,10 +159,10 @@
      "caption": "Image",
      "src": "/uploads/20261024-6khpee2h.webp",
      "variants": {
-      "w": 2800,
       "800": "/uploads/sized/20261024-6khpee2h-800.jpg",
       "1200": "/uploads/sized/20261024-6khpee2h-1200.jpg",
-      "1600": "/uploads/sized/20261024-6khpee2h-1600.jpg"
+      "1600": "/uploads/sized/20261024-6khpee2h-1600.jpg",
+      "w": 2800
      }
     },
     {
@@ -175,10 +175,10 @@
      "src": "/uploads/20261024-7y4lfj7s.webp",
      "caption": "",
      "variants": {
-      "w": 2800,
       "800": "/uploads/sized/20261024-7y4lfj7s-800.jpg",
       "1200": "/uploads/sized/20261024-7y4lfj7s-1200.jpg",
-      "1600": "/uploads/sized/20261024-7y4lfj7s-1600.jpg"
+      "1600": "/uploads/sized/20261024-7y4lfj7s-1600.jpg",
+      "w": 2800
      }
     },
     {
@@ -191,10 +191,10 @@
      "src": "/uploads/20261024-ln9aqask.webp",
      "caption": "",
      "variants": {
-      "w": 2800,
       "800": "/uploads/sized/20261024-ln9aqask-800.jpg",
       "1200": "/uploads/sized/20261024-ln9aqask-1200.jpg",
-      "1600": "/uploads/sized/20261024-ln9aqask-1600.jpg"
+      "1600": "/uploads/sized/20261024-ln9aqask-1600.jpg",
+      "w": 2800
      }
     },
     {
@@ -207,10 +207,10 @@
      "src": "/uploads/20261024-14x0cy76.webp",
      "caption": "",
      "variants": {
-      "w": 2800,
       "800": "/uploads/sized/20261024-14x0cy76-800.jpg",
       "1200": "/uploads/sized/20261024-14x0cy76-1200.jpg",
-      "1600": "/uploads/sized/20261024-14x0cy76-1600.jpg"
+      "1600": "/uploads/sized/20261024-14x0cy76-1600.jpg",
+      "w": 2800
      }
     },
     {
@@ -223,10 +223,10 @@
      "src": "/uploads/20261024-s7259jov.webp",
      "caption": "",
      "variants": {
-      "w": 1916,
       "800": "/uploads/sized/20261024-s7259jov-800.jpg",
       "1200": "/uploads/sized/20261024-s7259jov-1200.jpg",
-      "1600": "/uploads/sized/20261024-s7259jov-1600.jpg"
+      "1600": "/uploads/sized/20261024-s7259jov-1600.jpg",
+      "w": 1916
      }
     },
     {
@@ -239,10 +239,10 @@
      "src": "/uploads/20261024-jbogt509.png",
      "caption": "",
      "variants": {
-      "w": 3300,
       "800": "/uploads/sized/20261024-jbogt509-800.jpg",
       "1200": "/uploads/sized/20261024-jbogt509-1200.jpg",
-      "1600": "/uploads/sized/20261024-jbogt509-1600.jpg"
+      "1600": "/uploads/sized/20261024-jbogt509-1600.jpg",
+      "w": 3300
      }
     },
     {
@@ -255,8 +255,8 @@
      "src": "/uploads/20261025-qu19oexu.jpg",
      "caption": "",
      "variants": {
-      "w": 1276,
-      "800": "/uploads/sized/20261025-qu19oexu-800.jpg"
+      "800": "/uploads/sized/20261025-qu19oexu-800.jpg",
+      "w": 1276
      }
     },
     {
@@ -269,8 +269,8 @@
      "src": "/uploads/20261025-e0dsd7o5.jpg",
      "caption": "",
      "variants": {
-      "w": 1276,
-      "800": "/uploads/sized/20261025-e0dsd7o5-800.jpg"
+      "800": "/uploads/sized/20261025-e0dsd7o5-800.jpg",
+      "w": 1276
      }
     },
     {
@@ -283,8 +283,8 @@
      "src": "/uploads/20261025-n7abub7k.jpg",
      "caption": "",
      "variants": {
-      "w": 1276,
-      "800": "/uploads/sized/20261025-n7abub7k-800.jpg"
+      "800": "/uploads/sized/20261025-n7abub7k-800.jpg",
+      "w": 1276
      }
     },
     {
@@ -297,8 +297,8 @@
      "src": "/uploads/20261025-v2i8wg9w.jpg",
      "caption": "",
      "variants": {
-      "w": 1276,
-      "800": "/uploads/sized/20261025-v2i8wg9w-800.jpg"
+      "800": "/uploads/sized/20261025-v2i8wg9w-800.jpg",
+      "w": 1276
      }
     },
     {
@@ -311,8 +311,8 @@
      "src": "/uploads/20261025-rjuvsh9d.jpg",
      "caption": "",
      "variants": {
-      "w": 1276,
-      "800": "/uploads/sized/20261025-rjuvsh9d-800.jpg"
+      "800": "/uploads/sized/20261025-rjuvsh9d-800.jpg",
+      "w": 1276
      }
     },
     {
@@ -325,8 +325,8 @@
      "src": "/uploads/20261025-zgbzpzte.jpg",
      "caption": "",
      "variants": {
-      "w": 1274,
-      "800": "/uploads/sized/20261025-zgbzpzte-800.jpg"
+      "800": "/uploads/sized/20261025-zgbzpzte-800.jpg",
+      "w": 1274
      }
     },
     {
@@ -339,10 +339,10 @@
      "src": "/uploads/20261025-8wxwjify.webp",
      "caption": "",
      "variants": {
-      "w": 2800,
       "800": "/uploads/sized/20261025-8wxwjify-800.jpg",
       "1200": "/uploads/sized/20261025-8wxwjify-1200.jpg",
-      "1600": "/uploads/sized/20261025-8wxwjify-1600.jpg"
+      "1600": "/uploads/sized/20261025-8wxwjify-1600.jpg",
+      "w": 2800
      }
     },
     {
@@ -355,10 +355,10 @@
      "src": "/uploads/20261025-ja61c3kc.webp",
      "caption": "",
      "variants": {
-      "w": 2164,
       "800": "/uploads/sized/20261025-ja61c3kc-800.jpg",
       "1200": "/uploads/sized/20261025-ja61c3kc-1200.jpg",
-      "1600": "/uploads/sized/20261025-ja61c3kc-1600.jpg"
+      "1600": "/uploads/sized/20261025-ja61c3kc-1600.jpg",
+      "w": 2164
      }
     }
    ]
@@ -375,10 +375,10 @@
      "caption": "Image",
      "src": "/uploads/20261009-md1d1txo.jpg",
      "variants": {
-      "w": 1867,
       "800": "/uploads/sized/20261009-md1d1txo-800.jpg",
       "1200": "/uploads/sized/20261009-md1d1txo-1200.jpg",
-      "1600": "/uploads/sized/20261009-md1d1txo-1600.jpg"
+      "1600": "/uploads/sized/20261009-md1d1txo-1600.jpg",
+      "w": 1867
      }
     },
     {
@@ -401,10 +401,10 @@
      "caption": "Image",
      "src": "/uploads/20261009-gtu2kaoe.webp",
      "variants": {
-      "w": 2100,
       "800": "/uploads/sized/20261009-gtu2kaoe-800.jpg",
       "1200": "/uploads/sized/20261009-gtu2kaoe-1200.jpg",
-      "1600": "/uploads/sized/20261009-gtu2kaoe-1600.jpg"
+      "1600": "/uploads/sized/20261009-gtu2kaoe-1600.jpg",
+      "w": 2100
      }
     },
     {
@@ -417,10 +417,10 @@
      "src": "/uploads/20261009-d7vlh2hw.webp",
      "caption": "",
      "variants": {
-      "w": 2800,
       "800": "/uploads/sized/20261009-d7vlh2hw-800.jpg",
       "1200": "/uploads/sized/20261009-d7vlh2hw-1200.jpg",
-      "1600": "/uploads/sized/20261009-d7vlh2hw-1600.jpg"
+      "1600": "/uploads/sized/20261009-d7vlh2hw-1600.jpg",
+      "w": 2800
      }
     },
     {
@@ -433,10 +433,10 @@
      "src": "/uploads/20261009-vt6tvrfa.webp",
      "caption": "",
      "variants": {
-      "w": 2800,
       "800": "/uploads/sized/20261009-vt6tvrfa-800.jpg",
       "1200": "/uploads/sized/20261009-vt6tvrfa-1200.jpg",
-      "1600": "/uploads/sized/20261009-vt6tvrfa-1600.jpg"
+      "1600": "/uploads/sized/20261009-vt6tvrfa-1600.jpg",
+      "w": 2800
      }
     },
     {
@@ -449,10 +449,10 @@
      "src": "/uploads/20261009-xhqeypn8.webp",
      "caption": "",
      "variants": {
-      "w": 2800,
       "800": "/uploads/sized/20261009-xhqeypn8-800.jpg",
       "1200": "/uploads/sized/20261009-xhqeypn8-1200.jpg",
-      "1600": "/uploads/sized/20261009-xhqeypn8-1600.jpg"
+      "1600": "/uploads/sized/20261009-xhqeypn8-1600.jpg",
+      "w": 2800
      }
     },
     {
@@ -465,10 +465,10 @@
      "src": "/uploads/20261009-uf6fdamu.jpg",
      "caption": "",
      "variants": {
-      "w": 1920,
       "800": "/uploads/sized/20261009-uf6fdamu-800.jpg",
       "1200": "/uploads/sized/20261009-uf6fdamu-1200.jpg",
-      "1600": "/uploads/sized/20261009-uf6fdamu-1600.jpg"
+      "1600": "/uploads/sized/20261009-uf6fdamu-1600.jpg",
+      "w": 1920
      }
     },
     {
@@ -481,10 +481,10 @@
      "src": "/uploads/20261009-ve3mhh26.jpg",
      "caption": "",
      "variants": {
-      "w": 1920,
       "800": "/uploads/sized/20261009-ve3mhh26-800.jpg",
       "1200": "/uploads/sized/20261009-ve3mhh26-1200.jpg",
-      "1600": "/uploads/sized/20261009-ve3mhh26-1600.jpg"
+      "1600": "/uploads/sized/20261009-ve3mhh26-1600.jpg",
+      "w": 1920
      }
     },
     {
@@ -497,10 +497,10 @@
      "src": "/uploads/20261009-5t92w6yh.jpg",
      "caption": "",
      "variants": {
-      "w": 1920,
       "800": "/uploads/sized/20261009-5t92w6yh-800.jpg",
       "1200": "/uploads/sized/20261009-5t92w6yh-1200.jpg",
-      "1600": "/uploads/sized/20261009-5t92w6yh-1600.jpg"
+      "1600": "/uploads/sized/20261009-5t92w6yh-1600.jpg",
+      "w": 1920
      }
     },
     {
@@ -513,10 +513,10 @@
      "src": "/uploads/20261009-8sjzcr8y.jpg",
      "caption": "",
      "variants": {
-      "w": 1920,
       "800": "/uploads/sized/20261009-8sjzcr8y-800.jpg",
       "1200": "/uploads/sized/20261009-8sjzcr8y-1200.jpg",
-      "1600": "/uploads/sized/20261009-8sjzcr8y-1600.jpg"
+      "1600": "/uploads/sized/20261009-8sjzcr8y-1600.jpg",
+      "w": 1920
      }
     },
     {
@@ -539,10 +539,10 @@
      "src": "/uploads/20261009-7qwataxs.jpg",
      "caption": "",
      "variants": {
-      "w": 1867,
       "800": "/uploads/sized/20261009-7qwataxs-800.jpg",
       "1200": "/uploads/sized/20261009-7qwataxs-1200.jpg",
-      "1600": "/uploads/sized/20261009-7qwataxs-1600.jpg"
+      "1600": "/uploads/sized/20261009-7qwataxs-1600.jpg",
+      "w": 1867
      }
     },
     {
@@ -555,10 +555,10 @@
      "src": "/uploads/20261009-gvxo1t8r.jpg",
      "caption": "",
      "variants": {
-      "w": 1867,
       "800": "/uploads/sized/20261009-gvxo1t8r-800.jpg",
       "1200": "/uploads/sized/20261009-gvxo1t8r-1200.jpg",
-      "1600": "/uploads/sized/20261009-gvxo1t8r-1600.jpg"
+      "1600": "/uploads/sized/20261009-gvxo1t8r-1600.jpg",
+      "w": 1867
      }
     },
     {
@@ -571,10 +571,10 @@
      "src": "/uploads/20261009-z5g8f3d7.jpg",
      "caption": "",
      "variants": {
-      "w": 1867,
       "800": "/uploads/sized/20261009-z5g8f3d7-800.jpg",
       "1200": "/uploads/sized/20261009-z5g8f3d7-1200.jpg",
-      "1600": "/uploads/sized/20261009-z5g8f3d7-1600.jpg"
+      "1600": "/uploads/sized/20261009-z5g8f3d7-1600.jpg",
+      "w": 1867
      }
     },
     {
@@ -587,10 +587,10 @@
      "src": "/uploads/20261009-iaghsvti.jpg",
      "caption": "",
      "variants": {
-      "w": 1867,
       "800": "/uploads/sized/20261009-iaghsvti-800.jpg",
       "1200": "/uploads/sized/20261009-iaghsvti-1200.jpg",
-      "1600": "/uploads/sized/20261009-iaghsvti-1600.jpg"
+      "1600": "/uploads/sized/20261009-iaghsvti-1600.jpg",
+      "w": 1867
      }
     },
     {
@@ -603,10 +603,10 @@
      "src": "/uploads/20261009-f1k53uu4.jpg",
      "caption": "",
      "variants": {
-      "w": 2800,
       "800": "/uploads/sized/20261009-f1k53uu4-800.jpg",
       "1200": "/uploads/sized/20261009-f1k53uu4-1200.jpg",
-      "1600": "/uploads/sized/20261009-f1k53uu4-1600.jpg"
+      "1600": "/uploads/sized/20261009-f1k53uu4-1600.jpg",
+      "w": 2800
      }
     },
     {
@@ -619,10 +619,10 @@
      "src": "/uploads/20261009-fyr2hdh2.jpg",
      "caption": "",
      "variants": {
-      "w": 1867,
       "800": "/uploads/sized/20261009-fyr2hdh2-800.jpg",
       "1200": "/uploads/sized/20261009-fyr2hdh2-1200.jpg",
-      "1600": "/uploads/sized/20261009-fyr2hdh2-1600.jpg"
+      "1600": "/uploads/sized/20261009-fyr2hdh2-1600.jpg",
+      "w": 1867
      }
     },
     {
@@ -635,10 +635,10 @@
      "src": "/uploads/20261009-o4leqy6u.jpg",
      "caption": "",
      "variants": {
-      "w": 2800,
       "800": "/uploads/sized/20261009-o4leqy6u-800.jpg",
       "1200": "/uploads/sized/20261009-o4leqy6u-1200.jpg",
-      "1600": "/uploads/sized/20261009-o4leqy6u-1600.jpg"
+      "1600": "/uploads/sized/20261009-o4leqy6u-1600.jpg",
+      "w": 2800
      }
     },
     {
@@ -651,8 +651,8 @@
      "src": "/uploads/20261009-jd2r7zt5.png",
      "caption": "",
      "variants": {
-      "w": 960,
-      "800": "/uploads/sized/20261009-jd2r7zt5-800.png"
+      "800": "/uploads/sized/20261009-jd2r7zt5-800.png",
+      "w": 960
      }
     },
     {
@@ -665,10 +665,10 @@
      "src": "/uploads/20261009-iff7q4w7.png",
      "caption": "",
      "variants": {
-      "w": 2592,
       "800": "/uploads/sized/20261009-iff7q4w7-800.jpg",
       "1200": "/uploads/sized/20261009-iff7q4w7-1200.jpg",
-      "1600": "/uploads/sized/20261009-iff7q4w7-1600.jpg"
+      "1600": "/uploads/sized/20261009-iff7q4w7-1600.jpg",
+      "w": 2592
      }
     },
     {
@@ -681,10 +681,10 @@
      "src": "/uploads/20261009-wstj8idl.webp",
      "caption": "",
      "variants": {
-      "w": 2800,
       "800": "/uploads/sized/20261009-wstj8idl-800.jpg",
       "1200": "/uploads/sized/20261009-wstj8idl-1200.jpg",
-      "1600": "/uploads/sized/20261009-wstj8idl-1600.jpg"
+      "1600": "/uploads/sized/20261009-wstj8idl-1600.jpg",
+      "w": 2800
      }
     }
    ]
