@@ -209,7 +209,6 @@ function homeHTML() {
         <h1 class="display" data-edit="home.heroTitle"></h1>
         <p class="lede" data-edit="home.heroSub"></p>
       </div>
-      <div class="cue" aria-hidden="true"></div>
     </div>
   </section>
 
@@ -372,8 +371,6 @@ function onScroll() {
   requestAnimationFrame(() => {
     ticking = false;
     $('#nav').classList.toggle('scrolled', scrollY > 8);
-    const cue = $('.cue');
-    if (cue) cue.classList.toggle('gone', scrollY > 20);
     const hero = $('.hero'), inner = $('.hero-inner');
     if (!hero || !inner || reduceMotion) return;
     const r = hero.getBoundingClientRect();
