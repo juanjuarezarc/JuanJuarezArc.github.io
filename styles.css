@@ -89,7 +89,7 @@ h2 { font-size: clamp(32px, 4.2vw, 58px); font-weight: var(--title-weight, 600);
   display: grid; place-items: center; text-align: center;
   padding: 0 var(--pad); overflow: hidden;
 }
-.hero-inner { will-change: transform, opacity, filter; }
+.hero-inner { will-change: transform, opacity; }
 .hero .display { animation: rise 1.5s var(--ease) .15s both; }
 .hero .lede { animation: rise 1.5s var(--ease) .4s both; }
 @keyframes rise {
@@ -136,6 +136,8 @@ body:not(.editing) .board.side:not(:has(.item)) { margin-top: 0; }
   opacity: 0; transform: translateY(48px); filter: blur(10px);
   transition: opacity 1.1s var(--ease), transform 1.1s var(--ease), filter 1.1s var(--ease);
 }
+/* photo tiles rise and fade without the blur (blurring big photos while scrolling is costly) */
+.inner.reveal { filter: none; transition: opacity 1.1s var(--ease), transform 1.1s var(--ease); }
 .reveal.in { opacity: 1; transform: none; filter: none; }
 .reveal.now { transition: none; }
 
@@ -413,6 +415,9 @@ body:not(.editing) .dock .edit-only { display: none; }
   /* Phones show the same grid as a laptop, scaled to the screen width:
      thinner margins and gaps in proportion, and text kept at a readable minimum. */
   :root { --pad: 14px; --gap: 4px; }
+  /* phones: everything fades and rises without blur, which keeps scrolling smooth */
+  .reveal { filter: none; }
+  .hero .display, .hero .lede { animation-name: riseLite; }
   .txt { font-size: max(10px, calc(var(--cell) * .16)); line-height: 1.35; }
   .txt.size-s { font-size: max(9px, calc(var(--cell) * .13)); }
   .txt.size-l { font-size: max(13px, calc(var(--cell) * .3)); }

@@ -119,7 +119,7 @@ function linkHref(link) {
   if (/^(https?:\/\/|mailto:)/i.test(link)) return link;
   return null;
 }
-const safeSrc = s => (/^\/uploads\/[\w.-]+$/.test(s || '') || /^https:\/\//.test(s || '') ? s : '');
+const safeSrc = s => (/^\/uploads\/(sized\/)?[\w.-]+$/.test(s || '') || /^https:\/\//.test(s || '') ? s : '');
 const isVideo = s => /\.(mp4|webm)(\?|$)/i.test(s || '');
 // The starter layout labelled empty boxes "Image" — that label is hidden once a picture is added
 const isPlaceholderCaption = c => /^\s*image\s*$/i.test(c || '');
@@ -380,7 +380,6 @@ function onScroll() {
     const p = clamp(-r.top / Math.max(1, r.height - innerHeight), 0, 1);
     inner.style.transform = `scale(${1 - p * 0.14}) translateY(${-p * 40}px)`;
     inner.style.opacity = String(clamp(1 - p * 1.15, 0, 1));
-    inner.style.filter = p > 0.01 && !isLite() ? `blur(${p * 10}px)` : '';
   });
 }
 addEventListener('scroll', onScroll, { passive: true });
@@ -460,9 +459,21 @@ function itemEl(it, i) {
       if (m.tagName === 'IMG') { m.loading = 'lazy'; m.decoding = 'async'; m.alt = it.caption || ''; }
       m.draggable = false;
       if (it.fit === 'contain') m.classList.add('contain');
+      // Smaller copies (800 / 1600 px): the browser downloads the smallest one that is still sharp
+      // for the tile's size on this screen. The full photo is used when zooming in.
+      const v = it.variants;
+      if (v && m.tagName === 'IMG' && !localPreview.has(src)) {
+        const set = Object.keys(v).filter(k => k !== 'w' && safeSrc(v[k])).map(k => `${v[k]} ${k}w`);
+        if (set.length) {
+          if (v.w) set.push(`${src} ${v.w}w`);
+          m.sizes = it.blur ? '25vw' : `${(it.w / COLS * 100).toFixed(1)}vw`;   // blurred photos never need detail
+          m.srcset = set.join(', ');
+          m.dataset.full = src;
+        }
+      }
       // Fresh uploads take ~1 min to appear on GitHub Pages: show the local copy, or GitHub's raw file meanwhile
       if (owner && src.startsWith('/uploads/')) {
-        m.addEventListener('error', () => { if (!m.dataset.raw) { m.dataset.raw = '1'; m.src = rawUrl(src); } });
+        m.addEventListener('error', () => { if (!m.dataset.raw) { m.dataset.raw = '1'; m.removeAttribute('srcset'); m.src = rawUrl(src); } });
       }
       m.src = localPreview.get(src) || src;
       inner.appendChild(m);
@@ -556,7 +567,11 @@ function layoutBoard(boardEl) {
   boardEl.style.setProperty('--cell', `${m.cell}px`);
   for (const el of $$('.item', boardEl)) {
     const it = b.items.find(x => x.id === el.dataset.id);
-    if (it) place(el, it, m);
+    if (!it) continue;
+    place(el, it, m);
+    // tell the browser the tile's real width, so it downloads the smallest sharp copy
+    const img = el.querySelector('img[srcset]');
+    if (img) img.sizes = `${Math.ceil(it.w * m.cell * (it.blur ? 0.3 : 1))}px`;
   }
   sizeBoard(boardEl, m, fitText(boardEl, b, m));
 }
@@ -820,6 +835,12 @@ async function openZoom(media, capEl) {
     media2.style.willChange = 'auto';
     z.settled = true;
     z.ready = true;
+    const full = media.dataset.full;
+    if (full && !isVid && !(media.currentSrc || '').endsWith(full)) {
+      const hi = new Image();
+      hi.src = full;
+      hi.decode().then(() => { if (zoomState === z) media2.src = full; }).catch(() => {});
+    }
   });
 }
 
@@ -1070,8 +1091,7 @@ async function onTool(e, boardEl) {
       if (!f) return;
       const up = await upload(f);
       if (!up) return;
-      it.src = up.url;
-      delete it.embed; delete it.auto;
+      setMedia(it, up);
       break;
     }
     case 'video': {
@@ -1192,7 +1212,7 @@ function bindDrop(boardEl) {
     if (target && files.length === 1) {                  // drop on an image = replace it
       const it = findItem(boardEl, target.dataset.id);
       const up = await upload(files[0]);
-      if (up) { it.src = up.url; delete it.embed; delete it.auto; markDirty(); renderBoard(boardEl, true); }
+      if (up) { setMedia(it, up); markDirty(); renderBoard(boardEl, true); }
       return;
     }
     const m = metrics(boardEl), r = boardEl.getBoundingClientRect();
@@ -1233,6 +1253,7 @@ async function addMedia(boardEl, files, x0 = 0, y0 = null) {
     const w = 4, h = clamp(Math.round(w * nh / nw), 1, 12);
     if (x + w > COLS) { x = 0; y += rowH; rowH = 0; }
     last = { id: uid(), type: 'image', x, y, w, h, src: up.url, caption: '' };
+    if (up.variants) last.variants = up.variants;
     b.items.push(last);
     x += w; rowH = Math.max(rowH, h);
     markDirty();
@@ -1608,6 +1629,34 @@ const UPLOAD_TYPES = {
   'video/mp4': '.mp4', 'video/webm': '.webm', 'application/pdf': '.pdf',
 };
 const MAX_UPLOAD = 25 * 1024 * 1024;
+const COPY_SIZES = [800, 1200, 1600];
+
+// Smaller copies of a photo for the grid (PNG stays PNG so see-through drawings keep their background)
+async function makeCopies(file) {
+  if (!/^image\/(jpeg|png|webp)$/.test(file.type) || typeof createImageBitmap !== 'function') return null;
+  let bmp;
+  try { bmp = await createImageBitmap(file); } catch { return null; }
+  const copies = { w: bmp.width, list: [] };
+  const type = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+  for (const size of COPY_SIZES) {
+    if (bmp.width <= size * 1.15) continue;          // the original is already about this small
+    const cv = document.createElement('canvas');
+    cv.width = size;
+    cv.height = Math.round(bmp.height * size / bmp.width);
+    cv.getContext('2d').drawImage(bmp, 0, 0, cv.width, cv.height);
+    const blob = await new Promise(r => cv.toBlob(r, type, 0.82));
+    if (blob) copies.list.push({ size, blob, ext: type === 'image/png' ? 'png' : 'jpg' });
+  }
+  if (bmp.close) bmp.close();
+  return copies.list.length ? copies : null;
+}
+
+// Put an upload into a block: the photo plus its smaller copies
+function setMedia(it, up) {
+  it.src = up.url;
+  if (up.variants) it.variants = up.variants; else delete it.variants;
+  delete it.embed; delete it.auto;
+}
 
 function gh(method, path, body) {
   return fetch(`https://api.github.com/repos/${GH.owner}/${GH.repo}${path}`, {
@@ -1776,8 +1825,19 @@ async function upload(file) {
   if (!r || !r.ok) { await ghFailed(r); return null; }
   const url = '/uploads/' + name;
   localPreview.set(url, URL.createObjectURL(file));
+  let variants = null;
+  const copies = await makeCopies(file);
+  if (copies) {
+    const base = name.replace(/\.\w+$/, '');
+    for (const c of copies.list) {
+      const path = `uploads/sized/${base}-${c.size}.${c.ext}`;
+      let rr = null;
+      try { rr = await queued(async () => ghPut(path, await blobToB64(c.blob), `Upload ${file.name} (${c.size}px copy)`)); } catch { /* offline */ }
+      if (rr && rr.ok) (variants = variants || { w: copies.w })[c.size] = '/' + path;
+    }
+  }
   toast('Uploaded — remember to Save');
-  return { url };
+  return { url, variants };
 }
 
 async function askVideoLink(title) {
