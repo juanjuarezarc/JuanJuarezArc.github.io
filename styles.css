@@ -455,8 +455,15 @@ html[data-title-kind="script"] .txt.size-l, html[data-title-kind="script"] .txt.
 .lede, .zone-head p { font-weight: var(--weight-subtitle, 400); }
 .prose, .txt, .mail { font-weight: var(--weight-body, 400); }
 .nav, .cap, .foot, .back, .next span, .zoom-cap { font-weight: var(--weight-small, 400); }
+/* italic fonts ("Couture" italics) set these; otherwise text stays upright */
+.display, h2, .next strong, .txt.size-l, .txt.size-xl { font-style: var(--style-title, normal); }
+.lede, .zone-head p { font-style: var(--style-subtitle, normal); }
+.prose, .mail { font-style: var(--style-body, normal); }
+.txt:not(.size-l):not(.size-xl) { font-style: var(--style-body, normal); }
+.nav, .cap, .foot, .back, .next span, .zoom-cap { font-style: var(--style-small, normal); }
 /* your name (the big headline on the home page) — its own font, or the Titles font by default */
-.hero .display { font-family: var(--font-name); font-weight: var(--weight-name, var(--title-weight, 600)); }
+.hero .display { font-family: var(--font-name); font-weight: var(--weight-name, var(--title-weight, 600));
+  font-style: var(--style-name, var(--style-title, normal)); }
 html[data-name-kind="sans"] .hero .display { letter-spacing: -.045em; }
 html[data-name-kind="serif"] .hero .display { letter-spacing: -.015em; }
 html[data-name-kind="mono"] .hero .display { letter-spacing: -.03em; }

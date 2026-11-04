@@ -1677,6 +1677,15 @@ const FINE = [
   ['Fraunces', 100, 'serif'], ['Spectral', 200, 'serif'], ['Cormorant Garamond', 300, 'serif'], ['Cormorant', 300, 'serif'],
 ];
 const WEIGHT_NAMES = { 100: 'Thin', 200: 'ExtraLight', 300: 'Light' };
+// Couture: refined designer scripts and high-contrast fashion italics.
+// Scripts use the Google spec format above; italics are [family, weights].
+const COUTURE_SCRIPTS = ['Ballet!', 'Luxurious Script!', 'Bonheur Royale!', 'Carattere!', 'MonteCarlo!', 'Whisper!',
+  'Waterfall!', 'Rouge Script!', 'Lavishly Yours!', 'Mea Culpa!', 'Ephesis!', 'Fleur De Leah!', 'Ms Madi!',
+  'The Nautigal:wght@400;700', 'Qwitcher Grypen:wght@400;700', 'Birthstone!', 'Moon Dance!', 'Updock!'];
+const COUTURE_ITALICS = [['Bodoni Moda', '400;500;600;700'], ['Noto Serif Display', '300;400;500;600;700'],
+  ['Playfair Display', '400;500;600;700'], ['Cormorant Garamond', '300;400;500;600;700'], ['Cormorant', '300;400;500;600;700'],
+  ['EB Garamond', '400;500;600;700'], ['Newsreader', '300;400;500;600;700'], ['Libre Caslon Text', '400;700'],
+  ['Instrument Serif', '']];
 // Every font: { name, kind (sans/serif/mono/script), group (menu section, defaults to kind),
 //               css or g (Google spec), family (if the menu name differs), bold, weight (thin cuts) }
 const FONTS = [
@@ -1686,6 +1695,12 @@ const FONTS = [
     name: `${family} ${WEIGHT_NAMES[weight]}`, family, kind, group: 'fine', weight,
     g: `${family.replace(/ /g, '+')}:wght@${weight};400`,
   })),
+  ...COUTURE_SCRIPTS.map(spec => Object.assign(googleFont(spec, 'cursive'), { group: 'couture' })),
+  ...COUTURE_ITALICS.map(([family, weights]) => Object.assign({
+    name: `${family} Italic`, family, kind: 'serif', group: 'couture', italic: true,
+    g: family.replace(/ /g, '+') + (weights ? ':ital,wght@' + weights.split(';').map(w => '1,' + w).join(';') : ':ital@1'),
+  }, weights ? {} : { bold: false })),
+  { name: 'Cormorant Upright', kind: 'serif', group: 'couture', g: 'Cormorant+Upright:wght@300;400;500;600;700' },
 ];
 const FALLBACK = { sans: '-apple-system, Helvetica, Arial, sans-serif', serif: 'Georgia, "Times New Roman", serif',
   mono: 'ui-monospace, Menlo, monospace', script: '"Snell Roundhand", "Apple Chancery", cursive' };
@@ -1698,7 +1713,7 @@ function applyFonts() {
   const families = new Set();
   for (const r of FONT_ROLES) {
     if (r.follows && !chosen[r.key]) {                          // "Same as titles": let the CSS fall back to that font
-      ['font', 'weight'].forEach(v => root.style.removeProperty(`--${v}-${r.key}`));
+      ['font', 'weight', 'style'].forEach(v => root.style.removeProperty(`--${v}-${r.key}`));
       delete root.dataset[`${r.key}Kind`];
       continue;
     }
@@ -1706,12 +1721,14 @@ function applyFonts() {
     if (r.follows) {                                            // its own choice: spacing and weight to match that font
       root.dataset[`${r.key}Kind`] = f.kind;
       root.style.setProperty(`--weight-${r.key}`, String(f.weight || (f.bold === false ? 400 : 600)));
+      root.style.setProperty(`--style-${r.key}`, f.italic ? 'italic' : 'normal');
       root.style.setProperty(`--font-${r.key}`, fontCss(f));
       if (f.g) families.add(f.g);
       continue;
     }
     root.style.setProperty(`--font-${r.key}`, fontCss(f));
     root.style.setProperty(`--weight-${r.key}`, f.weight ? String(f.weight) : '');   // thin cuts
+    root.style.setProperty(`--style-${r.key}`, f.italic ? 'italic' : '');             // fashion italics
     if (f.g) families.add(f.g);
     if (r.key === 'title') {
       root.dataset.titleKind = f.kind;                         // serif/mono/script titles get looser spacing
@@ -1735,7 +1752,8 @@ function toggleFontPanel() {
   if (panel) { panel.remove(); return; }
   const chosen = C.site.fonts = C.site.fonts || {};
   const groups = [['classic', 'Classic — built in'], ['sans', 'Sans-serif'], ['serif', 'Serif'], ['display', 'Display (big titles)'],
-    ['cursive', 'Cursive & script'], ['fine', 'Fine & light'], ['mono', 'Monospace']];
+    ['couture', 'Couture — designer scripts & italics'], ['cursive', 'Cursive & script'], ['fine', 'Fine & light'],
+    ['mono', 'Monospace']];
   const options = cur => groups.map(([k, label]) =>
     `<optgroup label="${label}">${FONTS.filter(f => (f.group || f.kind) === k).map(f =>
       `<option${f.name === cur ? ' selected' : ''}>${esc(f.name)}</option>`).join('')}</optgroup>`).join('');
