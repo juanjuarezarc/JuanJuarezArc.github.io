@@ -320,6 +320,11 @@ body.editing .item.typing { cursor: auto; }
 }
 body.editing .item:hover .tools, body.editing .item.sel .tools { display: flex; }
 .item.dragging .tools { display: none !important; }
+body.editing .board.multi .tools, body.editing .board.multi .handle { display: none !important; }   /* several selected */
+.marquee {   /* drag-a-box selection */
+  position: absolute; z-index: 900; pointer-events: none;
+  border: 1px solid var(--fg); background: rgba(0, 0, 0, .04); border-radius: 2px;
+}
 .tools button {
   all: unset; cursor: pointer; color: #fff;
   font: 500 11px/1 var(--font); padding: 6px 9px; border-radius: 999px;
@@ -443,6 +448,12 @@ html[data-title-kind="serif"] .display, html[data-title-kind="serif"] h2, html[d
 html[data-title-kind="serif"] .txt.size-xl { letter-spacing: -.015em; }
 html[data-title-kind="mono"] .display, html[data-title-kind="mono"] h2, html[data-title-kind="mono"] .next strong,
 html[data-title-kind="mono"] .txt.size-xl { letter-spacing: -.03em; }
+html[data-title-kind="script"] .display, html[data-title-kind="script"] h2, html[data-title-kind="script"] .next strong,
+html[data-title-kind="script"] .txt.size-l, html[data-title-kind="script"] .txt.size-xl { letter-spacing: 0; }
+/* thin cuts ("Fine & light" fonts) set these; otherwise text keeps its normal weight */
+.lede, .zone-head p { font-weight: var(--weight-subtitle, 400); }
+.prose, .txt, .mail { font-weight: var(--weight-body, 400); }
+.nav, .cap, .foot, .back, .next span, .zoom-cap { font-weight: var(--weight-small, 400); }
 
 /* owner-mode font panel */
 .fontpanel {

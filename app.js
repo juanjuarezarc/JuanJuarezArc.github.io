@@ -403,7 +403,7 @@ function mainBoard() {
 
 function renderBoard(boardEl, instant = false) {
   const b = boardOf(boardEl);
-  const sel = $('.item.sel', boardEl)?.dataset.id;
+  const sel = $$('.item.sel', boardEl).map(x => x.dataset.id);
   boardEl.innerHTML = '<div class="snap" hidden></div>';
   b.items.forEach((it, i) => {
     const el = itemEl(it, i);
@@ -415,7 +415,8 @@ function renderBoard(boardEl, instant = false) {
   layoutBoard(boardEl);
   void boardEl.offsetHeight;
   $$('.item.fresh', boardEl).forEach(el => el.classList.remove('fresh'));
-  if (sel) $(`.item[data-id="${sel}"]`, boardEl)?.classList.add('sel');
+  sel.forEach(id => $(`.item[data-id="${id}"]`, boardEl)?.classList.add('sel'));
+  markMulti();
   if (!instant) observeReveals(boardEl);
   grainFx.refresh();
 }
@@ -1005,6 +1006,124 @@ function toolsHTML(it) {
 function select(el) {
   $$('.item.sel').forEach(x => x !== el && x.classList.remove('sel'));
   if (el) el.classList.add('sel');
+  markMulti();
+}
+
+/* ---------- selecting several blocks ----------
+   Shift/⌘-click adds or removes a block · drag a box on empty grid · ⌘A selects the whole grid.
+   Dragging any selected block (or the arrow keys) moves the whole group; Delete removes it. */
+const selectedIn = boardEl => $$('.item.sel', boardEl);
+// Hide the per-block toolbars while several are selected (they'd only apply to one)
+function markMulti() { $$('#view .board').forEach(b => b.classList.toggle('multi', selectedIn(b).length > 1)); }
+function announceSelection(boardEl) {
+  const n = selectedIn(boardEl).length;
+  if (n > 1) toast(`${n} blocks selected — drag one to move them all`);
+}
+function toggleSelect(el) {
+  const boardEl = el.closest('.board');
+  $$('.item.sel').forEach(x => { if (x.closest('.board') !== boardEl) x.classList.remove('sel'); });   // one grid at a time
+  el.classList.toggle('sel');
+  markMulti();
+  announceSelection(boardEl);
+}
+function selectAll(boardEl) {
+  $$('.item.sel').forEach(x => { if (x.closest('.board') !== boardEl) x.classList.remove('sel'); });
+  $$('.item', boardEl).forEach(x => x.classList.add('sel'));
+  markMulti();
+  announceSelection(boardEl);
+}
+
+// Drag a box on empty grid space to select every block it touches
+function marquee(e, boardEl, additive) {
+  if (e.pointerType === 'mouse') e.preventDefault();          // no text selection while dragging
+  const m = metrics(boardEl), b = boardOf(boardEl);
+  const r0 = boardEl.getBoundingClientRect();
+  const ox = r0.left + scrollX, oy = r0.top + scrollY;          // board corner on the page
+  const x0 = e.pageX - ox, y0 = e.pageY - oy;
+  const keep = new Set(additive ? selectedIn(boardEl) : []);
+  let box = null;
+  const onMove = ev => {
+    const x1 = ev.pageX - ox, y1 = ev.pageY - oy;
+    if (!box) {
+      if (Math.hypot(x1 - x0, y1 - y0) < 5) return;
+      box = document.createElement('div');
+      box.className = 'marquee';
+      boardEl.appendChild(box);
+    }
+    const L = Math.min(x0, x1), T = Math.min(y0, y1), R = Math.max(x0, x1), B = Math.max(y0, y1);
+    Object.assign(box.style, { left: `${L}px`, top: `${T}px`, width: `${R - L}px`, height: `${B - T}px` });
+    for (const el of $$('.item', boardEl)) {
+      const it = b.items.find(x => x.id === el.dataset.id);
+      if (!it) continue;
+      const ix = it.x * m.cell, iy = it.y * m.cell, iw = it.w * m.cell - m.gap, ih = it.h * m.cell - m.gap;
+      const hit = ix < R && ix + iw > L && iy < B && iy + ih > T;
+      el.classList.toggle('sel', keep.has(el) || hit);
+    }
+    markMulti();
+    if (ev.clientY > innerHeight - 70) scrollBy(0, 14);
+    else if (ev.clientY < 70) scrollBy(0, -14);
+  };
+  const onUp = () => {
+    removeEventListener('pointermove', onMove);
+    removeEventListener('pointerup', onUp);
+    removeEventListener('pointercancel', onUp);
+    if (box) { box.remove(); announceSelection(boardEl); }
+    else if (!additive) select(null);                          // a plain click on empty grid clears the selection
+  };
+  addEventListener('pointermove', onMove);
+  addEventListener('pointerup', onUp);
+  addEventListener('pointercancel', onUp);
+}
+
+// Move every selected block together, keeping the group inside the grid
+function dragGroup(e, boardEl, els) {
+  e.preventDefault();
+  const m = metrics(boardEl);
+  const sx = e.pageX, sy = e.pageY;
+  const parts = els.map(el => ({ el, it: findItem(boardEl, el.dataset.id) })).filter(p => p.it)
+    .map(p => Object.assign(p, { x: p.it.x, y: p.it.y }));
+  const minX = Math.min(...parts.map(p => p.x)), maxR = Math.max(...parts.map(p => p.x + p.it.w));
+  const minY = Math.min(...parts.map(p => p.y));
+  let moved = false, gx = 0, gy = 0;
+  const onMove = ev => {
+    const dx = ev.pageX - sx, dy = ev.pageY - sy;
+    if (!moved) {
+      if (Math.hypot(dx, dy) < 4) return;
+      moved = true;
+      parts.forEach(p => p.el.classList.add('dragging'));
+    }
+    gx = clamp(Math.round(dx / m.cell), -minX, COLS - maxR);
+    gy = Math.max(-minY, Math.round(dy / m.cell));
+    for (const p of parts) {
+      p.it.x = p.x + gx; p.it.y = p.y + gy;
+      p.el.style.transform = `translate(${p.x * m.cell + dx}px, ${p.y * m.cell + dy}px)`;
+    }
+    sizeBoard(boardEl, m);
+    if (ev.clientY > innerHeight - 70) scrollBy(0, 14);
+    else if (ev.clientY < 70) scrollBy(0, -14);
+  };
+  const onUp = () => {
+    removeEventListener('pointermove', onMove);
+    removeEventListener('pointerup', onUp);
+    removeEventListener('pointercancel', onUp);
+    if (!moved) return;
+    for (const p of parts) { p.el.classList.remove('dragging'); place(p.el, p.it, m); }
+    sizeBoard(boardEl, m);
+    if (gx || gy) markDirty();
+  };
+  addEventListener('pointermove', onMove);
+  addEventListener('pointerup', onUp);
+  addEventListener('pointercancel', onUp);
+}
+
+async function deleteSelected(boardEl) {
+  const ids = new Set(selectedIn(boardEl).map(el => el.dataset.id));
+  if (!ids.size || !await confirmBox(ids.size > 1 ? `Delete these ${ids.size} blocks?` : 'Delete this block?', 'Delete')) return;
+  const b = boardOf(boardEl);
+  b.items = b.items.filter(i => !ids.has(i.id));
+  select(null);
+  markDirty();
+  renderBoard(boardEl, true);
 }
 function focusBlock(boardEl, id) {
   const el = $(`.item[data-id="${id}"]`, boardEl);
@@ -1022,10 +1141,15 @@ function addBlock(boardEl, it) {
 function onBoardPointer(e, boardEl) {
   if (!editing || e.button !== 0) return;
   const el = e.target.closest('.item');
-  if (!el) { select(null); return; }
+  const additive = e.shiftKey || e.metaKey || e.ctrlKey;
+  if (!el) { marquee(e, boardEl, additive); return; }
   if (e.target.closest('.tools') || e.target.isContentEditable) return;
+  if (additive) { e.preventDefault(); toggleSelect(el); return; }
+  const handle = e.target.closest('.handle');
+  const group = selectedIn(boardEl);
+  if (!handle && el.classList.contains('sel') && group.length > 1) { dragGroup(e, boardEl, group); return; }
   select(el);
-  drag(e, boardEl, el, findItem(boardEl, el.dataset.id), e.target.closest('.handle') ? 'resize' : 'move');
+  drag(e, boardEl, el, findItem(boardEl, el.dataset.id), handle ? 'resize' : 'move');
 }
 
 function drag(e, boardEl, el, it, mode) {
@@ -1511,6 +1635,9 @@ const CLASSIC = [
   ['Palatino', 'serif', 'Palatino, "Palatino Linotype", "Book Antiqua", serif'],
   ['American Typewriter', 'mono', '"American Typewriter", "Courier New", Courier, monospace'],
   ['Courier New', 'mono', '"Courier New", Courier, monospace'],
+  ['Snell Roundhand', 'script', '"Snell Roundhand", "Apple Chancery", "Brush Script MT", cursive'],
+  ['Apple Chancery', 'script', '"Apple Chancery", "Snell Roundhand", "Brush Script MT", cursive'],
+  ['Brush Script MT', 'script', '"Brush Script MT", "Brush Script Std", "Snell Roundhand", cursive'],
 ];
 // Google Fonts, in menu order. "Name" = weights 300–700 · "Name:4" = 400–700 ·
 // "Name:<axes>" = exactly those · a trailing "!" = only one weight (no bold).
@@ -1524,27 +1651,45 @@ const GOOGLE = {
     'Merriweather', 'Crimson Pro', 'Spectral', 'Literata', 'PT Serif:wght@400;700', 'Noto Serif Display'],
   display: ['DM Serif Display!', 'Bodoni Moda:4', 'Abril Fatface!', 'Gloock!', 'Young Serif!', 'Prata!', 'Cinzel:4',
     'Marcellus!', 'Bebas Neue!|sans', 'Anton!|sans', 'Archivo Black!|sans', 'Oswald|sans', 'Unbounded|sans'],
+  cursive: ['Pinyon Script!', 'Great Vibes!', 'Allura!', 'Parisienne!', 'Italianno!', 'Alex Brush!', 'Petit Formal Script!',
+    'Imperial Script!', 'Corinthia:wght@400;700', 'Tangerine:wght@400;700', 'Monsieur La Doulaise!', 'Mrs Saint Delafield!',
+    'Herr Von Muellerhoff!', 'WindSong:wght@400;500', 'Sacramento!', 'La Belle Aurore!', 'Homemade Apple!',
+    'Dancing Script:4', 'Caveat:4', 'Pacifico!'],
   mono: ['Space Mono:wght@400;700', 'IBM Plex Mono', 'JetBrains Mono', 'Geist Mono', 'Roboto Mono', 'Source Code Pro',
     'Fira Code', 'DM Mono:wght@300;400;500!', 'Martian Mono', 'Courier Prime:wght@400;700'],
 };
 function googleFont(spec, group) {
-  let [rest, kind = group === 'display' ? 'serif' : group] = spec.split('|');
+  let [rest, kind = { display: 'serif', cursive: 'script' }[group] || group] = spec.split('|');
   const single = rest.endsWith('!');
   if (single) rest = rest.slice(0, -1);
   let [name, axes] = rest.split(':');
   if (axes === '4') axes = 'wght@400;500;600;700';
   else if (!axes && !single) axes = 'wght@300;400;500;600;700';
-  return Object.assign({ name, kind }, group === 'display' ? { group } : {},
+  return Object.assign({ name, kind }, group !== kind ? { group } : {},
     { g: name.replace(/ /g, '+') + (axes ? ':' + axes : '') }, single ? { bold: false } : {});
 }
-// Every font: { name, kind (sans/serif/mono), group (menu section, defaults to kind), css or g (Google spec), bold }
+// Fine & light: thin cuts of clean fonts. [family, weight used for that text, kind]
+const FINE = [
+  ['Inter', 100], ['Raleway', 100], ['Josefin Sans', 100], ['Outfit', 100], ['Urbanist', 100], ['Lexend', 100],
+  ['IBM Plex Sans', 100], ['Roboto', 100], ['Montserrat', 200], ['Work Sans', 200], ['Poppins', 200], ['Manrope', 200],
+  ['Jost', 200], ['Mulish', 200], ['Quicksand', 300], ['Lato', 300],
+  ['Fraunces', 100, 'serif'], ['Spectral', 200, 'serif'], ['Cormorant Garamond', 300, 'serif'], ['Cormorant', 300, 'serif'],
+];
+const WEIGHT_NAMES = { 100: 'Thin', 200: 'ExtraLight', 300: 'Light' };
+// Every font: { name, kind (sans/serif/mono/script), group (menu section, defaults to kind),
+//               css or g (Google spec), family (if the menu name differs), bold, weight (thin cuts) }
 const FONTS = [
   ...CLASSIC.map(([name, kind, css]) => ({ name, kind, group: 'classic', css })),
   ...Object.entries(GOOGLE).flatMap(([group, list]) => list.map(spec => googleFont(spec, group))),
+  ...FINE.map(([family, weight, kind = 'sans']) => ({
+    name: `${family} ${WEIGHT_NAMES[weight]}`, family, kind, group: 'fine', weight,
+    g: `${family.replace(/ /g, '+')}:wght@${weight};400`,
+  })),
 ];
-const FALLBACK = { sans: '-apple-system, Helvetica, Arial, sans-serif', serif: 'Georgia, "Times New Roman", serif', mono: 'ui-monospace, Menlo, monospace' };
+const FALLBACK = { sans: '-apple-system, Helvetica, Arial, sans-serif', serif: 'Georgia, "Times New Roman", serif',
+  mono: 'ui-monospace, Menlo, monospace', script: '"Snell Roundhand", "Apple Chancery", cursive' };
 const fontByName = n => FONTS.find(f => f.name === n) || FONTS[0];
-const fontCss = f => f.css || `"${f.name}", ${FALLBACK[f.kind]}`;
+const fontCss = f => f.css || `"${f.family || f.name}", ${FALLBACK[f.kind]}`;
 
 function applyFonts() {
   const chosen = (C.site && C.site.fonts) || {};
@@ -1553,11 +1698,12 @@ function applyFonts() {
   for (const r of FONT_ROLES) {
     const f = fontByName(chosen[r.key]);
     root.style.setProperty(`--font-${r.key}`, fontCss(f));
+    root.style.setProperty(`--weight-${r.key}`, f.weight ? String(f.weight) : '');   // thin cuts
     if (f.g) families.add(f.g);
     if (r.key === 'title') {
-      root.dataset.titleKind = f.kind;                         // serif/mono titles get looser spacing
-      root.style.setProperty('--title-weight', f.bold === false ? '400' : '600');
-      root.style.setProperty('--title-weight-l', f.bold === false ? '400' : '500');
+      root.dataset.titleKind = f.kind;                         // serif/mono/script titles get looser spacing
+      root.style.setProperty('--title-weight', String(f.weight || (f.bold === false ? 400 : 600)));
+      root.style.setProperty('--title-weight-l', String(f.weight || (f.bold === false ? 400 : 500)));
     }
   }
   let link = $('#gfonts');
@@ -1575,7 +1721,8 @@ function toggleFontPanel() {
   let panel = $('#fontPanel');
   if (panel) { panel.remove(); return; }
   const chosen = C.site.fonts = C.site.fonts || {};
-  const groups = [['classic', 'Classic — built in'], ['sans', 'Sans-serif'], ['serif', 'Serif'], ['display', 'Display (big titles)'], ['mono', 'Monospace']];
+  const groups = [['classic', 'Classic — built in'], ['sans', 'Sans-serif'], ['serif', 'Serif'], ['display', 'Display (big titles)'],
+    ['cursive', 'Cursive & script'], ['fine', 'Fine & light'], ['mono', 'Monospace']];
   const options = cur => groups.map(([k, label]) =>
     `<optgroup label="${label}">${FONTS.filter(f => (f.group || f.kind) === k).map(f =>
       `<option${f.name === cur ? ' selected' : ''}>${esc(f.name)}</option>`).join('')}</optgroup>`).join('');
@@ -1901,18 +2048,29 @@ document.addEventListener('keydown', e => {
     else if (e.key === 'Enter' && t.matches('[data-edit]:not([data-rich]):not(.lede)')) { e.preventDefault(); t.blur(); }
     return;
   }
-  const sel = $('.item.sel');
-  if (!sel) return;
-  const boardEl = sel.closest('.board');
-  const it = findItem(boardEl, sel.dataset.id);
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'a') {      // select every block on the grid in view
+    const boardEl = mainBoard();
+    if (boardEl) { e.preventDefault(); selectAll(boardEl); }
+    return;
+  }
+  const sels = $$('.item.sel');
+  if (!sels.length) return;
+  const boardEl = sels[0].closest('.board');
+  const its = sels.map(x => findItem(boardEl, x.dataset.id)).filter(Boolean);
   if (e.key === 'Escape') { select(null); return; }
-  if (e.key === 'Backspace' || e.key === 'Delete') { e.preventDefault(); $('[data-act=del]', sel).click(); return; }
-  if (e.key === 'Enter' && it.type === 'text') { e.preventDefault(); editText(sel, boardEl); return; }
+  if (e.key === 'Backspace' || e.key === 'Delete') { e.preventDefault(); deleteSelected(boardEl); return; }
+  if (e.key === 'Enter' && its.length === 1 && its[0].type === 'text') { e.preventDefault(); editText(sels[0], boardEl); return; }
   const d = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key];
   if (!d) return;
   e.preventDefault();
-  if (e.shiftKey) { it.w = clamp(it.w + d[0], 1, COLS - it.x); it.h = Math.max(1, it.h + d[1]); }
-  else { it.x = clamp(it.x + d[0], 0, COLS - it.w); it.y = Math.max(0, it.y + d[1]); }
+  if (e.shiftKey) {                                                      // resize: one block at a time
+    if (its.length !== 1) return;
+    const it = its[0];
+    it.w = clamp(it.w + d[0], 1, COLS - it.x); it.h = Math.max(1, it.h + d[1]);
+  } else {                                                               // move the whole group if it fits
+    if (!its.every(it => it.x + d[0] >= 0 && it.x + it.w + d[0] <= COLS && it.y + d[1] >= 0)) return;
+    its.forEach(it => { it.x += d[0]; it.y += d[1]; });
+  }
   layoutBoard(boardEl);
   markDirty();
 });

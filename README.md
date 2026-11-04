@@ -26,6 +26,7 @@ Treat it like a password — anyone with it can change this repository.
 | Move a block | Drag it — it snaps to the grid |
 | Resize a block | Drag the round handle at its bottom-right corner |
 | Nudge / resize with keys | Arrow keys / Shift + arrows (on the selected block) |
+| Select several blocks | Shift-click them, drag a box on empty grid, or ⌘A for the whole grid — then drag one to move them all (arrow keys and Delete work on the group too) |
 | Add a text block | **+ Text** (double-click a text block to edit; **Aa** cycles the size) |
 | Link a block to a project or website | Hover → **Link** |
 | Create a new project page | **+ Project** → its tile appears on the Work grid → hover → **Open ↗** |
