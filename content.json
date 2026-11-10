@@ -98,19 +98,10 @@
      "caption": "WIP"
     },
     {
-     "id": "w4",
-     "type": "image",
-     "x": 0,
-     "y": 6,
-     "w": 4,
-     "h": 6,
-     "caption": "WIP"
-    },
-    {
      "id": "w5",
      "type": "image",
      "x": 0,
-     "y": 12,
+     "y": 6,
      "w": 4,
      "h": 4,
      "caption": "SOLID/VOID",
@@ -125,28 +116,10 @@
      "blur": true
     },
     {
-     "id": "5bh0djbq",
-     "type": "image",
-     "x": 8,
-     "y": 6,
-     "w": 4,
-     "h": 6,
-     "caption": "WIP"
-    },
-    {
-     "id": "falyn4hq",
-     "type": "image",
-     "x": 4,
-     "y": 6,
-     "w": 4,
-     "h": 6,
-     "caption": "WIP"
-    },
-    {
      "id": "oog601bx",
      "type": "image",
      "x": 4,
-     "y": 12,
+     "y": 6,
      "w": 4,
      "h": 4,
      "caption": "WIP",
@@ -157,7 +130,7 @@
      "id": "9dxs6tmp",
      "type": "image",
      "x": 8,
-     "y": 12,
+     "y": 6,
      "w": 4,
      "h": 4,
      "caption": "WIP",
