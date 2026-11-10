@@ -41,6 +41,10 @@
   "pressure": {
    "title": "AIR",
    "sub": "Spatial systems driven by airflow"
+  },
+  "seminar": {
+   "title": "SEMINAR",
+   "sub": ""
   }
  },
  "boards": {
@@ -109,7 +113,8 @@
      "y": 0,
      "w": 4,
      "h": 5,
-     "caption": "WIP"
+     "caption": "SEMINAR",
+     "link": "p:seminar"
     },
     {
      "id": "5bh0djbq",
@@ -695,6 +700,29 @@
   },
   "contact": {
    "items": []
+  },
+  "seminar": {
+   "items": [
+    {
+     "id": "8l8wdg4b",
+     "type": "text",
+     "x": 0,
+     "y": 0,
+     "w": 4,
+     "h": 10,
+     "size": "m",
+     "html": "<p>Describe the seminar: the topic, the question you explored, and what came out of it.</p>"
+    },
+    {
+     "id": "9t1tcbam",
+     "type": "image",
+     "x": 5,
+     "y": 0,
+     "w": 7,
+     "h": 10,
+     "caption": "Image"
+    }
+   ]
   }
  }
 }
