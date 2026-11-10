@@ -56,7 +56,7 @@
      "x": 0,
      "y": 0,
      "w": 4,
-     "h": 5,
+     "h": 6,
      "caption": "PRESSURE",
      "link": "p:air",
      "blur": true,
@@ -75,7 +75,7 @@
      "x": 4,
      "y": 0,
      "w": 4,
-     "h": 5,
+     "h": 6,
      "caption": "AIR",
      "link": "p:pressure",
      "z": 3,
@@ -91,8 +91,8 @@
     {
      "id": "w3",
      "type": "image",
-     "x": 0,
-     "y": 5,
+     "x": 8,
+     "y": 0,
      "w": 4,
      "h": 6,
      "caption": "WIP"
@@ -100,8 +100,8 @@
     {
      "id": "w4",
      "type": "image",
-     "x": 4,
-     "y": 5,
+     "x": 0,
+     "y": 6,
      "w": 4,
      "h": 6,
      "caption": "WIP"
@@ -109,21 +109,53 @@
     {
      "id": "w5",
      "type": "image",
-     "x": 8,
-     "y": 0,
+     "x": 0,
+     "y": 12,
      "w": 4,
-     "h": 5,
-     "caption": "SEMINAR",
+     "h": 4,
+     "caption": "SOLID/VOID",
      "link": "p:seminar"
     },
     {
      "id": "5bh0djbq",
      "type": "image",
      "x": 8,
-     "y": 5,
+     "y": 6,
      "w": 4,
      "h": 6,
      "caption": "WIP"
+    },
+    {
+     "id": "falyn4hq",
+     "type": "image",
+     "x": 4,
+     "y": 6,
+     "w": 4,
+     "h": 6,
+     "caption": "WIP"
+    },
+    {
+     "id": "oog601bx",
+     "type": "image",
+     "x": 4,
+     "y": 12,
+     "w": 4,
+     "h": 4,
+     "caption": "WIP",
+     "link": null,
+     "z": 4
+    },
+    {
+     "id": "9dxs6tmp",
+     "type": "image",
+     "x": 8,
+     "y": 12,
+     "w": 4,
+     "h": 4,
+     "caption": "WIP",
+     "link": null,
+     "z": 4,
+     "blur": false
     }
    ]
   },
