@@ -756,7 +756,8 @@
       "1200": "/uploads/sized/20261111-1mmqe4qj-1200.jpg",
       "1600": "/uploads/sized/20261111-1mmqe4qj-1600.jpg",
       "w": 2800
-     }
+     },
+     "fit": "contain"
     },
     {
      "id": "g6i49b7a",
