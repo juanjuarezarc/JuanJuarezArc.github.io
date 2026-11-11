@@ -911,7 +911,7 @@
      "id": "jd1he6mx",
      "type": "image",
      "x": 9,
-     "y": 26,
+     "y": 27,
      "w": 3,
      "h": 3,
      "src": "/uploads/20261111-84ttvi06.webp",
@@ -935,7 +935,7 @@
      "id": "1smjty3w",
      "type": "image",
      "x": 0,
-     "y": 26,
+     "y": 27,
      "w": 3,
      "h": 3,
      "src": "/uploads/20261111-4rn9wh7i.webp",
@@ -973,22 +973,6 @@
      }
     },
     {
-     "id": "1jarfayq",
-     "type": "image",
-     "x": 8,
-     "y": 37,
-     "w": 4,
-     "h": 3,
-     "src": "/uploads/20261111-n3r8ugkm.webp",
-     "caption": "",
-     "variants": {
-      "800": "/uploads/sized/20261111-n3r8ugkm-800.jpg",
-      "1200": "/uploads/sized/20261111-n3r8ugkm-1200.jpg",
-      "1600": "/uploads/sized/20261111-n3r8ugkm-1600.jpg",
-      "w": 2800
-     }
-    },
-    {
      "id": "f9hv2ip9",
      "type": "image",
      "x": 6,
@@ -1014,7 +998,7 @@
      "id": "jffsy57w",
      "type": "image",
      "x": 6,
-     "y": 26,
+     "y": 27,
      "w": 3,
      "h": 3,
      "src": "/uploads/20261111-6nenbhhz.webp",
@@ -1060,7 +1044,7 @@
      "id": "qc330ana",
      "type": "image",
      "x": 3,
-     "y": 26,
+     "y": 27,
      "w": 3,
      "h": 3,
      "src": "/uploads/20261111-2l3k6pmu.webp",
