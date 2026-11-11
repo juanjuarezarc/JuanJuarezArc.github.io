@@ -741,6 +741,86 @@
       "1600": "/uploads/sized/20261110-blz6rxzb-1600.jpg",
       "w": 2800
      }
+    },
+    {
+     "id": "rhh823hb",
+     "type": "image",
+     "x": 6,
+     "y": 11,
+     "w": 4,
+     "h": 2,
+     "src": "/uploads/20261111-1mmqe4qj.jpg",
+     "caption": "",
+     "variants": {
+      "800": "/uploads/sized/20261111-1mmqe4qj-800.jpg",
+      "1200": "/uploads/sized/20261111-1mmqe4qj-1200.jpg",
+      "1600": "/uploads/sized/20261111-1mmqe4qj-1600.jpg",
+      "w": 2800
+     }
+    },
+    {
+     "id": "g6i49b7a",
+     "type": "image",
+     "x": 0,
+     "y": 14,
+     "w": 4,
+     "h": 3,
+     "src": "/uploads/20261111-rz4396kl.webp",
+     "caption": "",
+     "variants": {
+      "800": "/uploads/sized/20261111-rz4396kl-800.jpg",
+      "1200": "/uploads/sized/20261111-rz4396kl-1200.jpg",
+      "1600": "/uploads/sized/20261111-rz4396kl-1600.jpg",
+      "w": 2800
+     }
+    },
+    {
+     "id": "kd30k2wx",
+     "type": "image",
+     "x": 4,
+     "y": 17,
+     "w": 4,
+     "h": 3,
+     "src": "/uploads/20261111-zy9629be.webp",
+     "caption": "",
+     "variants": {
+      "800": "/uploads/sized/20261111-zy9629be-800.jpg",
+      "1200": "/uploads/sized/20261111-zy9629be-1200.jpg",
+      "1600": "/uploads/sized/20261111-zy9629be-1600.jpg",
+      "w": 2800
+     }
+    },
+    {
+     "id": "vfqajbkx",
+     "type": "image",
+     "x": 4,
+     "y": 14,
+     "w": 4,
+     "h": 3,
+     "src": "/uploads/20261111-ddbv20jl.webp",
+     "caption": "",
+     "variants": {
+      "800": "/uploads/sized/20261111-ddbv20jl-800.jpg",
+      "1200": "/uploads/sized/20261111-ddbv20jl-1200.jpg",
+      "1600": "/uploads/sized/20261111-ddbv20jl-1600.jpg",
+      "w": 2800
+     }
+    },
+    {
+     "id": "wsfnf4pd",
+     "type": "image",
+     "x": 0,
+     "y": 17,
+     "w": 4,
+     "h": 3,
+     "src": "/uploads/20261111-2kffy7ui.webp",
+     "caption": "",
+     "variants": {
+      "800": "/uploads/sized/20261111-2kffy7ui-800.jpg",
+      "1200": "/uploads/sized/20261111-2kffy7ui-1200.jpg",
+      "1600": "/uploads/sized/20261111-2kffy7ui-1600.jpg",
+      "w": 2800
+     }
     }
    ]
   }
