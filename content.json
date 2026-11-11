@@ -853,6 +853,70 @@
       "1600": "/uploads/sized/20261111-hvdk59hs-1600.jpg",
       "w": 2800
      }
+    },
+    {
+     "id": "sdjdt0x7",
+     "type": "image",
+     "x": 0,
+     "y": 20,
+     "w": 4,
+     "h": 3,
+     "src": "/uploads/20261111-qnim61aw.webp",
+     "caption": "",
+     "variants": {
+      "800": "/uploads/sized/20261111-qnim61aw-800.jpg",
+      "1200": "/uploads/sized/20261111-qnim61aw-1200.jpg",
+      "1600": "/uploads/sized/20261111-qnim61aw-1600.jpg",
+      "w": 2800
+     }
+    },
+    {
+     "id": "o599yiwm",
+     "type": "image",
+     "x": 4,
+     "y": 20,
+     "w": 4,
+     "h": 3,
+     "src": "/uploads/20261111-h83gm8tt.webp",
+     "caption": "",
+     "variants": {
+      "800": "/uploads/sized/20261111-h83gm8tt-800.jpg",
+      "1200": "/uploads/sized/20261111-h83gm8tt-1200.jpg",
+      "1600": "/uploads/sized/20261111-h83gm8tt-1600.jpg",
+      "w": 2800
+     }
+    },
+    {
+     "id": "jd1he6mx",
+     "type": "image",
+     "x": 8,
+     "y": 20,
+     "w": 4,
+     "h": 3,
+     "src": "/uploads/20261111-84ttvi06.webp",
+     "caption": "",
+     "variants": {
+      "800": "/uploads/sized/20261111-84ttvi06-800.jpg",
+      "1200": "/uploads/sized/20261111-84ttvi06-1200.jpg",
+      "1600": "/uploads/sized/20261111-84ttvi06-1600.jpg",
+      "w": 2800
+     }
+    },
+    {
+     "id": "1smjty3w",
+     "type": "image",
+     "x": 0,
+     "y": 23,
+     "w": 4,
+     "h": 3,
+     "src": "/uploads/20261111-4rn9wh7i.webp",
+     "caption": "",
+     "variants": {
+      "800": "/uploads/sized/20261111-4rn9wh7i-800.jpg",
+      "1200": "/uploads/sized/20261111-4rn9wh7i-1200.jpg",
+      "1600": "/uploads/sized/20261111-4rn9wh7i-1600.jpg",
+      "w": 2800
+     }
     }
    ]
   }
