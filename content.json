@@ -821,6 +821,38 @@
       "1600": "/uploads/sized/20261111-2kffy7ui-1600.jpg",
       "w": 2800
      }
+    },
+    {
+     "id": "jt83une3",
+     "type": "image",
+     "x": 4,
+     "y": 17,
+     "w": 4,
+     "h": 3,
+     "src": "/uploads/20261111-29qwwbhw.webp",
+     "caption": "",
+     "variants": {
+      "800": "/uploads/sized/20261111-29qwwbhw-800.jpg",
+      "1200": "/uploads/sized/20261111-29qwwbhw-1200.jpg",
+      "1600": "/uploads/sized/20261111-29qwwbhw-1600.jpg",
+      "w": 2800
+     }
+    },
+    {
+     "id": "ebi80sf6",
+     "type": "image",
+     "x": 8,
+     "y": 17,
+     "w": 4,
+     "h": 3,
+     "src": "/uploads/20261111-hvdk59hs.webp",
+     "caption": "",
+     "variants": {
+      "800": "/uploads/sized/20261111-hvdk59hs-800.jpg",
+      "1200": "/uploads/sized/20261111-hvdk59hs-1200.jpg",
+      "1600": "/uploads/sized/20261111-hvdk59hs-1600.jpg",
+      "w": 2800
+     }
     }
    ]
   }
