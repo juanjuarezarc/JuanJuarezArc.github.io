@@ -949,6 +949,22 @@
       "1600": "/uploads/sized/20261111-n3r8ugkm-1600.jpg",
       "w": 2800
      }
+    },
+    {
+     "id": "f9hv2ip9",
+     "type": "image",
+     "x": 0,
+     "y": 26,
+     "w": 4,
+     "h": 4,
+     "src": "/uploads/20261111-8k77bq0t.webp",
+     "caption": "",
+     "variants": {
+      "800": "/uploads/sized/20261111-8k77bq0t-800.jpg",
+      "1200": "/uploads/sized/20261111-8k77bq0t-1200.jpg",
+      "1600": "/uploads/sized/20261111-8k77bq0t-1600.jpg",
+      "w": 2400
+     }
     }
    ]
   }
