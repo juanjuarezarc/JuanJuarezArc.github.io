@@ -965,6 +965,86 @@
       "1600": "/uploads/sized/20261111-8k77bq0t-1600.jpg",
       "w": 2400
      }
+    },
+    {
+     "id": "jffsy57w",
+     "type": "image",
+     "x": 4,
+     "y": 26,
+     "w": 4,
+     "h": 4,
+     "src": "/uploads/20261111-6nenbhhz.webp",
+     "caption": "",
+     "variants": {
+      "800": "/uploads/sized/20261111-6nenbhhz-800.jpg",
+      "1200": "/uploads/sized/20261111-6nenbhhz-1200.jpg",
+      "1600": "/uploads/sized/20261111-6nenbhhz-1600.jpg",
+      "w": 2400
+     }
+    },
+    {
+     "id": "5tlfxpxh",
+     "type": "image",
+     "x": 8,
+     "y": 26,
+     "w": 4,
+     "h": 4,
+     "src": "/uploads/20261111-hv35jto2.webp",
+     "caption": "",
+     "variants": {
+      "800": "/uploads/sized/20261111-hv35jto2-800.jpg",
+      "1200": "/uploads/sized/20261111-hv35jto2-1200.jpg",
+      "1600": "/uploads/sized/20261111-hv35jto2-1600.jpg",
+      "w": 2400
+     }
+    },
+    {
+     "id": "qc330ana",
+     "type": "image",
+     "x": 0,
+     "y": 30,
+     "w": 4,
+     "h": 4,
+     "src": "/uploads/20261111-2l3k6pmu.webp",
+     "caption": "",
+     "variants": {
+      "800": "/uploads/sized/20261111-2l3k6pmu-800.jpg",
+      "1200": "/uploads/sized/20261111-2l3k6pmu-1200.jpg",
+      "1600": "/uploads/sized/20261111-2l3k6pmu-1600.jpg",
+      "w": 2400
+     }
+    },
+    {
+     "id": "n3cttk15",
+     "type": "image",
+     "x": 4,
+     "y": 30,
+     "w": 4,
+     "h": 4,
+     "src": "/uploads/20261111-5wdkl6mw.webp",
+     "caption": "",
+     "variants": {
+      "800": "/uploads/sized/20261111-5wdkl6mw-800.jpg",
+      "1200": "/uploads/sized/20261111-5wdkl6mw-1200.jpg",
+      "1600": "/uploads/sized/20261111-5wdkl6mw-1600.jpg",
+      "w": 2800
+     }
+    },
+    {
+     "id": "4exuss6l",
+     "type": "image",
+     "x": 8,
+     "y": 30,
+     "w": 4,
+     "h": 4,
+     "src": "/uploads/20261111-pxv40d42.webp",
+     "caption": "",
+     "variants": {
+      "800": "/uploads/sized/20261111-pxv40d42-800.jpg",
+      "1200": "/uploads/sized/20261111-pxv40d42-1200.jpg",
+      "1600": "/uploads/sized/20261111-pxv40d42-1600.jpg",
+      "w": 2800
+     }
     }
    ]
   }
