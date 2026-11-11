@@ -1013,10 +1013,10 @@
     {
      "id": "5tlfxpxh",
      "type": "image",
-     "x": 8,
-     "y": 52,
-     "w": 4,
-     "h": 4,
+     "x": 6,
+     "y": 30,
+     "w": 6,
+     "h": 6,
      "src": "/uploads/20261111-hv35jto2.webp",
      "caption": "",
      "variants": {
@@ -1024,7 +1024,13 @@
       "1200": "/uploads/sized/20261111-hv35jto2-1200.jpg",
       "1600": "/uploads/sized/20261111-hv35jto2-1600.jpg",
       "w": 2400
-     }
+     },
+     "crop": {
+      "x": 50,
+      "y": 50,
+      "z": 0.88
+     },
+     "bg": "#030303"
     },
     {
      "id": "qc330ana",
