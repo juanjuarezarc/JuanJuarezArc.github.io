@@ -163,6 +163,7 @@ body:not(.editing) .board.side:not(:has(.item)) { margin-top: 0; }
 .item.text .inner { overflow: visible; border-radius: 0; }
 .inner img, .inner video {
   width: 100%; height: 100%; object-fit: cover;
+  transform: scale(var(--z, 1));                /* --z: zoom from Crop (owner mode) */
   transition: transform 1.4s var(--ease);
 }
 .inner .contain { object-fit: contain; }
@@ -197,7 +198,7 @@ body.editing .inner iframe { pointer-events: none; }  /* so blocks can be dragge
 }
 
 /* click-to-zoom images */
-body:not(.editing) .inner.zoomable:hover img, body:not(.editing) .inner.zoomable:hover video { transform: scale(1.03); }
+body:not(.editing) .inner.zoomable:hover img, body:not(.editing) .inner.zoomable:hover video { transform: scale(calc(var(--z, 1) * 1.03)); }
 .inner.zoom-src img, .inner.zoom-src video { visibility: hidden; }
 .zoom { position: fixed; inset: 0; z-index: 500; overscroll-behavior: contain; touch-action: none; -webkit-user-select: none; user-select: none; }
 .zoom-pz { width: 100%; height: 100%; transform-origin: 0 0; }
@@ -235,7 +236,7 @@ body:not(.editing) .inner.zoomable:hover img, body:not(.editing) .inner.zoomable
 .zoom.open .zoom-cap { opacity: 1; transform: none; transition-delay: .2s; }
 
 /* linked tiles: zoom inside the frame + dim the others (like a desktop focus) */
-a.inner:hover img, a.inner:hover video { transform: scale(1.04); }
+a.inner:hover img, a.inner:hover video { transform: scale(calc(var(--z, 1) * 1.04)); }
 a.inner.ph { transition: filter .4s var(--ease); }
 a.inner.ph:hover { filter: brightness(.97); }
 body:not(.editing) .board.dim:has(a.inner:hover) .item:not(:hover) { opacity: .3; }
@@ -243,10 +244,10 @@ body:not(.editing) .board.dim:has(a.inner:hover) .item:not(:hover) { opacity: .3
 /* blurred + grainy photo tiles (owner mode: hover a photo → Blur) */
 .inner.blurred img, .inner.blurred video {
   filter: blur(calc(var(--cell) * .26)) saturate(.85);
-  transform: scale(1.15);                                    /* hides the soft edges blur creates */
+  transform: scale(calc(var(--z, 1) * 1.15));               /* hides the soft edges blur creates */
   transition: transform 1.4s var(--ease), filter .9s var(--ease);
 }
-a.inner.blurred:hover img, a.inner.blurred:hover video { filter: blur(calc(var(--cell) * .17)) saturate(.9); transform: scale(1.2); }
+a.inner.blurred:hover img, a.inner.blurred:hover video { filter: blur(calc(var(--cell) * .17)) saturate(.9); transform: scale(calc(var(--z, 1) * 1.2)); }
 .inner.blurred .dust {   /* the grain is made of drifting dust, thickest along an angled ray */
   position: absolute; inset: 0; overflow: hidden; pointer-events: none;
   -webkit-mask-image: linear-gradient(118deg, rgba(0,0,0,.55) 8%, #000 36%, #000 60%, rgba(0,0,0,.55) 90%);
@@ -291,6 +292,22 @@ body.editing .item:hover .inner { outline-color: rgba(0, 0, 0, .3); }
 body.editing .item.sel .inner { outline-color: var(--fg); }
 body.editing .item.typing { cursor: auto; }
 .item.fresh { transition: none; }
+/* Crop mode */
+body.editing .item.cropping .inner { cursor: move; outline-color: var(--fg); touch-action: none; }
+body.editing .item.cropping .inner img, body.editing .item.cropping .inner video { transition: none; }
+body.editing .item.cropping .tools, body.editing .item.cropping .handle { display: none !important; }
+.cropbar {
+  position: absolute; left: 50%; bottom: 10px; z-index: 6; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 8px; padding: 5px 6px 5px 12px; white-space: nowrap;
+  background: rgba(0, 0, 0, .88); color: #fff; border-radius: 999px; font: 11px/1 var(--font);
+}
+.cropbar input { width: 90px; accent-color: #fff; }
+.cropbar button { all: unset; cursor: pointer; padding: 6px 10px; border-radius: 999px; }
+.cropbar button:hover { background: rgba(255, 255, 255, .18); }
+.cropbar button.on { background: #fff; color: #000; }
+.bgrow { display: flex; gap: 8px; align-items: center; }
+.bgrow input[type=color] { width: 44px; height: 40px; padding: 0; border: 1px solid #d2d2d7; border-radius: 10px; background: none; flex: none; }
+.bgrow input[type=text] { flex: 1; font-family: ui-monospace, Menlo, monospace; text-transform: lowercase; }
 .item.dragging { transition: none; z-index: 1000 !important; cursor: grabbing !important; }
 .item.dragging .inner { box-shadow: 0 24px 60px rgba(0, 0, 0, .18); }
 
@@ -487,7 +504,7 @@ html.lite .zoom-bg { background: rgba(250, 250, 250, .95); -webkit-backdrop-filt
 html.lite .zoom-grain { display: none; }
 html.lite .inner.blurred img, html.lite .inner.blurred video { transition: none; }
 html.lite .inner.blurred .specks { will-change: auto; }
-html.lite a.inner.blurred:hover img { filter: blur(calc(var(--cell) * .26)) saturate(.85); transform: scale(1.15); }
+html.lite a.inner.blurred:hover img { filter: blur(calc(var(--cell) * .26)) saturate(.85); transform: scale(calc(var(--z, 1) * 1.15)); }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }

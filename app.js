@@ -457,6 +457,8 @@ function itemEl(it, i) {
       if (m.tagName === 'IMG') { m.loading = 'lazy'; m.decoding = 'async'; m.alt = it.caption || ''; }
       m.draggable = false;
       if (it.fit === 'contain') m.classList.add('contain');
+      applyCrop(m, it.crop);
+      if (it.bg && /^#[0-9a-f]{6}$/i.test(it.bg)) inner.style.background = it.bg;
       // Smaller copies (800 / 1600 px): the browser downloads the smallest one that is still sharp
       // for the tile's size on this screen. The full photo is used when zooming in.
       const v = it.variants;
@@ -664,6 +666,120 @@ const grainFx = (() => {
   return { refresh };
 })();
 
+/* ---------- crop: a focus point (x, y in %) and a zoom; absent = the default centred fill ---------- */
+const CROP_MIN = 0.5, CROP_MAX = 4;
+function applyCrop(m, c) {
+  if (!c) { m.style.removeProperty('object-position'); m.style.removeProperty('transform-origin'); m.style.removeProperty('--z'); return; }
+  m.style.objectPosition = m.style.transformOrigin = `${c.x}% ${c.y}%`;
+  m.style.setProperty('--z', String(c.z));
+}
+
+let cropping = null;
+function startCrop(el, boardEl, it) {
+  finishCrop();
+  const m = $('.inner img, .inner video', el);
+  if (!m) return;
+  select(el);
+  const c = Object.assign({ x: 50, y: 50, z: 1 }, it.crop);
+  el.classList.add('cropping');
+  const bar = document.createElement('div');
+  bar.className = 'cropbar';
+  bar.innerHTML = `<span>Drag to move · scroll to zoom</span><input type="range" min="${CROP_MIN * 100}" max="${CROP_MAX * 100}" value="${Math.round(c.z * 100)}" aria-label="Zoom">
+    <button type="button" data-c="reset">Reset</button><button type="button" data-c="done" class="on">Done</button>`;
+  el.appendChild(bar);
+  const slider = $('input', bar);
+  const show = () => { applyCrop(m, c); slider.value = Math.round(c.z * 100); };
+  // how far the picture can travel at this zoom (negative = it is smaller than the block)
+  const travel = () => {
+    const r = inner.getBoundingClientRect();
+    const [nw, nh] = naturalSize(m);
+    const tw = r.width, th = r.height;
+    const k = (it.fit === 'contain' ? Math.min : Math.max)(tw / nw, th / nh);
+    return [nw * k * c.z - tw, nh * k * c.z - th];
+  };
+  const inner = $('.inner', el);
+  let start = null;
+  const down = e => {
+    if (e.target.closest('.cropbar')) return;
+    e.preventDefault(); e.stopPropagation();
+    start = { x: e.clientX, y: e.clientY, cx: c.x, cy: c.y, t: travel() };
+    try { inner.setPointerCapture(e.pointerId); } catch { /* keep tracking without capture */ }
+  };
+  const move = e => {
+    if (!start) return;
+    const [ox, oy] = start.t;
+    if (Math.abs(ox) > 1) c.x = clamp(start.cx - (e.clientX - start.x) * 100 / ox, 0, 100);
+    if (Math.abs(oy) > 1) c.y = clamp(start.cy - (e.clientY - start.y) * 100 / oy, 0, 100);
+    show();
+  };
+  const up = () => { start = null; };
+  const wheel = e => { e.preventDefault(); c.z = clamp(c.z * Math.exp(-e.deltaY * 0.002), CROP_MIN, CROP_MAX); show(); };
+  inner.addEventListener('pointerdown', down);
+  inner.addEventListener('pointermove', move);
+  inner.addEventListener('pointerup', up);
+  inner.addEventListener('pointercancel', up);
+  inner.addEventListener('wheel', wheel, { passive: false });
+  slider.addEventListener('input', () => { c.z = slider.value / 100; show(); });
+  bar.addEventListener('pointerdown', e => e.stopPropagation());
+  bar.addEventListener('click', e => {
+    const b = e.target.closest('[data-c]');
+    if (!b) return;
+    e.preventDefault(); e.stopPropagation();
+    if (b.dataset.c === 'reset') { c.x = 50; c.y = 50; c.z = 1; show(); } else finishCrop();
+  });
+  cropping = {
+    el, it, c, bar,
+    off: () => {
+      inner.removeEventListener('pointerdown', down); inner.removeEventListener('pointermove', move);
+      inner.removeEventListener('pointerup', up); inner.removeEventListener('pointercancel', up);
+      inner.removeEventListener('wheel', wheel);
+    },
+  };
+}
+function finishCrop() {
+  if (!cropping) return;
+  const { el, it, c, bar, off } = cropping;
+  cropping = null;
+  off(); bar.remove(); el.classList.remove('cropping');
+  const next = (c.x === 50 && c.y === 50 && c.z === 1) ? null
+    : { x: Math.round(c.x * 10) / 10, y: Math.round(c.y * 10) / 10, z: Math.round(c.z * 100) / 100 };
+  if (JSON.stringify(next) !== JSON.stringify(it.crop || null)) {
+    if (next) it.crop = next; else delete it.crop;
+    markDirty();
+  }
+}
+document.addEventListener('pointerdown', e => { if (cropping && !cropping.el.contains(e.target) && !e.target.closest('.modal')) finishCrop(); }, true);
+
+// Background colour behind a photo: colour picker, plus an eyedropper where the browser has one (Chrome, Edge)
+async function chooseBg(cur, el) {
+  const inner = $('.inner', el);
+  const before = inner.style.background;
+  const v = await modal((card, done) => {
+    card.innerHTML = `<h3>Background colour</h3><p class="hint" style="margin-bottom:14px">Shows behind the photo wherever it doesn’t fill the block (with Fit, or when zoomed out in Crop).</p>
+      <div class="bgrow"><input type="color" value="${cur || '#ffffff'}" aria-label="Colour"><input type="text" value="${cur || ''}" placeholder="#ffffff" spellcheck="false" maxlength="7"></div>
+      <div class="row">${'EyeDropper' in window ? '<button type="button" class="btn plain pick">Eyedropper</button>' : ''}<button type="button" class="btn plain none">None</button><button type="button" class="btn plain cancel">Cancel</button><button class="btn solid ok">OK</button></div>`;
+    const [col, hex] = card.querySelectorAll('input');
+    const preview = h => { if (/^#[0-9a-f]{6}$/i.test(h)) inner.style.background = h; };
+    col.oninput = () => { hex.value = col.value; preview(col.value); };
+    hex.oninput = () => { if (/^#[0-9a-f]{6}$/i.test(hex.value)) { col.value = hex.value; preview(hex.value); } };
+    card.querySelector('.ok').onclick = () => done(/^#[0-9a-f]{6}$/i.test(hex.value) ? hex.value.toLowerCase() : (cur || null));
+    card.querySelector('.none').onclick = () => done(null);
+    card.querySelector('.cancel').onclick = () => done(undefined);
+    const pick = card.querySelector('.pick');
+    if (pick) pick.onclick = () => done('pick');
+  });
+  if (v === 'pick') {                       // the dialog closes first so the colour comes from the page itself
+    try {
+      const { sRGBHex } = await new EyeDropper().open();
+      inner.style.background = sRGBHex;
+      return sRGBHex.toLowerCase();
+    } catch { inner.style.background = before; return undefined; }
+  }
+  if (v === undefined) { inner.style.background = before; return undefined; }
+  if (!v) inner.style.background = '';
+  return v;
+}
+
 // Blurred tiles: dark title on light photos, white title on dark ones
 function captionTone(inner, img) {
   try {
@@ -712,17 +828,28 @@ const naturalSize = m => (m.tagName === 'VIDEO' ? [m.videoWidth, m.videoHeight] 
 // How the picture sits in the grid right now (accounts for cropping, "Fit" and the hover zoom)
 function zoomGeometry(media) {
   const tile = media.closest('.inner').getBoundingClientRect();
+  const tw = tile.width, th = tile.height;
   const [nw, nh] = naturalSize(media);
   const cs = getComputedStyle(media);
-  const hover = cs.transform && cs.transform !== 'none' ? new DOMMatrixReadOnly(cs.transform).a : 1;
+  const s = cs.transform && cs.transform !== 'none' ? new DOMMatrixReadOnly(cs.transform).a : 1;   // crop zoom × hover
   const fit = cs.objectFit === 'contain' ? Math.min : Math.max;
-  const k = fit(tile.width / nw, tile.height / nh) * hover;
-  const dw = nw * k, dh = nh * k;
+  const k = fit(tw / nw, th / nh);
+  const dw0 = nw * k, dh0 = nh * k;
+  // where the picture sits inside its block: object-position, then scaled about transform-origin
+  const pos = cs.objectPosition.split(' ').map(v => parseFloat(v) / 100);
+  const org = cs.transformOrigin.split(' ').map(parseFloat);
+  const cx0 = (tw - dw0) * pos[0] + dw0 / 2, cy0 = (th - dh0) * pos[1] + dh0 / 2;
+  const icx = org[0] + (cx0 - org[0]) * s, icy = org[1] + (cy0 - org[1]) * s;
+  const dw = dw0 * s, dh = dh0 * s;
+  // the part you can see = picture ∩ block
+  const L = Math.max(0, icx - dw / 2), R = Math.min(tw, icx + dw / 2);
+  const T = Math.max(0, icy - dh / 2), B = Math.min(th, icy + dh / 2);
+  const vx = (L + R) / 2, vy = (T + B) / 2;
   return {
     dw,                                            // picture width as shown in the grid
-    cw: Math.min(dw, tile.width),                  // visible (cropped) width
-    ch: Math.min(dh, tile.height),                 // visible (cropped) height
-    cx: tile.left + tile.width / 2, cy: tile.top + tile.height / 2,
+    cw: R - L, ch: B - T,                          // visible (cropped) size
+    cx: tile.left + vx, cy: tile.top + vy,         // centre of the visible part
+    ox: icx - vx, oy: icy - vy,                    // picture centre relative to it (0 unless cropped)
   };
 }
 
@@ -737,7 +864,7 @@ function zoomFrames(z, p0, p1) {
     const sy = (g.ch + (box.height - g.ch) * p) / box.height;
     const S = (g.dw + (box.width - g.dw) * p) / box.width;       // picture scale
     outer.push({ transform: `translate3d(${(g.cx - fx) * (1 - p)}px, ${(g.cy - fy) * (1 - p)}px, 0) scale(${sx}, ${sy})` });
-    inner.push({ transform: `scale(${S / sx}, ${S / sy})` });
+    inner.push({ transform: `translate(${g.ox * (1 - p) / sx}px, ${g.oy * (1 - p) / sy}px) scale(${S / sx}, ${S / sy})` });
   }
   return { outer, inner };
 }
@@ -994,7 +1121,7 @@ function toolsHTML(it) {
       ? b('size', 'Aa', 'Text size') + b('edit', 'Edit', 'Edit text')
       : it.embed
         ? b('video', 'Video link', 'Change the YouTube / Vimeo link') + b('auto', it.auto ? 'Player' : 'Loop', it.auto ? 'Show a normal player with sound and controls' : 'Play silently on a loop, like a moving image') + b('caption', 'Caption')
-        : b('replace', 'Replace', 'Replace image or video') + b('blur', it.blur ? 'Sharp' : 'Blur', it.blur ? 'Show the photo sharp' : 'Heavily blur the photo and add grain, with the caption on top') + b('video', 'Video link', 'Use a YouTube / Vimeo video instead') + b('fit', 'Fit', 'Fill frame / show whole image') + b('caption', 'Caption')
+        : b('replace', 'Replace', 'Replace image or video') + b('blur', it.blur ? 'Sharp' : 'Blur', it.blur ? 'Show the photo sharp' : 'Heavily blur the photo and add grain, with the caption on top') + b('video', 'Video link', 'Use a YouTube / Vimeo video instead') + b('fit', 'Fit', 'Fill frame / show whole image') + b('crop', 'Crop', 'Drag to choose what shows, scroll or pinch to zoom') + b('bg', 'Bg', 'Background colour behind the photo (shows where it doesn’t fill the block)') + b('caption', 'Caption')
   }${b('link', 'Link', 'Link to a project or website')}${
     it.link && it.link.startsWith('p:') ? b('open', 'Open ↗', 'Open the linked project page') : ''
   }${b('front', '↑', 'Bring to front')}${b('dup', '⧉', 'Duplicate')}${b('del', '✕', 'Delete')}</div><div class="handle" title="Drag to resize"></div>`;
@@ -1140,7 +1267,7 @@ function onBoardPointer(e, boardEl) {
   const el = e.target.closest('.item');
   const additive = e.shiftKey || e.metaKey || e.ctrlKey;
   if (!el) { marquee(e, boardEl, additive); return; }
-  if (e.target.closest('.tools') || e.target.isContentEditable) return;
+  if (e.target.closest('.tools') || e.target.isContentEditable || e.target.closest('.item.cropping')) return;
   if (additive) { e.preventDefault(); toggleSelect(el); return; }
   const handle = e.target.closest('.handle');
   const group = selectedIn(boardEl);
@@ -1226,6 +1353,8 @@ async function onTool(e, boardEl) {
       toast(it.auto ? 'Plays silently on a loop' : 'Normal player with sound and controls');
       break;
     case 'fit': it.fit = it.fit === 'contain' ? 'cover' : 'contain'; break;
+    case 'crop': startCrop(el, boardEl, it); return;
+    case 'bg': { const v = await chooseBg(it.bg, el); if (v === undefined) return; if (v) it.bg = v; else delete it.bg; break; }
     case 'blur':
       it.blur = !it.blur;
       if (it.blur && !it.caption) toast('Blurred — add a Caption to show a title on top');
@@ -1387,6 +1516,7 @@ async function addMedia(boardEl, files, x0 = 0, y0 = null) {
    Owner mode — page text, format bar, dock
    ========================================================= */
 function setEditing(on) {
+  if (!on) finishCrop();
   if (!on) { const fp = $('#fontPanel'); if (fp) fp.remove(); finishText(); }
   editing = on;
   document.body.classList.toggle('editing', on);
@@ -2084,6 +2214,7 @@ document.addEventListener('keydown', e => {
     if (boardEl) { e.preventDefault(); selectAll(boardEl); }
     return;
   }
+  if (cropping) { if (e.key === 'Escape' || e.key === 'Enter') { e.preventDefault(); finishCrop(); } return; }
   const sels = $$('.item.sel');
   if (!sels.length) return;
   const boardEl = sels[0].closest('.board');
