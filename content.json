@@ -746,7 +746,7 @@
      "id": "rhh823hb",
      "type": "image",
      "x": 7,
-     "y": 32,
+     "y": 33,
      "w": 5,
      "h": 3,
      "src": "/uploads/20261111-1mmqe4qj.jpg",
@@ -1107,6 +1107,28 @@
       "x": 50.2,
       "y": 50.4,
       "z": 1.64
+     }
+    },
+    {
+     "id": "8wa0zoiw",
+     "type": "image",
+     "x": 7,
+     "y": 32,
+     "w": 5,
+     "h": 1,
+     "src": "/uploads/20261111-c87yhxga.jpg",
+     "caption": "",
+     "variants": {
+      "800": "/uploads/sized/20261111-c87yhxga-800.jpg",
+      "1200": "/uploads/sized/20261111-c87yhxga-1200.jpg",
+      "1600": "/uploads/sized/20261111-c87yhxga-1600.jpg",
+      "w": 2800
+     },
+     "fit": "contain",
+     "crop": {
+      "x": 50,
+      "y": 50,
+      "z": 1.36
      }
     }
    ]
