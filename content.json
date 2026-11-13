@@ -96,14 +96,19 @@
      "w": 4,
      "h": 6,
      "caption": "WIP",
-     "src": "/uploads/20261113-8450yl40.jpg",
+     "src": "/uploads/20261113-artshebe.jpg",
      "variants": {
-      "800": "/uploads/sized/20261113-8450yl40-800.jpg",
-      "1200": "/uploads/sized/20261113-8450yl40-1200.jpg",
-      "1600": "/uploads/sized/20261113-8450yl40-1600.jpg",
+      "800": "/uploads/sized/20261113-artshebe-800.jpg",
+      "1200": "/uploads/sized/20261113-artshebe-1200.jpg",
+      "1600": "/uploads/sized/20261113-artshebe-1600.jpg",
       "w": 2800
      },
-     "blur": true
+     "blur": true,
+     "crop": {
+      "x": 50,
+      "y": 50,
+      "z": 0.8
+     }
     },
     {
      "id": "w5",
