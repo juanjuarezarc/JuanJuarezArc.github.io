@@ -95,7 +95,15 @@
      "y": 0,
      "w": 4,
      "h": 6,
-     "caption": "WIP"
+     "caption": "WIP",
+     "src": "/uploads/20261113-8450yl40.jpg",
+     "variants": {
+      "800": "/uploads/sized/20261113-8450yl40-800.jpg",
+      "1200": "/uploads/sized/20261113-8450yl40-1200.jpg",
+      "1600": "/uploads/sized/20261113-8450yl40-1600.jpg",
+      "w": 2800
+     },
+     "blur": true
     },
     {
      "id": "w5",
