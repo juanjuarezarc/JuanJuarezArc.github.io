@@ -119,14 +119,16 @@
      "h": 4,
      "caption": "SOLID/VOID",
      "link": "p:seminar",
-     "src": "/uploads/20261110-mt20t4x5.jpg",
+     "src": "/uploads/20261113-llihzo9o.webp",
      "variants": {
-      "800": "/uploads/sized/20261110-mt20t4x5-800.jpg",
-      "1200": "/uploads/sized/20261110-mt20t4x5-1200.jpg",
-      "1600": "/uploads/sized/20261110-mt20t4x5-1600.jpg",
+      "800": "/uploads/sized/20261113-llihzo9o-800.jpg",
+      "1200": "/uploads/sized/20261113-llihzo9o-1200.jpg",
+      "1600": "/uploads/sized/20261113-llihzo9o-1600.jpg",
       "w": 2800
      },
-     "blur": true
+     "blur": true,
+     "fit": "contain",
+     "bg": "#000000"
     },
     {
      "id": "oog601bx",
