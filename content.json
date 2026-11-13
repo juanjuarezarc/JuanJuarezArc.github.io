@@ -79,14 +79,20 @@
      "caption": "AIR",
      "link": "p:pressure",
      "z": 3,
-     "src": "/uploads/20261031-4k5x5mv6.jpg",
+     "src": "/uploads/20261113-jdx6wp2i.webp",
      "blur": true,
      "variants": {
-      "800": "/uploads/sized/20261031-4k5x5mv6-800.jpg",
-      "1200": "/uploads/sized/20261031-4k5x5mv6-1200.jpg",
-      "1600": "/uploads/sized/20261031-4k5x5mv6-1600.jpg",
+      "800": "/uploads/sized/20261113-jdx6wp2i-800.jpg",
+      "1200": "/uploads/sized/20261113-jdx6wp2i-1200.jpg",
+      "1600": "/uploads/sized/20261113-jdx6wp2i-1600.jpg",
       "w": 1867
-     }
+     },
+     "crop": {
+      "x": 18,
+      "y": 50,
+      "z": 0.92
+     },
+     "bg": "#0c0c0c"
     },
     {
      "id": "w3",
