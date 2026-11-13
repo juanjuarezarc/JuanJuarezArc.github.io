@@ -268,6 +268,10 @@ a.inner.blurred:hover img, a.inner.blurred:hover video { filter: blur(calc(var(-
 }
 .inner.blurred.light-bg .cap { color: #000; text-shadow: 0 0 24px rgba(255, 255, 255, .3); }
 
+/* credits pinned to the bottom of their text block (level with the image beside it) */
+.txt.split { display: flex; flex-direction: column; min-height: 100%; }
+.txt.split .txt-foot { margin-top: auto; padding-top: 1.6em; }
+
 /* text blocks — size scales with the grid so layouts hold at any width */
 .txt { font-size: clamp(14px, calc(var(--cell) * .16), 19px); line-height: 1.45; color: var(--text); }
 .txt.size-s { font-size: clamp(12px, calc(var(--cell) * .13), 15px); color: var(--muted); }

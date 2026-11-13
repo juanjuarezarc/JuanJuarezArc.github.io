@@ -435,8 +435,7 @@ function itemEl(it, i) {
 
   if (it.type === 'text') {
     const t = document.createElement('div');
-    t.className = `txt size-${it.size || 'm'}`;
-    t.innerHTML = clean(it.html);
+    fillText(t, it);
     inner.appendChild(t);
   } else {
     const src = safeSrc(it.src);
@@ -778,6 +777,32 @@ async function chooseBg(cur, el) {
   if (v === undefined) { inner.style.background = before; return undefined; }
   if (!v) inner.style.background = '';
   return v;
+}
+
+/* ---------- credits pinned to the bottom of a text block ----------
+   Lines after the last blank line in a text block count as credits when each one is
+   "Label: name" (Team:, Institution:, Instructor:…) or starts with Individual/Group/Solo.
+   Visitors see them pinned to the block's bottom edge, level with the image beside it
+   at any screen size. Owner mode shows the text exactly as written, so it edits normally. */
+const BLANK_P = /(?:<p>(?:\s|&nbsp;|<br\s*\/?>)*<\/p>)+/gi;
+function splitCredits(html) {
+  let last = null;
+  for (const m of html.matchAll(BLANK_P)) last = m;
+  if (!last || last.index === 0) return null;
+  const main = html.slice(0, last.index), foot = html.slice(last.index + last[0].length);
+  const lines = [...foot.matchAll(/<p>([\s\S]*?)<\/p>/gi)].map(m => m[1].replace(/<[^>]+>/g, '').trim()).filter(Boolean);
+  if (!lines.length || lines.length > 8) return null;
+  const looksLikeCredit = l => /^[^:]{1,40}:\s*\S/.test(l) || /^(individual|group|solo|team)\b/i.test(l);
+  return lines.every(looksLikeCredit) ? { main, foot } : null;
+}
+function fillText(t, it) {
+  t.className = `txt size-${it.size || 'm'}`;
+  const html = clean(it.html);
+  const parts = editing ? null : splitCredits(html);
+  if (parts) {
+    t.classList.add('split');
+    t.innerHTML = `<div class="txt-main">${parts.main}</div><div class="txt-foot">${parts.foot}</div>`;
+  } else t.innerHTML = html;
 }
 
 // Blurred tiles: dark title on light photos, white title on dark ones
@@ -1527,6 +1552,10 @@ function setEditing(on) {
     } else el.removeAttribute('contenteditable');
   });
   if (!on) { select(null); hideFmt(); bindText(document); }
+  for (const el of $$('#view .item.text')) {               // switch credits between pinned (visitor) and as-written (owner)
+    const it = findItem(el.closest('.board'), el.dataset.id);
+    if (it) fillText($('.txt', el), it);
+  }
   $$('#view .board').forEach(layoutBoard);
   renderSocials();
   updateDock();
