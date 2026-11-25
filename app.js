@@ -193,7 +193,9 @@ function render() {
   document.title = proj ? `${proj.title} — ${C.site.name || ''}` : (C.site.title || C.site.name || 'Portfolio');
   if (proj) syncProjectCaption.prev[route.slug] = proj.title;
   $('#view').innerHTML = route.type === 'project' ? projectHTML(route.slug) : homeHTML();
+  document.body.classList.toggle('page-project', route.type === 'project');   // project pages: no scroll fades below the top
   bindText(document);
+  setupProjectHero();
   renderNav();
   renderSocials();
   $$('#view .board').forEach(b => renderBoard(b));
@@ -240,16 +242,28 @@ function projectHTML(slug) {
   if (!p) return `<section class="project-head"><h1 class="display">Not found</h1><p class="lede"><a href="/#work">Back to work</a></p></section>`;
   const next = nextProject(slug);
   const s = esc(slug);
-  return `
-  <section class="project-head">
-    <a class="back reveal" href="/#work">← Work</a>
-    <h1 class="display reveal" data-edit="projects.${s}.title"></h1>
-    <p class="lede reveal" data-edit="projects.${s}.sub"></p>
+  const head = coverItem(slug) ? `
+  <section class="p-hero" id="top">
+    <div class="p-hero-bg"></div>
+    <div class="p-hero-stick">
+      <img class="p-hero-img" alt="" decoding="async">
+      <div class="p-hero-title">
+        <h1 class="display" data-edit="projects.${s}.title"></h1>
+        <p class="lede" data-edit="projects.${s}.sub"></p>
+      </div>
+    </div>
   </section>
+  <section class="project-under"><a class="back" href="/#work">← Work</a></section>` : `
+  <section class="project-head">
+    <a class="back" href="/#work">← Work</a>
+    <h1 class="display" data-edit="projects.${s}.title"></h1>
+    <p class="lede" data-edit="projects.${s}.sub"></p>
+  </section>`;
+  return `${head}
   <section class="zone tight">
     <div class="board" data-board="${s}"></div>
   </section>
-  ${next ? `<a class="next reveal" href="/?p=${encodeURIComponent(next)}"><span>Next project</span><strong>${esc(C.projects[next].title)}</strong></a>` : ''}`;
+  ${next ? `<a class="next" href="/?p=${encodeURIComponent(next)}"><span>Next project</span><strong>${esc(C.projects[next].title)}</strong></a>` : ''}`;
 }
 
 /* Projects in the order they appear on the Work grid */
@@ -357,6 +371,108 @@ function renderNav() {
   a.href = C.site.resume || '#';
 }
 
+/* ---------- project pages: full-screen top image (like apple.com/apple-vision-pro) ----------
+   The cover photo fills the screen top to bottom, shown whole, on its own dominant colour.
+   The title sits at the top in black or white, whichever reads on what's behind it.
+   Scrolling shrinks the photo slightly, lifts the title away and fades the colour back to white. */
+function coverItem(slug) {
+  const items = ((C.boards[slug] || {}).items || []).filter(i => i.type !== 'text' && safeSrc(i.src) && !isVideo(i.src));
+  const chosen = C.projects[slug] && items.find(i => i.id === C.projects[slug].cover);
+  if (chosen) return chosen;
+  const top = Math.min(...items.map(i => i.y));            // the title image: biggest photo in the top row
+  return items.filter(i => i.y === top).sort((a, b) => b.w * b.h - a.w * a.h)[0] || null;
+}
+
+let heroTone = null;   // { color: [r,g,b], imgTop: luminance of the photo's top band }
+function setupProjectHero() {
+  heroTone = null;
+  document.documentElement.classList.remove('hero-on', 'hero-dark', 'hero-mixed');
+  const img = $('.p-hero-img');
+  if (!img) return;
+  const it = coverItem(route.slug);
+  const v = it.variants || {};
+  const src = safeSrc(it.src);
+  // start with a copy that is probably cached from the grid, then step up to whatever is sharp at full screen
+  img.src = localPreview.get(src) || safeSrc(v['1200']) || safeSrc(v['1600']) || src;
+  img.addEventListener('load', function first() {
+    img.removeEventListener('load', first);
+    heroTone = analyseHero(img);
+    if (heroTone) $('.p-hero-bg').style.background = `rgb(${heroTone.color.join(',')})`;
+    const need = Math.min(innerWidth, innerHeight * img.naturalWidth / img.naturalHeight) * (devicePixelRatio || 1);
+    const best = [['1200', v['1200']], ['1600', v['1600']]].find(([w, u]) => safeSrc(u) && +w >= need * 0.95);
+    const sharp = best ? best[1] : src;
+    if (!img.src.endsWith(sharp)) { const hi = new Image(); hi.src = sharp; hi.decode().then(() => { img.src = sharp; }).catch(() => {}); }
+    projectHeroScroll(true);
+  });
+}
+
+// Dominant colour (most common colour, averaged) and how bright the top of the photo is
+function analyseHero(img) {
+  try {
+    const N = 48, c = document.createElement('canvas');
+    c.width = c.height = N;
+    const x = c.getContext('2d', { willReadFrequently: true });
+    x.drawImage(img, 0, 0, N, N);
+    const d = x.getImageData(0, 0, N, N).data;
+    const bins = new Map();
+    for (let i = 0; i < d.length; i += 4) {
+      const k = (d[i] >> 4) << 8 | (d[i + 1] >> 4) << 4 | (d[i + 2] >> 4);
+      const e = bins.get(k) || [0, 0, 0, 0];
+      e[0] += d[i]; e[1] += d[i + 1]; e[2] += d[i + 2]; e[3]++;
+      bins.set(k, e);
+    }
+    const top = [...bins.values()].sort((a, b) => b[3] - a[3])[0];
+    const color = top.slice(0, 3).map(v => Math.round(v / top[3]));
+    const grid = new Float32Array(N * N);                     // brightness map, to read exactly what sits behind the title
+    for (let i = 0; i < grid.length; i++) grid[i] = lum(d[i * 4], d[i * 4 + 1], d[i * 4 + 2]);
+    return { color, grid, N };
+  } catch { return null; }
+}
+const lum = (r, g, b) => 0.2126 * r + 0.7152 * g + 0.0722 * b;
+
+function projectHeroScroll(retone) {
+  const hero = $('.p-hero');
+  if (!hero) return;
+  const r = hero.getBoundingClientRect();
+  const p = clamp(-r.top / Math.max(1, r.height - innerHeight), 0, 1);
+  const img = $('.p-hero-img'), title = $('.p-hero-title'), bg = $('.p-hero-bg');
+  if (!reduceMotion) {
+    img.style.transform = `scale(${1 - p * 0.16})`;
+    title.style.transform = `translateY(${-p * 60}px)`;
+  }
+  title.style.opacity = String(clamp(1 - p * 2.2, 0, 1));
+  bg.style.opacity = String(1 - p);                         // the colour gives way to the white page
+  if (heroTone) $('.p-hero-stick').style.background = `rgba(${heroTone.color.join(',')}, ${1 - p})`;   // (lets a mixed title invert against it)
+  const onHero = p < 0.5;
+  document.documentElement.classList.toggle('hero-on', onHero);
+  if (retone || onHero) {
+    // what is behind the title: the photo (if its top reaches the title) and/or the colour beside it
+    let dark = false, mixed = false;
+    const h1 = $('.p-hero-title .display');
+    if (heroTone && h1) {
+      // average brightness of exactly what is behind the title's letters: photo pixels where it overlaps, colour elsewhere
+      const ir = img.getBoundingClientRect(), tr = h1.getBoundingClientRect();
+      const { grid, N } = heroTone, bgL = lum(...heroTone.color);
+      let sum = 0, n = 0, darkN = 0, lightN = 0;
+      for (let sy = 0; sy < 12; sy++) for (let sx = 0; sx < 24; sx++) {
+        const px = tr.left + (sx + 0.5) * tr.width / 24, py = tr.top + (sy + 0.5) * tr.height / 12;
+        if (px >= ir.left && px < ir.right && py >= ir.top && py < ir.bottom) {
+          const gx = Math.floor((px - ir.left) / ir.width * N), gy = Math.floor((py - ir.top) / ir.height * N);
+          const L = grid[clamp(gy, 0, N - 1) * N + clamp(gx, 0, N - 1)];
+          sum += L; darkN += L < 96; lightN += L > 160;
+        } else { sum += bgL; darkN += bgL < 96; lightN += bgL > 160; }
+        n++;
+      }
+      dark = sum / n < 118;
+      // half over dark, half over light: letters invert whatever is behind them instead
+      mixed = darkN / n > 0.22 && lightN / n > 0.22;
+    }
+    document.documentElement.classList.toggle('hero-mixed', mixed);
+    document.documentElement.classList.toggle('hero-dark', dark);
+  }
+}
+addEventListener('resize', () => projectHeroScroll(true));
+
 /* ---------- reveal on scroll ---------- */
 const io = new IntersectionObserver(entries => {
   for (const en of entries) if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
@@ -371,6 +487,7 @@ function onScroll() {
   requestAnimationFrame(() => {
     ticking = false;
     $('#nav').classList.toggle('scrolled', scrollY > 8);
+    projectHeroScroll();
     const hero = $('.hero'), inner = $('.hero-inner');
     if (!hero || !inner || reduceMotion) return;
     const r = hero.getBoundingClientRect();
@@ -1149,6 +1266,8 @@ function toolsHTML(it) {
         : b('replace', 'Replace', 'Replace image or video') + b('blur', it.blur ? 'Sharp' : 'Blur', it.blur ? 'Show the photo sharp' : 'Heavily blur the photo and add grain, with the caption on top') + b('video', 'Video link', 'Use a YouTube / Vimeo video instead') + b('fit', 'Fit', 'Fill frame / show whole image') + b('crop', 'Crop', 'Drag to choose what shows, scroll or pinch to zoom') + b('bg', 'Bg', 'Background colour behind the photo (shows where it doesn’t fill the block)') + b('caption', 'Caption')
   }${b('link', 'Link', 'Link to a project or website')}${
     it.link && it.link.startsWith('p:') ? b('open', 'Open ↗', 'Open the linked project page') : ''
+  }${route.type === 'project' && it.type !== 'text' && it.src && !isVideo(it.src)
+      ? b('cover', coverItem(route.slug)?.id === it.id ? 'Cover ✓' : 'Cover', 'Use as the full-screen image at the top of this page') : ''
   }${b('front', '↑', 'Bring to front')}${b('dup', '⧉', 'Duplicate')}${b('del', '✕', 'Delete')}</div><div class="handle" title="Drag to resize"></div>`;
 }
 
@@ -1379,6 +1498,7 @@ async function onTool(e, boardEl) {
       break;
     case 'fit': it.fit = it.fit === 'contain' ? 'cover' : 'contain'; break;
     case 'crop': startCrop(el, boardEl, it); return;
+    case 'cover': C.projects[route.slug].cover = it.id; markDirty(); render(); toast('Set as the top image'); return;
     case 'bg': { const v = await chooseBg(it.bg, el); if (v === undefined) return; if (v) it.bg = v; else delete it.bg; break; }
     case 'blur':
       it.blur = !it.blur;

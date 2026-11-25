@@ -27,6 +27,7 @@ Treat it like a password — anyone with it can change this repository.
 | Resize a block | Drag the round handle at its bottom-right corner |
 | Nudge / resize with keys | Arrow keys / Shift + arrows (on the selected block) |
 | Crop a photo | Hover → **Crop** → drag to choose what shows, scroll / pinch or the slider to zoom → **Done** (**Reset** goes back to the default) |
+| Top image of a project | Each project opens on its biggest top-row photo, full screen on its own colour. To use a different one: on the project page hover a photo → **Cover** |
 | Colour behind a photo | Hover → **Bg** → pick a colour (Chrome/Edge also have an **Eyedropper** to pick from the screen) — shows where the photo doesn’t fill the block |
 | Select several blocks | Shift-click them, drag a box on empty grid, or ⌘A for the whole grid — then drag one to move them all (arrow keys and Delete work on the group too) |
 | Add a text block | **+ Text** (double-click a text block to edit; **Aa** cycles the size) |

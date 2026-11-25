@@ -131,6 +131,29 @@ body:not(.editing) .board.side:not(:has(.item)) { margin-top: 0; }
 .reveal.now { transition: none; }
 
 /* ---------- PROJECT PAGE ---------- */
+/* full-screen top image (Vision Pro-style): shown whole, on its dominant colour */
+.p-hero { position: relative; height: 175vh; height: 175svh; }
+.p-hero-bg { position: fixed; inset: 0; z-index: -1; pointer-events: none; background: var(--bg); will-change: opacity; }
+.p-hero-stick { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; display: grid; place-items: center; }
+.p-hero-img { display: block; max-width: 100vw; max-height: 100vh; max-height: 100svh; width: auto; height: auto; will-change: transform; }
+.p-hero-title {
+  position: absolute; left: 0; right: 0; top: calc(52px + 2vh); padding: 0 var(--pad);
+  text-align: center; color: #000; will-change: transform, opacity; pointer-events: none;
+  transition: color .4s var(--ease);
+}
+.p-hero-title .display { font-size: clamp(36px, 6vw, 96px); }
+.p-hero-title .lede { color: inherit; opacity: .72; margin-top: 12px; }
+.p-hero-title { text-shadow: 0 0 30px rgba(255, 255, 255, .6), 0 0 2px rgba(255, 255, 255, .25); }   /* a soft halo keeps it readable over mixed light/dark */
+html.hero-dark .p-hero-title { color: #fff; text-shadow: 0 0 30px rgba(0, 0, 0, .5), 0 0 2px rgba(0, 0, 0, .25); }
+html.hero-mixed .p-hero-title { color: #fff; mix-blend-mode: difference; text-shadow: none; }   /* white over black, black over light — per letter */
+body.editing .p-hero-title, body.editing .p-hero-title [data-edit] { pointer-events: auto; }
+.project-under { max-width: calc(var(--max) + 2 * var(--pad)); margin: 0 auto; padding: 28px var(--pad) 8px; text-align: center; }
+/* the menu sits on the photo: no frosted bar, and white text over dark photos */
+html.hero-on .nav, html.hero-on .nav.scrolled { background: transparent; border-bottom-color: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; }
+html.hero-on.hero-dark .nav { color: #fff; }
+/* below the top, project pages don't fade in on scroll */
+body.page-project .reveal { opacity: 1; transform: none; filter: none; }
+
 .project-head {
   max-width: calc(var(--max) + 2 * var(--pad)); margin: 0 auto; text-align: center;
   padding: clamp(120px, 20vh, 200px) var(--pad) clamp(40px, 7vh, 80px);
