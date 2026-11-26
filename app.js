@@ -848,9 +848,9 @@ const grainFx = (() => {
     // phones show the texture smaller (see the CSS), so it's drawn at that size, at the screen's sharpness
     const phone = innerWidth < 640, dpr = Math.min(3, Math.max(2, devicePixelRatio || 1));
     const kinds = [   // css var, tile size (css px: computer, phone), count, speck radius (css px), colour
-      ['--speck-fine', [613, 233], 420, [0.5, 0.95], '255,255,255'],
-      ['--speck-dark', [709, 269], 300, [0.5, 0.95], '0,0,0'],
-      ['--speck-near', [827, 314], 160, [0.8, 1.5], '255,255,255'],
+      ['--speck-fine', [613, 233], 550, [0.5, 0.95], '255,255,255'],
+      ['--speck-dark', [709, 269], 390, [0.5, 0.95], '0,0,0'],
+      ['--speck-near', [827, 314], 210, [0.8, 1.5], '255,255,255'],
     ];
     for (const [name, sizes, n, [cr0, cr1], col] of kinds) {
       const sc = phone ? 0.6 : 1;                                      // finer specks on phones
