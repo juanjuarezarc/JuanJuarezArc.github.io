@@ -255,8 +255,7 @@ function projectHTML(slug) {
     </div>
     <div class="p-spacer"></div>
     <div class="p-copy"></div>
-  </section>
-  <section class="project-under"><a class="back" href="/#work">← Work</a></section>` : `
+  </section>` : `
   <section class="project-head">
     <a class="back" href="/#work">← Work</a>
     <h1 class="display" data-edit="projects.${s}.title"></h1>
@@ -534,7 +533,8 @@ function projectHeroScroll(retone) {
   if (!hero) return;
   const vh = innerHeight;
   const sc = -hero.getBoundingClientRect().top;               // how far into the opening sequence we are
-  const pa = clamp(sc / (vh * 0.55), 0, 1);                   // 1: colour fades to white, title lifts away
+  const ph = heroPhone();                                    // computers get a shorter sequence (about half the scrolling)
+  const pa = clamp(sc / (vh * (ph ? 0.55 : 0.3)), 0, 1);      // 1: colour fades to white, title lifts away
   const img = $('.p-hero-img'), title = $('.p-hero-title'), bg = $('.p-hero-bg'), copy = $('.p-copy');
   title.style.opacity = String(clamp(1 - pa * 1.8, 0, 1));
   bg.style.opacity = String(1 - pa);
@@ -546,7 +546,7 @@ function projectHeroScroll(retone) {
     const { S, T } = heroGeo;
     // 2: the image glides into the right column (desktop)
     // (it holds still while the surroundings fade, so they stay lined up with it)
-    const raw = T ? clamp((sc - vh * 0.55) / (vh * 0.6), 0, 1) : 0;
+    const raw = T ? clamp((sc - vh * 0.2) / (vh * 0.42), 0, 1) : 0;
     const e = raw * raw * (3 - 2 * raw);
     const s0 = 1;
     const sT = T ? T.w / S.w : s0;
@@ -557,7 +557,7 @@ function projectHeroScroll(retone) {
   }
   // 3: the written part fades in as it rises into view
   if (copy) {
-    const q = clamp((vh - copy.getBoundingClientRect().top) / (vh * 0.35), 0, 1);
+    const q = clamp((vh - copy.getBoundingClientRect().top) / (vh * (ph ? 0.35 : 0.5)), 0, 1);
     copy.style.opacity = String(q);
     if (!reduceMotion) copy.style.transform = `translateY(${(1 - q) * 28}px)`;
   }
