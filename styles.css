@@ -302,9 +302,9 @@ a.inner.blurred:hover img, a.inner.blurred:hover video { filter: blur(calc(var(-
 .inner.blurred .specks {   /* texture tiles larger than the block, in sizes that never line up: no visible repeat */
   position: absolute; inset: 0; mix-blend-mode: overlay;
 }
-.inner.blurred .specks.fine { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='613' height='613'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='2' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 16 0 0 0 -11.1'/%3E%3CfeGaussianBlur stdDeviation='0.35'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url%28%23n%29'/%3E%3C/svg%3E") 0 0 / 613px 613px; opacity: .55; }
-.inner.blurred .specks.dark { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='709' height='709'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' seed='17' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 16 0 0 0 -11.3'/%3E%3CfeGaussianBlur stdDeviation='0.35'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url%28%23n%29'/%3E%3C/svg%3E") 0 0 / 709px 709px; opacity: .45; }
-.inner.blurred .specks.near { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='827' height='827'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.55' numOctaves='2' seed='9' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 16 0 0 0 -11.5'/%3E%3CfeGaussianBlur stdDeviation='0.5'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url%28%23n%29'/%3E%3C/svg%3E") 0 0 / 827px 827px; opacity: .6; }
+.inner.blurred .specks.fine { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1226' height='1226'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.475' numOctaves='2' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 16 0 0 0 -11.6'/%3E%3CfeGaussianBlur stdDeviation='0.7'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url%28%23n%29'/%3E%3C/svg%3E") 0 0 / 613px 613px; opacity: .55; }
+.inner.blurred .specks.dark { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1418' height='1418'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.425' numOctaves='2' seed='17' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 16 0 0 0 -11.8'/%3E%3CfeGaussianBlur stdDeviation='0.7'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url%28%23n%29'/%3E%3C/svg%3E") 0 0 / 709px 709px; opacity: .45; }
+.inner.blurred .specks.near { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1654' height='1654'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.275' numOctaves='2' seed='9' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 16 0 0 0 -12.0'/%3E%3CfeGaussianBlur stdDeviation='1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url%28%23n%29'/%3E%3C/svg%3E") 0 0 / 827px 827px; opacity: .6; }
 .inner.blurred .cap {
   inset: 0; left: 0; bottom: 0; display: flex; align-items: center; justify-content: center;
   opacity: 1; transform: none; mix-blend-mode: normal; color: #fff;
@@ -484,10 +484,10 @@ body:not(.editing) .dock .edit-only { display: none; }
   .txt.size-xl { font-size: max(18px, calc(var(--cell) * .6)); }
   .cap { left: 8px; bottom: 6px; font-size: 10px; }
   body.editing .item { touch-action: none; }   /* drag blocks with a finger in owner mode */
-  /* finer grain and dust on small tiles (same drawing cost) */
-  .inner.blurred .specks.fine { background-size: 337px 337px; }
-  .inner.blurred .specks.dark { background-size: 390px 390px; }
-  .inner.blurred .specks.near { background-size: 455px 455px; }
+  /* finer, smaller dust on phones (the textures are drawn at double resolution, so they stay crisp) */
+  .inner.blurred .specks.fine { background-size: 233px 233px; }
+  .inner.blurred .specks.dark { background-size: 269px 269px; }
+  .inner.blurred .specks.near { background-size: 314px 314px; }
   .ph::after { background-size: 90px 90px; }
 }
 

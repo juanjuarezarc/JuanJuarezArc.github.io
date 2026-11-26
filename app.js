@@ -851,8 +851,8 @@ const grainFx = (() => {
   // one entry per particle layer (matches the order in the markup): pattern size, rise speed (px/ms),
   // sway amount and period, and how strongly the stirred air moves it (depth)
   // Phones: finer particles (matching the smaller tiles) and motion scaled to match — no extra work to draw
-  let K = innerWidth < 640 ? 0.55 : 1;
-  addEventListener('resize', () => { K = innerWidth < 640 ? 0.55 : 1; });
+  let K = innerWidth < 640 ? 0.38 : 1;
+  addEventListener('resize', () => { K = innerWidth < 640 ? 0.38 : 1; });
   const LAYERS = [
     { size: 613, rise: 0.004, sway: 8, period: 7800, phase: 0.0, depth: 0.45 },   // fine, far
     { size: 709, rise: 0.006, sway: 10, period: 6100, phase: 2.1, depth: 0.7 },   // dark, middle
