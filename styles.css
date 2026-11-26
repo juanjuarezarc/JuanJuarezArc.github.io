@@ -134,18 +134,17 @@ body:not(.editing) .board.side:not(:has(.item)) { margin-top: 0; }
 /* full-screen top image (Vision Pro-style): shown whole, on its dominant colour */
 .p-hero { position: relative; height: 175vh; height: 175svh; }
 .p-hero-bg { position: fixed; inset: 0; z-index: -1; pointer-events: none; background: var(--bg); will-change: opacity; }
-.p-hero-stick { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; display: grid; place-items: center; }
-.p-hero-img { display: block; max-width: 100vw; max-height: 100vh; max-height: 100svh; width: auto; height: auto; will-change: transform; }
+.p-hero-stick { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; display: flex; flex-direction: column; align-items: center; }
+.p-hero-frame { flex: 1; min-height: 0; width: 100%; display: flex; align-items: center; justify-content: center; }
+.p-hero-img { display: block; max-width: 100%; max-height: 100%; width: auto; height: auto; will-change: transform; }
 .p-hero-title {
-  position: absolute; left: 0; right: 0; top: calc(52px + 2vh); padding: 0 var(--pad);
+  flex: none; width: 100%; padding: calc(52px + 1.5vh) var(--pad) 2.5vh;
   text-align: center; color: #000; will-change: transform, opacity; pointer-events: none;
   transition: color .4s var(--ease);
 }
 .p-hero-title .display { font-size: clamp(36px, 6vw, 96px); }
 .p-hero-title .lede { color: inherit; opacity: .72; margin-top: 12px; }
-.p-hero-title { text-shadow: 0 0 30px rgba(255, 255, 255, .6), 0 0 2px rgba(255, 255, 255, .25); }   /* a soft halo keeps it readable over mixed light/dark */
-html.hero-dark .p-hero-title { color: #fff; text-shadow: 0 0 30px rgba(0, 0, 0, .5), 0 0 2px rgba(0, 0, 0, .25); }
-html.hero-mixed .p-hero-title { color: #fff; mix-blend-mode: difference; text-shadow: none; }   /* white over black, black over light — per letter */
+html.hero-dark .p-hero-title { color: #fff; }
 body.editing .p-hero-title, body.editing .p-hero-title [data-edit] { pointer-events: auto; }
 .project-under { max-width: calc(var(--max) + 2 * var(--pad)); margin: 0 auto; padding: 28px var(--pad) 8px; text-align: center; }
 /* the menu sits on the photo: no frosted bar, and white text over dark photos */
@@ -276,13 +275,12 @@ a.inner.blurred:hover img, a.inner.blurred:hover video { filter: blur(calc(var(-
   -webkit-mask-image: linear-gradient(118deg, rgba(0,0,0,.55) 8%, #000 36%, #000 60%, rgba(0,0,0,.55) 90%);
   mask-image: linear-gradient(118deg, rgba(0,0,0,.55) 8%, #000 36%, #000 60%, rgba(0,0,0,.55) 90%);
 }
-.inner.blurred .specks {
-  position: absolute; left: 0; top: 0; width: calc(100% + 560px); height: calc(100% + 560px);
-  mix-blend-mode: overlay; will-change: transform;
+.inner.blurred .specks {   /* texture tiles larger than the block, in sizes that never line up: no visible repeat */
+  position: absolute; inset: 0; mix-blend-mode: overlay;
 }
-.inner.blurred .specks.fine { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='2' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 16 0 0 0 -11.1'/%3E%3CfeGaussianBlur stdDeviation='0.35'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url%28%23n%29'/%3E%3C/svg%3E") 0 0 / 200px 200px; opacity: .55; }
-.inner.blurred .specks.dark { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='230' height='230'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' seed='17' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 16 0 0 0 -11.3'/%3E%3CfeGaussianBlur stdDeviation='0.35'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url%28%23n%29'/%3E%3C/svg%3E") 0 0 / 230px 230px; opacity: .45; }
-.inner.blurred .specks.near { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.55' numOctaves='2' seed='9' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 16 0 0 0 -11.5'/%3E%3CfeGaussianBlur stdDeviation='0.5'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url%28%23n%29'/%3E%3C/svg%3E") 0 0 / 260px 260px; opacity: .6; }
+.inner.blurred .specks.fine { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='613' height='613'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='2' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 16 0 0 0 -11.1'/%3E%3CfeGaussianBlur stdDeviation='0.35'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url%28%23n%29'/%3E%3C/svg%3E") 0 0 / 613px 613px; opacity: .55; }
+.inner.blurred .specks.dark { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='709' height='709'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' seed='17' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 16 0 0 0 -11.3'/%3E%3CfeGaussianBlur stdDeviation='0.35'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url%28%23n%29'/%3E%3C/svg%3E") 0 0 / 709px 709px; opacity: .45; }
+.inner.blurred .specks.near { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='827' height='827'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.55' numOctaves='2' seed='9' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 16 0 0 0 -11.5'/%3E%3CfeGaussianBlur stdDeviation='0.5'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url%28%23n%29'/%3E%3C/svg%3E") 0 0 / 827px 827px; opacity: .6; }
 .inner.blurred .cap {
   inset: 0; left: 0; bottom: 0; display: flex; align-items: center; justify-content: center;
   opacity: 1; transform: none; mix-blend-mode: normal; color: #fff;
@@ -463,9 +461,9 @@ body:not(.editing) .dock .edit-only { display: none; }
   .cap { left: 8px; bottom: 6px; font-size: 10px; }
   body.editing .item { touch-action: none; }   /* drag blocks with a finger in owner mode */
   /* finer grain and dust on small tiles (same drawing cost) */
-  .inner.blurred .specks.fine { background-size: 110px 110px; }
-  .inner.blurred .specks.dark { background-size: 126.5px 126.5px; }
-  .inner.blurred .specks.near { background-size: 143px 143px; }
+  .inner.blurred .specks.fine { background-size: 337px 337px; }
+  .inner.blurred .specks.dark { background-size: 390px 390px; }
+  .inner.blurred .specks.near { background-size: 455px 455px; }
   .ph::after { background-size: 90px 90px; }
 }
 

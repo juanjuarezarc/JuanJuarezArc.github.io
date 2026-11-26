@@ -246,11 +246,11 @@ function projectHTML(slug) {
   <section class="p-hero" id="top">
     <div class="p-hero-bg"></div>
     <div class="p-hero-stick">
-      <img class="p-hero-img" alt="" decoding="async">
       <div class="p-hero-title">
         <h1 class="display" data-edit="projects.${s}.title"></h1>
         <p class="lede" data-edit="projects.${s}.sub"></p>
       </div>
+      <div class="p-hero-frame"><img class="p-hero-img" alt="" decoding="async"></div>
     </div>
   </section>
   <section class="project-under"><a class="back" href="/#work">← Work</a></section>` : `
@@ -386,7 +386,7 @@ function coverItem(slug) {
 let heroTone = null;   // { color: [r,g,b], imgTop: luminance of the photo's top band }
 function setupProjectHero() {
   heroTone = null;
-  document.documentElement.classList.remove('hero-on', 'hero-dark', 'hero-mixed');
+  document.documentElement.classList.remove('hero-on', 'hero-dark');
   const img = $('.p-hero-img');
   if (!img) return;
   const it = coverItem(route.slug);
@@ -406,7 +406,7 @@ function setupProjectHero() {
   });
 }
 
-// Dominant colour (most common colour, averaged) and how bright the top of the photo is
+// Dominant colour of the photo (most common colour, averaged)
 function analyseHero(img) {
   try {
     const N = 48, c = document.createElement('canvas');
@@ -423,9 +423,7 @@ function analyseHero(img) {
     }
     const top = [...bins.values()].sort((a, b) => b[3] - a[3])[0];
     const color = top.slice(0, 3).map(v => Math.round(v / top[3]));
-    const grid = new Float32Array(N * N);                     // brightness map, to read exactly what sits behind the title
-    for (let i = 0; i < grid.length; i++) grid[i] = lum(d[i * 4], d[i * 4 + 1], d[i * 4 + 2]);
-    return { color, grid, N };
+    return { color };
   } catch { return null; }
 }
 const lum = (r, g, b) => 0.2126 * r + 0.7152 * g + 0.0722 * b;
@@ -442,32 +440,11 @@ function projectHeroScroll(retone) {
   }
   title.style.opacity = String(clamp(1 - p * 2.2, 0, 1));
   bg.style.opacity = String(1 - p);                         // the colour gives way to the white page
-  if (heroTone) $('.p-hero-stick').style.background = `rgba(${heroTone.color.join(',')}, ${1 - p})`;   // (lets a mixed title invert against it)
   const onHero = p < 0.5;
   document.documentElement.classList.toggle('hero-on', onHero);
   if (retone || onHero) {
-    // what is behind the title: the photo (if its top reaches the title) and/or the colour beside it
-    let dark = false, mixed = false;
-    const h1 = $('.p-hero-title .display');
-    if (heroTone && h1) {
-      // average brightness of exactly what is behind the title's letters: photo pixels where it overlaps, colour elsewhere
-      const ir = img.getBoundingClientRect(), tr = h1.getBoundingClientRect();
-      const { grid, N } = heroTone, bgL = lum(...heroTone.color);
-      let sum = 0, n = 0, darkN = 0, lightN = 0;
-      for (let sy = 0; sy < 12; sy++) for (let sx = 0; sx < 24; sx++) {
-        const px = tr.left + (sx + 0.5) * tr.width / 24, py = tr.top + (sy + 0.5) * tr.height / 12;
-        if (px >= ir.left && px < ir.right && py >= ir.top && py < ir.bottom) {
-          const gx = Math.floor((px - ir.left) / ir.width * N), gy = Math.floor((py - ir.top) / ir.height * N);
-          const L = grid[clamp(gy, 0, N - 1) * N + clamp(gx, 0, N - 1)];
-          sum += L; darkN += L < 96; lightN += L > 160;
-        } else { sum += bgL; darkN += bgL < 96; lightN += bgL > 160; }
-        n++;
-      }
-      dark = sum / n < 118;
-      // half over dark, half over light: letters invert whatever is behind them instead
-      mixed = darkN / n > 0.22 && lightN / n > 0.22;
-    }
-    document.documentElement.classList.toggle('hero-mixed', mixed);
+    // the title sits on the plain background colour: white on dark colours, black on light ones
+    const dark = heroTone ? lum(...heroTone.color) < 118 : false;
     document.documentElement.classList.toggle('hero-dark', dark);
   }
 }
@@ -593,7 +570,7 @@ function itemEl(it, i) {
       }
       m.src = localPreview.get(src) || src;
       inner.appendChild(m);
-      if (!href) inner.classList.add('zoomable');   // click to view it large
+      if (!href && !it.blur) inner.classList.add('zoomable');   // click to view it large (blurred photos are atmosphere, not for zooming)
       if (it.blur) {                                  // atmospheric: heavy blur + film grain, title centred on top
         inner.classList.add('blurred');
         // the grain *is* the dust: three depths of particles drifting through an angled ray
@@ -750,9 +727,9 @@ const grainFx = (() => {
   let K = innerWidth < 640 ? 0.55 : 1;
   addEventListener('resize', () => { K = innerWidth < 640 ? 0.55 : 1; });
   const LAYERS = [
-    { size: 200, rise: 0.004, sway: 8, period: 7800, phase: 0.0, depth: 0.45 },   // fine, far
-    { size: 230, rise: 0.006, sway: 10, period: 6100, phase: 2.1, depth: 0.7 },   // dark, middle
-    { size: 260, rise: 0.009, sway: 14, period: 5300, phase: 4.0, depth: 1.0 },   // larger, near
+    { size: 613, rise: 0.004, sway: 8, period: 7800, phase: 0.0, depth: 0.45 },   // fine, far
+    { size: 709, rise: 0.006, sway: 10, period: 6100, phase: 2.1, depth: 0.7 },   // dark, middle
+    { size: 827, rise: 0.009, sway: 14, period: 5300, phase: 4.0, depth: 1.0 },   // larger, near
   ];
   function step(t) {
     if (!visible.size || !enabled()) { running = false; return; }
@@ -768,13 +745,15 @@ const grainFx = (() => {
     airX += airVX * dt; airY += airVY * dt;
     const tfs = LAYERS.map(L => {
       const size = L.size * K;
-      const y = wrap((-t * L.rise + airY * L.depth) * K, size);
-      const x = wrap((Math.sin(t / L.period + L.phase) * L.sway + t * L.rise * 0.35 + airX * L.depth) * K, size);
-      return `translate3d(${(x - size).toFixed(1)}px, ${(y - size).toFixed(1)}px, 0)`;
+      // two unrelated slow waves per direction, so the drift never settles into a visible rhythm
+      const y = wrap((-t * L.rise + Math.sin(t / (L.period * 1.73) + L.phase * 1.3) * L.sway * 0.6 + airY * L.depth) * K, size);
+      const x = wrap((Math.sin(t / L.period + L.phase) * L.sway + Math.sin(t / (L.period * 2.41) + L.phase) * L.sway * 0.5
+        + t * L.rise * 0.35 + airX * L.depth) * K, size);
+      return `${x.toFixed(1)}px ${y.toFixed(1)}px`;
     });
     for (const e of visible) {
       const kids = e.children;
-      for (let i = 0; i < kids.length && i < tfs.length; i++) kids[i].style.transform = tfs[i];
+      for (let i = 0; i < kids.length && i < tfs.length; i++) kids[i].style.backgroundPosition = tfs[i];
     }
     requestAnimationFrame(step);
   }
