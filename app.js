@@ -839,7 +839,39 @@ const grainFx = (() => {
     for (const e of entries) { if (e.isIntersecting) visible.add(e.target); else visible.delete(e.target); }
     kick();
   });
+  // The specks themselves: scattered truly at random (no noise lattice, so no grid shows), drawn once
+  // at double resolution so they stay crisp, and wrapped at the edges so the texture tiles seamlessly
+  let drawn = false;
+  function drawSpecks() {
+    if (drawn) return;
+    drawn = true;
+    // phones show the texture smaller (see the CSS), so it's drawn at that size, at the screen's sharpness
+    const phone = innerWidth < 640, dpr = Math.min(3, Math.max(2, devicePixelRatio || 1));
+    const kinds = [   // css var, tile size (css px: computer, phone), count, speck radius (css px), colour
+      ['--speck-fine', [613, 233], 420, [0.5, 0.95], '255,255,255'],
+      ['--speck-dark', [709, 269], 300, [0.5, 0.95], '0,0,0'],
+      ['--speck-near', [827, 314], 160, [0.8, 1.5], '255,255,255'],
+    ];
+    for (const [name, sizes, n, [cr0, cr1], col] of kinds) {
+      const sc = phone ? 0.6 : 1;                                      // finer specks on phones
+      const W = Math.round(sizes[phone ? 1 : 0] * dpr), r0 = cr0 * dpr * sc, r1 = cr1 * dpr * sc;
+      const c = document.createElement('canvas');
+      c.width = c.height = W;
+      const x = c.getContext('2d');
+      for (let i = 0; i < n; i++) {
+        const px = Math.random() * W, py = Math.random() * W;
+        const r = r0 + (r1 - r0) * Math.random() ** 2;              // mostly small, a few larger
+        x.fillStyle = `rgba(${col},${(0.55 + 0.45 * Math.random()).toFixed(2)})`;
+        for (const ox of [-W, 0, W]) for (const oy of [-W, 0, W]) {  // wrap across the edges
+          if (px + ox < -4 || px + ox > W + 4 || py + oy < -4 || py + oy > W + 4) continue;
+          x.beginPath(); x.arc(px + ox, py + oy, r, 0, Math.PI * 2); x.fill();
+        }
+      }
+      document.documentElement.style.setProperty(name, `url(${c.toDataURL()})`);
+    }
+  }
   function refresh() {
+    if ($('.inner.blurred .dust')) drawSpecks();
     els.forEach(e => seen.unobserve(e));
     visible.clear();
     els = $$('.inner.blurred .dust');
