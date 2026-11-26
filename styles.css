@@ -132,11 +132,29 @@ body:not(.editing) .board.side:not(:has(.item)) { margin-top: 0; }
 
 /* ---------- PROJECT PAGE ---------- */
 /* full-screen top image (Vision Pro-style): shown whole, on its dominant colour */
-.p-hero { position: relative; height: 175vh; height: 175svh; }
+.p-hero { position: relative; }
 .p-hero-bg { position: fixed; inset: 0; z-index: -1; pointer-events: none; background: var(--bg); will-change: opacity; }
 .p-hero-stick { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; display: flex; flex-direction: column; align-items: center; }
 .p-hero-frame { flex: 1; min-height: 0; width: 100%; display: flex; align-items: center; justify-content: center; }
-.p-hero-img { display: block; max-width: 100%; max-height: 100%; width: auto; height: auto; will-change: transform; }
+.p-hero-img {
+  display: block; max-width: 100%; max-height: 100%; width: auto; height: auto; will-change: transform;
+  /* soft edges melt the photo into the page colour, so it reads as one image; they sharpen as the page turns white */
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 var(--feather, 5%), #000 calc(100% - var(--feather, 5%)), transparent), linear-gradient(to bottom, transparent, #000 var(--feather, 5%), #000 calc(100% - var(--feather, 5%)), transparent);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(to right, transparent, #000 var(--feather, 5%), #000 calc(100% - var(--feather, 5%)), transparent), linear-gradient(to bottom, transparent, #000 var(--feather, 5%), #000 calc(100% - var(--feather, 5%)), transparent);
+  mask-composite: intersect;
+}
+/* scroll room for the colour to fade and the image to glide left, then the written part */
+.p-spacer { height: 105vh; }
+body:not(.has-copy) .p-spacer { height: 75vh; }
+.p-copy { position: relative; z-index: 2; padding-bottom: 14vh; opacity: 0; will-change: opacity, transform; }
+.p-copy .txt { font-size: clamp(15px, 1.15vw, 18px); line-height: 1.6; color: var(--text); }
+.p-copy .txt.split { min-height: 0; }
+@media (max-width: 759px) {   /* phones: the text slides up over the pinned image on a white sheet */
+  .p-spacer { height: 70vh; }
+  .p-copy { background: var(--bg); padding: 36px var(--pad) 12vh; border-radius: 18px 18px 0 0; box-shadow: 0 -18px 50px rgba(0, 0, 0, .08); }
+  .p-copy .txt { font-size: 15px; }
+}
 .p-hero-title {
   flex: none; width: 100%; padding: calc(52px + 1.5vh) var(--pad) 2.5vh;
   text-align: center; color: #000; will-change: transform, opacity; pointer-events: none;

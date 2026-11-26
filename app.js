@@ -252,6 +252,8 @@ function projectHTML(slug) {
       </div>
       <div class="p-hero-frame"><img class="p-hero-img" alt="" decoding="async"></div>
     </div>
+    <div class="p-spacer"></div>
+    <div class="p-copy"></div>
   </section>
   <section class="project-under"><a class="back" href="/#work">← Work</a></section>` : `
   <section class="project-head">
@@ -383,15 +385,35 @@ function coverItem(slug) {
   return items.filter(i => i.y === top).sort((a, b) => b.w * b.h - a.w * a.h)[0] || null;
 }
 
-let heroTone = null;   // { color: [r,g,b], imgTop: luminance of the photo's top band }
+// The description that fades in beside the image: the top text block of the page
+function introText(slug) {
+  const texts = ((C.boards[slug] || {}).items || []).filter(i => i.type === 'text');
+  if (!texts.length) return null;
+  const top = Math.min(...texts.map(i => i.y));
+  return texts.filter(i => i.y === top).sort((a, b) => a.x - b.x)[0];
+}
+// On a visitor's view the opening sequence already shows the title image and description,
+// so the grid leaves them out (owner mode still shows the full grid for editing)
+function introHidden(boardEl) {
+  if (editing || route.type !== 'project' || boardEl.dataset.board !== route.slug || !$('.p-hero')) return new Set();
+  return new Set([coverItem(route.slug), introText(route.slug)].filter(Boolean).map(i => i.id));
+}
+
+let heroTone = null;
+let heroGeo = null;    // where the image starts (centred) and ends (left column), relative to the pinned stage   // { color: [r,g,b], imgTop: luminance of the photo's top band }
 function setupProjectHero() {
   heroTone = null;
+  heroGeo = null;
   document.documentElement.classList.remove('hero-on', 'hero-dark');
   const img = $('.p-hero-img');
   if (!img) return;
   const it = coverItem(route.slug);
   const v = it.variants || {};
   const src = safeSrc(it.src);
+  const textIt = introText(route.slug);
+  const copy = $('.p-copy');
+  if (textIt) { const t = document.createElement('div'); copy.appendChild(t); fillText(t, textIt); } else copy.remove();
+  document.body.classList.toggle('has-copy', !!textIt);
   // start with a copy that is probably cached from the grid, then step up to whatever is sharp at full screen
   img.src = localPreview.get(src) || safeSrc(v['1200']) || safeSrc(v['1600']) || src;
   img.addEventListener('load', function first() {
@@ -402,8 +424,28 @@ function setupProjectHero() {
     const best = [['1200', v['1200']], ['1600', v['1600']]].find(([w, u]) => safeSrc(u) && +w >= need * 0.95);
     const sharp = best ? best[1] : src;
     if (!img.src.endsWith(sharp)) { const hi = new Image(); hi.src = sharp; hi.decode().then(() => { img.src = sharp; }).catch(() => {}); }
+    measureHero();
     projectHeroScroll(true);
   });
+}
+
+const heroPhone = () => innerWidth < 760;
+// Measure the image's centred position, and the left-column spot it glides to (desktop)
+function measureHero() {
+  const img = $('.p-hero-img'), stage = $('.p-hero-stick'), copy = $('.p-copy'), board = $('#view .board');
+  if (!img || !img.naturalWidth || !stage) return;
+  img.style.transform = 'none';
+  const st = stage.getBoundingClientRect(), r = img.getBoundingClientRect();
+  const S = { x: r.left - st.left, y: r.top - st.top, w: r.width, h: r.height };
+  heroGeo = { S, T: null };
+  if (!copy || heroPhone() || !board) { if (copy) copy.style.cssText = ''; return; }
+  // the page's column: same width and grid as the project's photos below
+  const br = board.getBoundingClientRect(), gap = parseFloat(getComputedStyle(board).getPropertyValue('--gap')) || 12;
+  const cell = (br.width + gap) / 12;
+  const colW = 6 * cell - gap, top = 52 + innerHeight * 0.06, colH = innerHeight - top - innerHeight * 0.06;
+  const k = Math.min(colW / S.w, colH / S.h);
+  heroGeo.T = { x: br.left, y: top + (colH - S.h * k) / 2, w: S.w * k, h: S.h * k };
+  Object.assign(copy.style, { marginLeft: `${br.left + 6 * cell}px`, width: `${colW}px`, minHeight: `${colH}px`, paddingTop: `${top}px` });
 }
 
 // Dominant colour of the photo (most common colour, averaged)
@@ -414,15 +456,14 @@ function analyseHero(img) {
     const x = c.getContext('2d', { willReadFrequently: true });
     x.drawImage(img, 0, 0, N, N);
     const d = x.getImageData(0, 0, N, N).data;
-    const bins = new Map();
-    for (let i = 0; i < d.length; i += 4) {
-      const k = (d[i] >> 4) << 8 | (d[i + 1] >> 4) << 4 | (d[i + 2] >> 4);
-      const e = bins.get(k) || [0, 0, 0, 0];
-      e[0] += d[i]; e[1] += d[i + 1]; e[2] += d[i + 2]; e[3]++;
-      bins.set(k, e);
+    // the page takes the colour of the photo's edges (median of the outer ring), so the two meet without a seam
+    const ring = [[], [], []];
+    for (let y = 0; y < N; y++) for (let xx = 0; xx < N; xx++) {
+      if (y > 1 && y < N - 2 && xx > 1 && xx < N - 2) continue;
+      const i = (y * N + xx) * 4;
+      ring[0].push(d[i]); ring[1].push(d[i + 1]); ring[2].push(d[i + 2]);
     }
-    const top = [...bins.values()].sort((a, b) => b[3] - a[3])[0];
-    const color = top.slice(0, 3).map(v => Math.round(v / top[3]));
+    const color = ring.map(ch => ch.sort((a, b) => a - b)[ch.length >> 1]);
     return { color };
   } catch { return null; }
 }
@@ -431,16 +472,33 @@ const lum = (r, g, b) => 0.2126 * r + 0.7152 * g + 0.0722 * b;
 function projectHeroScroll(retone) {
   const hero = $('.p-hero');
   if (!hero) return;
-  const r = hero.getBoundingClientRect();
-  const p = clamp(-r.top / Math.max(1, r.height - innerHeight), 0, 1);
-  const img = $('.p-hero-img'), title = $('.p-hero-title'), bg = $('.p-hero-bg');
-  if (!reduceMotion) {
-    img.style.transform = `scale(${1 - p * 0.16})`;
-    title.style.transform = `translateY(${-p * 60}px)`;
+  const vh = innerHeight;
+  const sc = -hero.getBoundingClientRect().top;               // how far into the opening sequence we are
+  const pa = clamp(sc / (vh * 0.55), 0, 1);                   // 1: colour fades to white, title lifts away
+  const img = $('.p-hero-img'), title = $('.p-hero-title'), bg = $('.p-hero-bg'), copy = $('.p-copy');
+  title.style.opacity = String(clamp(1 - pa * 1.8, 0, 1));
+  bg.style.opacity = String(1 - pa);
+  img.style.setProperty('--feather', `${(5 * (1 - pa)).toFixed(2)}%`);   // crisp edges once the page is white
+  if (!reduceMotion) title.style.transform = `translateY(${-pa * 60}px)`;
+  if (heroGeo && !reduceMotion) {
+    const { S, T } = heroGeo;
+    // 2: the image glides into the left column (desktop)
+    const raw = T ? clamp((sc - vh * 0.4) / (vh * 0.6), 0, 1) : 0;
+    const e = raw * raw * (3 - 2 * raw);
+    const s0 = 1 - 0.08 * pa;
+    const sT = T ? T.w / S.w : s0;
+    const sNow = s0 + (sT - s0) * e;
+    const cx0 = S.x + S.w / 2, cy0 = S.y + S.h / 2;
+    const cx = cx0 + ((T ? T.x + T.w / 2 : cx0) - cx0) * e, cy = cy0 + ((T ? T.y + T.h / 2 : cy0) - cy0) * e;
+    img.style.transform = `translate3d(${cx - cx0}px, ${cy - cy0}px, 0) scale(${sNow})`;
   }
-  title.style.opacity = String(clamp(1 - p * 2.2, 0, 1));
-  bg.style.opacity = String(1 - p);                         // the colour gives way to the white page
-  const onHero = p < 0.5;
+  // 3: the written part fades in as it rises into view
+  if (copy) {
+    const q = clamp((vh - copy.getBoundingClientRect().top) / (vh * 0.35), 0, 1);
+    copy.style.opacity = String(q);
+    if (!reduceMotion) copy.style.transform = `translateY(${(1 - q) * 28}px)`;
+  }
+  const onHero = pa < 0.5;
   document.documentElement.classList.toggle('hero-on', onHero);
   if (retone || onHero) {
     // the title sits on the plain background colour: white on dark colours, black on light ones
@@ -448,7 +506,7 @@ function projectHeroScroll(retone) {
     document.documentElement.classList.toggle('hero-dark', dark);
   }
 }
-addEventListener('resize', () => projectHeroScroll(true));
+addEventListener('resize', () => { measureHero(); projectHeroScroll(true); });
 
 /* ---------- reveal on scroll ---------- */
 const io = new IntersectionObserver(entries => {
@@ -617,8 +675,8 @@ function place(el, it, m) {
   el.style.zIndex = it.z || '';
 }
 
-function sizeBoard(boardEl, m, minPx = 0) {
-  const rows = bottomOf(boardOf(boardEl)) + (editing ? 3 : 0);
+function sizeBoard(boardEl, m, minPx = 0, b = boardOf(boardEl)) {
+  const rows = bottomOf(b) + (editing ? 3 : 0);
   boardEl.style.height = `${Math.max(rows * m.cell - m.gap, minPx, 0)}px`;
 }
 
@@ -658,15 +716,21 @@ function layoutBoard(boardEl) {
   const b = boardOf(boardEl);
   const m = metrics(boardEl);
   boardEl.style.setProperty('--cell', `${m.cell}px`);
+  // blocks the project's opening sequence already shows are left out, and the rows they used close up
+  const hide = introHidden(boardEl);
+  const shown = b.items.filter(i => !hide.has(i.id));
+  const shift = hide.size && shown.length ? Math.min(...shown.map(i => i.y)) : 0;
+  const view = hide.size ? { items: shown.map(i => Object.assign({}, i, { y: i.y - shift })) } : b;
   for (const el of $$('.item', boardEl)) {
-    const it = b.items.find(x => x.id === el.dataset.id);
+    el.style.display = hide.has(el.dataset.id) ? 'none' : '';
+    const it = view.items.find(x => x.id === el.dataset.id);
     if (!it) continue;
     place(el, it, m);
     // tell the browser the tile's real width, so it downloads the smallest sharp copy
     const img = el.querySelector('img[srcset]');
     if (img) img.sizes = `${Math.ceil(it.w * m.cell * (it.blur ? 0.3 : 1))}px`;
   }
-  sizeBoard(boardEl, m, fitText(boardEl, b, m));
+  sizeBoard(boardEl, m, fitText(boardEl, view, m), view);
 }
 
 function bindBoard(boardEl) {
@@ -1651,6 +1715,8 @@ function setEditing(on) {
     } else el.removeAttribute('contenteditable');
   });
   if (!on) { select(null); hideFmt(); bindText(document); }
+  const copyTxt = $('.p-copy > div'), copyIt = route.type === 'project' && introText(route.slug);
+  if (copyTxt && copyIt) fillText(copyTxt, copyIt);
   for (const el of $$('#view .item.text')) {               // switch credits between pinned (visitor) and as-written (owner)
     const it = findItem(el.closest('.board'), el.dataset.id);
     if (it) fillText($('.txt', el), it);
