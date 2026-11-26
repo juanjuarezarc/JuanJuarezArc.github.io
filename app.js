@@ -255,6 +255,7 @@ function projectHTML(slug) {
     </div>
     <div class="p-spacer"></div>
     <div class="p-copy"></div>
+    <div class="p-hold"></div>
   </section>` : `
   <section class="project-head">
     <a class="back" href="/#work">← Work</a>
@@ -505,6 +506,8 @@ function measureHero() {
   const k = Math.min(colW / S.w, colH / S.h);
   heroGeo.T = { x: br.left + 6 * cell + (colW - S.w * k), y: top + (colH - S.h * k) / 2, w: S.w * k, h: S.h * k };   // right column, flush with its right edge
   Object.assign(copy.style, { marginLeft: `${br.left}px`, width: `${colW}px`, minHeight: `${colH}px`, paddingTop: `${top}px` });   // text on the left
+  // the text is pinned beside the image (long text pins once its end is on screen)
+  copy.style.top = `${Math.min(0, innerHeight - copy.offsetHeight)}px`;
 }
 
 // Dominant colour of the photo (most common colour, averaged)
@@ -534,7 +537,7 @@ function projectHeroScroll(retone) {
   const vh = innerHeight;
   const sc = -hero.getBoundingClientRect().top;               // how far into the opening sequence we are
   const ph = heroPhone();                                    // computers get a shorter sequence (about half the scrolling)
-  const pa = clamp(sc / (vh * (ph ? 0.55 : 0.3)), 0, 1);      // 1: colour fades to white, title lifts away
+  const pa = clamp(sc / (vh * (ph ? 0.55 : 0.25)), 0, 1);     // 1: colour fades to white, title lifts away
   const img = $('.p-hero-img'), title = $('.p-hero-title'), bg = $('.p-hero-bg'), copy = $('.p-copy');
   title.style.opacity = String(clamp(1 - pa * 1.8, 0, 1));
   bg.style.opacity = String(1 - pa);
@@ -546,7 +549,7 @@ function projectHeroScroll(retone) {
     const { S, T } = heroGeo;
     // 2: the image glides into the right column (desktop)
     // (it holds still while the surroundings fade, so they stay lined up with it)
-    const raw = T ? clamp((sc - vh * 0.2) / (vh * 0.42), 0, 1) : 0;
+    const raw = T ? clamp((sc - vh * 0.1) / (vh * 0.32), 0, 1) : 0;
     const e = raw * raw * (3 - 2 * raw);
     const s0 = 1;
     const sT = T ? T.w / S.w : s0;
@@ -557,8 +560,10 @@ function projectHeroScroll(retone) {
   }
   // 3: the written part fades in as it rises into view
   if (copy) {
-    const q = clamp((vh - copy.getBoundingClientRect().top) / (vh * (ph ? 0.35 : 0.5)), 0, 1);
+    // phones: as it rises into view; computers: it's already in place, and fades in as the image moves aside
+    const q = ph ? clamp((vh - copy.getBoundingClientRect().top) / (vh * 0.35), 0, 1) : clamp((sc - vh * 0.3) / (vh * 0.2), 0, 1);
     copy.style.opacity = String(q);
+    copy.style.pointerEvents = q < 0.5 ? 'none' : '';
     if (!reduceMotion) copy.style.transform = `translateY(${(1 - q) * 28}px)`;
   }
   const onHero = pa < 0.5;
