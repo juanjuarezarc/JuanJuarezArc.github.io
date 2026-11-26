@@ -246,6 +246,7 @@ function projectHTML(slug) {
   <section class="p-hero" id="top">
     <div class="p-hero-bg"></div>
     <div class="p-hero-stick">
+      <canvas class="p-hero-ext" aria-hidden="true"></canvas>
       <div class="p-hero-title">
         <h1 class="display" data-edit="projects.${s}.title"></h1>
         <p class="lede" data-edit="projects.${s}.sub"></p>
@@ -425,8 +426,67 @@ function setupProjectHero() {
     const sharp = best ? best[1] : src;
     if (!img.src.endsWith(sharp)) { const hi = new Image(); hi.src = sharp; hi.decode().then(() => { img.src = sharp; }).catch(() => {}); }
     measureHero();
+    drawHeroExtension();
     projectHeroScroll(true);
   });
+}
+
+/* The page around the photo is the photo itself, continued: each edge row/column is stretched
+   outward to the screen's edges and softly blurred, so gradients, vignettes and floor glow carry
+   on past the frame with no seam. Drawn small (a quarter of screen size) and blurred, so it's cheap. */
+function drawHeroExtension() {
+  const cv = $('.p-hero-ext'), img = $('.p-hero-img'), stage = $('.p-hero-stick');
+  if (!cv || !heroGeo || !img.naturalWidth) return;
+  const PAD = 40, Q = 4;                                     // canvas overhangs the screen (blur stays solid); quarter size
+  const W = stage.clientWidth + PAD * 2, H = stage.clientHeight + PAD * 2;
+  cv.width = Math.ceil(W / Q); cv.height = Math.ceil(H / Q);
+  const x = cv.getContext('2d');
+  // a small averaged copy of the photo: its edge pixels are smooth, not specks
+  const sw = 64, sh = Math.max(2, Math.round(64 * img.naturalHeight / img.naturalWidth));
+  const src = document.createElement('canvas');
+  src.width = sw; src.height = sh;
+  src.getContext('2d').drawImage(img, 0, 0, sw, sh);
+  // a photo whose border is one plain colour just sits on that colour (exact, nothing stretched);
+  // only a border that varies (gradients, vignettes running off the edge) gets continued outward
+  const sx = src.getContext('2d'), all = sx.getImageData(0, 0, sw, sh).data, ring = [];
+  for (let y = 0; y < sh; y++) for (let xx = 0; xx < sw; xx++) {
+    if (y > 0 && y < sh - 1 && xx > 0 && xx < sw - 1) continue;
+    const i = (y * sw + xx) * 4;
+    ring.push(lum(all[i], all[i + 1], all[i + 2]));
+  }
+  ring.sort((a, b) => a - b);
+  const plain = ring[Math.floor(ring.length * 0.95)] - ring[Math.floor(ring.length * 0.05)] < 12;
+  cv.hidden = plain;
+  // just inside the border, is the backdrop a different tone (like AIR's lit studio backdrop)?
+  // then the photo's box would still show, so only those photos get a soft edge into the page
+  const inner = [], ix0 = Math.round(sw * 0.1), iy0 = Math.round(sh * 0.1), ix1 = sw - 1 - ix0, iy1 = sh - 1 - iy0;
+  for (let y = iy0; y <= iy1; y++) for (let xx = ix0; xx <= ix1; xx++) {
+    if (y > iy0 && y < iy1 && xx > ix0 && xx < ix1) continue;
+    const i = (y * sw + xx) * 4;
+    inner.push(lum(all[i], all[i + 1], all[i + 2]));
+  }
+  inner.sort((a, b) => a - b);
+  const soft = Math.abs(inner[inner.length >> 1] - ring[ring.length >> 1]) > 6;
+  img.classList.toggle('p-hero-soft', soft);
+  const { S } = heroGeo;
+  const L = (S.x + PAD) / Q, T = (S.y + PAD) / Q, R = L + S.w / Q, B = T + S.h / Q, CW = cv.width, CH = cv.height;
+  x.imageSmoothingEnabled = true;
+  x.drawImage(src, 0, 0, sw, sh, L, T, R - L, B - T);                    // the photo
+  x.drawImage(src, 0, 0, 1, sh, 0, T, L, B - T);                         // left edge, stretched
+  x.drawImage(src, sw - 1, 0, 1, sh, R, T, CW - R, B - T);               // right edge
+  x.drawImage(src, 0, 0, sw, 1, L, 0, R - L, T);                         // top edge
+  x.drawImage(src, 0, sh - 1, sw, 1, L, B, R - L, CH - B);               // bottom edge
+  x.drawImage(src, 0, 0, 1, 1, 0, 0, L, T);                              // corners
+  x.drawImage(src, sw - 1, 0, 1, 1, R, 0, CW - R, T);
+  x.drawImage(src, 0, sh - 1, 1, 1, 0, B, L, CH - B);
+  x.drawImage(src, sw - 1, sh - 1, 1, 1, R, B, CW - R, CH - B);
+  // brightness along the top edge: that's what sits behind the title
+  try {
+    const row = sx.getImageData(0, 0, sw, 1).data;
+    let t = 0;
+    for (let i = 0; i < row.length; i += 4) t += lum(row[i], row[i + 1], row[i + 2]);
+    if (heroTone) heroTone.topL = t / sw;
+  } catch { /* keep the edge colour's brightness */ }
 }
 
 const heroPhone = () => innerWidth < 760;
@@ -478,14 +538,17 @@ function projectHeroScroll(retone) {
   const img = $('.p-hero-img'), title = $('.p-hero-title'), bg = $('.p-hero-bg'), copy = $('.p-copy');
   title.style.opacity = String(clamp(1 - pa * 1.8, 0, 1));
   bg.style.opacity = String(1 - pa);
-  img.style.setProperty('--feather', `${(5 * (1 - pa)).toFixed(2)}%`);   // crisp edges once the page is white
+  const ext = $('.p-hero-ext');
+  if (ext) ext.style.opacity = String(1 - pa);               // the photo's extended surroundings fade with the colour
+  img.style.setProperty('--soft', `${(9 * (1 - pa)).toFixed(2)}%`);   // soft edge (only where needed) sharpens as the page turns white
   if (!reduceMotion) title.style.transform = `translateY(${-pa * 60}px)`;
   if (heroGeo && !reduceMotion) {
     const { S, T } = heroGeo;
     // 2: the image glides into the right column (desktop)
-    const raw = T ? clamp((sc - vh * 0.4) / (vh * 0.6), 0, 1) : 0;
+    // (it holds still while the surroundings fade, so they stay lined up with it)
+    const raw = T ? clamp((sc - vh * 0.55) / (vh * 0.6), 0, 1) : 0;
     const e = raw * raw * (3 - 2 * raw);
-    const s0 = 1 - 0.08 * pa;
+    const s0 = 1;
     const sT = T ? T.w / S.w : s0;
     const sNow = s0 + (sT - s0) * e;
     const cx0 = S.x + S.w / 2, cy0 = S.y + S.h / 2;
@@ -502,11 +565,11 @@ function projectHeroScroll(retone) {
   document.documentElement.classList.toggle('hero-on', onHero);
   if (retone || onHero) {
     // the title sits on the plain background colour: white on dark colours, black on light ones
-    const dark = heroTone ? lum(...heroTone.color) < 118 : false;
+    const dark = heroTone ? (heroTone.topL ?? lum(...heroTone.color)) < 118 : false;
     document.documentElement.classList.toggle('hero-dark', dark);
   }
 }
-addEventListener('resize', () => { measureHero(); projectHeroScroll(true); });
+addEventListener('resize', () => { measureHero(); drawHeroExtension(); projectHeroScroll(true); });
 
 /* ---------- reveal on scroll ---------- */
 const io = new IntersectionObserver(entries => {
