@@ -400,7 +400,7 @@ function introHidden(boardEl) {
 }
 
 let heroTone = null;
-let heroGeo = null;    // where the image starts (centred) and ends (left column), relative to the pinned stage   // { color: [r,g,b], imgTop: luminance of the photo's top band }
+let heroGeo = null;    // where the image starts (centred) and ends (right column), relative to the pinned stage   // { color: [r,g,b], imgTop: luminance of the photo's top band }
 function setupProjectHero() {
   heroTone = null;
   heroGeo = null;
@@ -430,7 +430,7 @@ function setupProjectHero() {
 }
 
 const heroPhone = () => innerWidth < 760;
-// Measure the image's centred position, and the left-column spot it glides to (desktop)
+// Measure the image's centred position, and the right-column spot it glides to (desktop)
 function measureHero() {
   const img = $('.p-hero-img'), stage = $('.p-hero-stick'), copy = $('.p-copy'), board = $('#view .board');
   if (!img || !img.naturalWidth || !stage) return;
@@ -444,8 +444,8 @@ function measureHero() {
   const cell = (br.width + gap) / 12;
   const colW = 6 * cell - gap, top = 52 + innerHeight * 0.06, colH = innerHeight - top - innerHeight * 0.06;
   const k = Math.min(colW / S.w, colH / S.h);
-  heroGeo.T = { x: br.left, y: top + (colH - S.h * k) / 2, w: S.w * k, h: S.h * k };
-  Object.assign(copy.style, { marginLeft: `${br.left + 6 * cell}px`, width: `${colW}px`, minHeight: `${colH}px`, paddingTop: `${top}px` });
+  heroGeo.T = { x: br.left + 6 * cell + (colW - S.w * k), y: top + (colH - S.h * k) / 2, w: S.w * k, h: S.h * k };   // right column, flush with its right edge
+  Object.assign(copy.style, { marginLeft: `${br.left}px`, width: `${colW}px`, minHeight: `${colH}px`, paddingTop: `${top}px` });   // text on the left
 }
 
 // Dominant colour of the photo (most common colour, averaged)
@@ -482,7 +482,7 @@ function projectHeroScroll(retone) {
   if (!reduceMotion) title.style.transform = `translateY(${-pa * 60}px)`;
   if (heroGeo && !reduceMotion) {
     const { S, T } = heroGeo;
-    // 2: the image glides into the left column (desktop)
+    // 2: the image glides into the right column (desktop)
     const raw = T ? clamp((sc - vh * 0.4) / (vh * 0.6), 0, 1) : 0;
     const e = raw * raw * (3 - 2 * raw);
     const s0 = 1 - 0.08 * pa;
