@@ -153,20 +153,17 @@ body:not(.editing) .board.side:not(:has(.item)) { margin-top: 0; }
 /* scroll room for the colour to fade and the image to glide left, then the written part */
 .p-spacer { height: 15vh; }
 body:not(.has-copy) .p-spacer { height: 10vh; }
-.p-copy { position: relative; z-index: 2; padding-bottom: 14vh; opacity: 0; will-change: opacity, transform; }
+.p-copy { z-index: 2; opacity: 0; will-change: opacity, transform; }
 .p-copy .txt { font-size: clamp(15px, 1.15vw, 18px); line-height: 1.6; color: var(--text); }
 .p-copy .txt.split { min-height: 0; }
-/* computers: the text sits pinned beside the image from the start, fades in, and stays a while before the page moves on */
-@media (min-width: 760px) {
-  body.has-copy .p-spacer { height: 0; }
-  body.has-copy .p-copy { position: sticky; margin-top: -100vh; padding-bottom: 6vh; }
-  body.has-copy .p-hold { height: 95vh; }
-}
-@media (max-width: 759px) {   /* phones: the text slides up over the pinned image on a white sheet */
-  .p-spacer { height: 70vh; }
-  body:not(.has-copy) .p-spacer { height: 75vh; }
-  .p-copy { background: var(--bg); padding: 36px var(--pad) 12vh; border-radius: 18px 18px 0 0; box-shadow: 0 -18px 50px rgba(0, 0, 0, .08); }
-  .p-copy .txt { font-size: 15px; }
+/* the text sits beside the image from the start (pinned), fades in and stays a while; longer text then
+   scrolls past while the image stays in frame, and both leave once the text's end is on screen */
+body.has-copy .p-spacer { height: 0; }
+.p-copy-wrap { margin-top: -100vh; margin-top: -100svh; }
+.p-copy { position: sticky; top: 0; padding-bottom: 6vh; }
+.p-hold { height: 95vh; }
+@media (max-width: 759px) {   /* phones: the same two columns, in smaller type */
+  .p-copy .txt { font-size: 12px; line-height: 1.5; }
 }
 .p-hero-title {
   flex: none; width: 100%; padding: calc(52px + 1.5vh) var(--pad) 2.5vh;

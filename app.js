@@ -254,8 +254,7 @@ function projectHTML(slug) {
       <div class="p-hero-frame"><img class="p-hero-img" alt="" decoding="async"></div>
     </div>
     <div class="p-spacer"></div>
-    <div class="p-copy"></div>
-    <div class="p-hold"></div>
+    <div class="p-copy-wrap"><div class="p-copy"></div><div class="p-hold"></div></div>
   </section>` : `
   <section class="project-head">
     <a class="back" href="/#work">← Work</a>
@@ -413,7 +412,7 @@ function setupProjectHero() {
   const src = safeSrc(it.src);
   const textIt = introText(route.slug);
   const copy = $('.p-copy');
-  if (textIt) { const t = document.createElement('div'); copy.appendChild(t); fillText(t, textIt); } else copy.remove();
+  if (textIt) { const t = document.createElement('div'); copy.appendChild(t); fillText(t, textIt); } else copy.parentNode.remove();   // no text: no text column or pause
   document.body.classList.toggle('has-copy', !!textIt);
   // start with a copy that is probably cached from the grid, then step up to whatever is sharp at full screen
   img.src = localPreview.get(src) || safeSrc(v['1200']) || safeSrc(v['1600']) || src;
@@ -489,7 +488,6 @@ function drawHeroExtension() {
   } catch { /* keep the edge colour's brightness */ }
 }
 
-const heroPhone = () => innerWidth < 760;
 // Measure the image's centred position, and the right-column spot it glides to (desktop)
 function measureHero() {
   const img = $('.p-hero-img'), stage = $('.p-hero-stick'), copy = $('.p-copy'), board = $('#view .board');
@@ -498,7 +496,7 @@ function measureHero() {
   const st = stage.getBoundingClientRect(), r = img.getBoundingClientRect();
   const S = { x: r.left - st.left, y: r.top - st.top, w: r.width, h: r.height };
   heroGeo = { S, T: null };
-  if (!copy || heroPhone() || !board) { if (copy) copy.style.cssText = ''; return; }
+  if (!copy || !board) return;
   // the page's column: same width and grid as the project's photos below
   const br = board.getBoundingClientRect(), gap = parseFloat(getComputedStyle(board).getPropertyValue('--gap')) || 12;
   const cell = (br.width + gap) / 12;
@@ -506,8 +504,6 @@ function measureHero() {
   const k = Math.min(colW / S.w, colH / S.h);
   heroGeo.T = { x: br.left + 6 * cell + (colW - S.w * k), y: top + (colH - S.h * k) / 2, w: S.w * k, h: S.h * k };   // right column, flush with its right edge
   Object.assign(copy.style, { marginLeft: `${br.left}px`, width: `${colW}px`, minHeight: `${colH}px`, paddingTop: `${top}px` });   // text on the left
-  // the text is pinned beside the image (long text pins once its end is on screen)
-  copy.style.top = `${Math.min(0, innerHeight - copy.offsetHeight)}px`;
 }
 
 // Dominant colour of the photo (most common colour, averaged)
@@ -536,8 +532,7 @@ function projectHeroScroll(retone) {
   if (!hero) return;
   const vh = innerHeight;
   const sc = -hero.getBoundingClientRect().top;               // how far into the opening sequence we are
-  const ph = heroPhone();                                    // computers get a shorter sequence (about half the scrolling)
-  const pa = clamp(sc / (vh * (ph ? 0.55 : 0.25)), 0, 1);     // 1: colour fades to white, title lifts away
+  const pa = clamp(sc / (vh * 0.25), 0, 1);     // 1: colour fades to white, title lifts away
   const img = $('.p-hero-img'), title = $('.p-hero-title'), bg = $('.p-hero-bg'), copy = $('.p-copy');
   title.style.opacity = String(clamp(1 - pa * 1.8, 0, 1));
   bg.style.opacity = String(1 - pa);
@@ -560,8 +555,8 @@ function projectHeroScroll(retone) {
   }
   // 3: the written part fades in as it rises into view
   if (copy) {
-    // phones: as it rises into view; computers: it's already in place, and fades in as the image moves aside
-    const q = ph ? clamp((vh - copy.getBoundingClientRect().top) / (vh * 0.35), 0, 1) : clamp((sc - vh * 0.3) / (vh * 0.2), 0, 1);
+    // it's already in place beside the image, and fades in as the image moves aside
+    const q = clamp((sc - vh * 0.3) / (vh * 0.2), 0, 1);
     copy.style.opacity = String(q);
     copy.style.pointerEvents = q < 0.5 ? 'none' : '';
     if (!reduceMotion) copy.style.transform = `translateY(${(1 - q) * 28}px)`;
