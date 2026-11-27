@@ -161,10 +161,17 @@ body:not(.has-copy) .p-spacer { height: 10vh; }
 body.has-copy .p-spacer { height: 0; }
 .p-copy-wrap { margin-top: -100vh; margin-top: -100svh; }
 .p-copy { position: sticky; top: 0; padding-bottom: 6vh; }
+body.has-copy .p-hero { margin-bottom: 6vh; }   /* twice the room between the image and the photos below */
 .p-hold { height: 95vh; }
 @media (max-width: 759px) {   /* phones: the same two columns, in smaller type */
   .p-copy .txt { font-size: 12px; line-height: 1.5; }
+  .p-copy { padding-bottom: 5vh; }   /* the column already leaves room under short text */
+  body.has-copy .p-hero { margin-bottom: 0; }
+  .p-copy.credits-moved .txt-foot { display: none; }
+  .p-hero-credits.txt { position: absolute; z-index: 2; font-size: 11px; line-height: 1.45; color: var(--text); opacity: 0; pointer-events: none; }
+  .p-hero-credits p { margin: 0 0 .5em; }
 }
+.p-hero-credits[hidden] { display: none; }
 .p-hero-title {
   flex: none; width: 100%; padding: calc(52px + 1.5vh) var(--pad) 2.5vh;
   text-align: center; color: #000; will-change: transform, opacity; pointer-events: none;

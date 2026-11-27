@@ -252,6 +252,7 @@ function projectHTML(slug) {
         <p class="lede" data-edit="projects.${s}.sub"></p>
       </div>
       <div class="p-hero-frame"><img class="p-hero-img" alt="" decoding="async"></div>
+      <div class="p-hero-credits txt" hidden></div>
     </div>
     <div class="p-spacer"></div>
     <div class="p-copy-wrap"><div class="p-copy"></div><div class="p-hold"></div></div>
@@ -501,8 +502,20 @@ function measureHero() {
   const br = board.getBoundingClientRect(), gap = parseFloat(getComputedStyle(board).getPropertyValue('--gap')) || 12;
   const cell = (br.width + gap) / 12;
   const colW = 6 * cell - gap, top = 52 + innerHeight * 0.06, colH = innerHeight - top - innerHeight * 0.06;
-  const k = Math.min(colW / S.w, colH / S.h);
-  heroGeo.T = { x: br.left + 6 * cell + (colW - S.w * k), y: top + (colH - S.h * k) / 2, w: S.w * k, h: S.h * k };   // right column, flush with its right edge
+  // phones: the credits move from under the text to under the image, so the two columns balance
+  const credits = $('.p-hero-credits'), foot = copy.querySelector('.txt-foot');
+  const moveCredits = !!(credits && foot && foot.textContent.trim() && innerWidth < 760);
+  copy.classList.toggle('credits-moved', moveCredits);
+  let extra = 0;
+  if (credits) {
+    credits.hidden = !moveCredits;
+    credits.innerHTML = moveCredits ? foot.innerHTML : '';
+    if (moveCredits) { credits.style.width = `${colW}px`; extra = credits.offsetHeight + 16; }
+  }
+  const k = Math.min(colW / S.w, (colH - extra) / S.h);
+  const w = S.w * k, h = S.h * k, x = br.left + 6 * cell;
+  heroGeo.T = { x: x + (colW - w), y: top + (colH - h - extra) / 2, w, h };   // right column, flush with its right edge
+  if (moveCredits) Object.assign(credits.style, { left: `${x}px`, top: `${heroGeo.T.y + h + 16}px` });
   Object.assign(copy.style, { marginLeft: `${br.left}px`, width: `${colW}px`, minHeight: `${colH}px`, paddingTop: `${top}px` });   // text on the left
 }
 
@@ -558,6 +571,8 @@ function projectHeroScroll(retone) {
     // it's already in place beside the image, and fades in as the image moves aside
     const q = clamp((sc - vh * 0.3) / (vh * 0.2), 0, 1);
     copy.style.opacity = String(q);
+    const credits = $('.p-hero-credits');
+    if (credits) credits.style.opacity = String(q);
     copy.style.pointerEvents = q < 0.5 ? 'none' : '';
     if (!reduceMotion) copy.style.transform = `translateY(${(1 - q) * 28}px)`;
   }
@@ -1811,7 +1826,7 @@ function setEditing(on) {
   });
   if (!on) { select(null); hideFmt(); bindText(document); }
   const copyTxt = $('.p-copy > div'), copyIt = route.type === 'project' && introText(route.slug);
-  if (copyTxt && copyIt) fillText(copyTxt, copyIt);
+  if (copyTxt && copyIt) { fillText(copyTxt, copyIt); measureHero(); projectHeroScroll(true); }
   for (const el of $$('#view .item.text')) {               // switch credits between pinned (visitor) and as-written (owner)
     const it = findItem(el.closest('.board'), el.dataset.id);
     if (it) fillText($('.txt', el), it);
