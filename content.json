@@ -1,7 +1,7 @@
 {
  "site": {
-  "name": "HOME",
-  "title": "Juan Juarez — Portfolio",
+  "name": "JUAN JUAREZ",
+  "title": "Juan Juarez — Architecture Portfolio",
   "email": "juanjuarezarc@gmail.com",
   "footer": "© 2026 Juan Juarez",
   "resume": "",
@@ -25,7 +25,7 @@
  },
  "home": {
   "heroTitle": "JUAN JUAREZ JR.",
-  "heroSub": "Portflio",
+  "heroSub": "Portfolio",
   "workTitle": "WORK",
   "workSub": "Selected architectural explorations",
   "aboutTitle": "ABOUT",
@@ -35,12 +35,12 @@
  },
  "projects": {
   "air": {
-   "title": "PRESSURE",
-   "sub": "Floor & Ground"
-  },
-  "pressure": {
    "title": "AIR",
    "sub": "Spatial systems driven by airflow"
+  },
+  "pressure": {
+   "title": "PRESSURE",
+   "sub": "Floor & Ground"
   },
   "seminar": {
    "title": "SOLID/VOID",
@@ -58,7 +58,7 @@
      "w": 4,
      "h": 6,
      "caption": "PRESSURE",
-     "link": "p:air",
+     "link": "p:pressure",
      "blur": true,
      "fit": "contain",
      "src": "/uploads/20261031-f5zzq8vs.webp",
@@ -77,7 +77,7 @@
      "w": 4,
      "h": 6,
      "caption": "AIR",
-     "link": "p:pressure",
+     "link": "p:air",
      "z": 3,
      "src": "/uploads/20261113-xg0xzbhm.webp",
      "blur": true,
@@ -157,248 +157,6 @@
    ]
   },
   "air": {
-   "items": [
-    {
-     "id": "a1",
-     "type": "text",
-     "x": 0,
-     "y": 0,
-     "w": 4,
-     "h": 10,
-     "size": "m",
-     "html": "<p>A K–5 elementary school organized by the relationship between ground and roof, treated as two opposing yet interdependent surfaces. The ground steps in terraces while the roof folds and lifts into a butterfly geometry. Because the two are displaced from one another, the section varies continuously across the building, producing a field of pressure rather than a uniform interior. Where the surfaces converge, space is compressed; where they diverge, it is released. This alternation structures the sequence of the school, moving occupants between low, contained areas and taller, open ones as they cross the building. The substructure acts as an intermediary between the two surfaces. Its walls, columns and stairs negotiate the changing distance between ground and roof, and in doing so establish the scale, enclosure and light of each interior. Skylights puncture the roof at the points of greatest compression, introducing daylight where the section is lowest and marking moments of release within otherwise contained spaces. At the classrooms, this condition extends outward. Large garage-style doors open onto the terraced ground, dissolving the threshold between interior and exterior and allowing instruction to continue beyond the building edge.</p><p><br></p><p>Individual Project</p><p>2A Design Studio: Environments I</p><p>Institution: SCI Arc</p><p>Instructor: Angelica Lorenzi</p>"
-    },
-    {
-     "id": "a2",
-     "type": "image",
-     "x": 5,
-     "y": 0,
-     "w": 7,
-     "h": 10,
-     "caption": "Image",
-     "src": "/uploads/20261024-7h2bbrs1.webp",
-     "variants": {
-      "800": "/uploads/sized/20261024-7h2bbrs1-800.jpg",
-      "1200": "/uploads/sized/20261024-7h2bbrs1-1200.jpg",
-      "1600": "/uploads/sized/20261024-7h2bbrs1-1600.jpg",
-      "w": 2164
-     }
-    },
-    {
-     "id": "a3",
-     "type": "image",
-     "x": 0,
-     "y": 12,
-     "w": 12,
-     "h": 8,
-     "caption": "Image",
-     "src": "/uploads/20261024-6khpee2h.webp",
-     "variants": {
-      "800": "/uploads/sized/20261024-6khpee2h-800.jpg",
-      "1200": "/uploads/sized/20261024-6khpee2h-1200.jpg",
-      "1600": "/uploads/sized/20261024-6khpee2h-1600.jpg",
-      "w": 2800
-     }
-    },
-    {
-     "id": "u60msflt",
-     "type": "image",
-     "x": 6,
-     "y": 21,
-     "w": 6,
-     "h": 4,
-     "src": "/uploads/20261024-7y4lfj7s.webp",
-     "caption": "",
-     "variants": {
-      "800": "/uploads/sized/20261024-7y4lfj7s-800.jpg",
-      "1200": "/uploads/sized/20261024-7y4lfj7s-1200.jpg",
-      "1600": "/uploads/sized/20261024-7y4lfj7s-1600.jpg",
-      "w": 2800
-     }
-    },
-    {
-     "id": "a8bb94go",
-     "type": "image",
-     "x": 0,
-     "y": 26,
-     "w": 6,
-     "h": 4,
-     "src": "/uploads/20261024-ln9aqask.webp",
-     "caption": "",
-     "variants": {
-      "800": "/uploads/sized/20261024-ln9aqask-800.jpg",
-      "1200": "/uploads/sized/20261024-ln9aqask-1200.jpg",
-      "1600": "/uploads/sized/20261024-ln9aqask-1600.jpg",
-      "w": 2800
-     }
-    },
-    {
-     "id": "62yy84it",
-     "type": "image",
-     "x": 0,
-     "y": 21,
-     "w": 6,
-     "h": 4,
-     "src": "/uploads/20261024-14x0cy76.webp",
-     "caption": "",
-     "variants": {
-      "800": "/uploads/sized/20261024-14x0cy76-800.jpg",
-      "1200": "/uploads/sized/20261024-14x0cy76-1200.jpg",
-      "1600": "/uploads/sized/20261024-14x0cy76-1600.jpg",
-      "w": 2800
-     }
-    },
-    {
-     "id": "ys34kvi2",
-     "type": "image",
-     "x": 8,
-     "y": 28,
-     "w": 3,
-     "h": 2,
-     "src": "/uploads/20261024-s7259jov.webp",
-     "caption": "",
-     "variants": {
-      "800": "/uploads/sized/20261024-s7259jov-800.jpg",
-      "1200": "/uploads/sized/20261024-s7259jov-1200.jpg",
-      "1600": "/uploads/sized/20261024-s7259jov-1600.jpg",
-      "w": 1916
-     }
-    },
-    {
-     "id": "4utreuun",
-     "type": "image",
-     "x": 8,
-     "y": 26,
-     "w": 3,
-     "h": 2,
-     "src": "/uploads/20261024-jbogt509.png",
-     "caption": "",
-     "variants": {
-      "800": "/uploads/sized/20261024-jbogt509-800.jpg",
-      "1200": "/uploads/sized/20261024-jbogt509-1200.jpg",
-      "1600": "/uploads/sized/20261024-jbogt509-1600.jpg",
-      "w": 3300
-     }
-    },
-    {
-     "id": "4bwprcam",
-     "type": "image",
-     "x": 8,
-     "y": 54,
-     "w": 4,
-     "h": 5,
-     "src": "/uploads/20261025-qu19oexu.jpg",
-     "caption": "",
-     "variants": {
-      "800": "/uploads/sized/20261025-qu19oexu-800.jpg",
-      "w": 1276
-     }
-    },
-    {
-     "id": "krj9imqu",
-     "type": "image",
-     "x": 0,
-     "y": 48,
-     "w": 4,
-     "h": 5,
-     "src": "/uploads/20261025-e0dsd7o5.jpg",
-     "caption": "",
-     "variants": {
-      "800": "/uploads/sized/20261025-e0dsd7o5-800.jpg",
-      "w": 1276
-     }
-    },
-    {
-     "id": "wo5g4l0n",
-     "type": "image",
-     "x": 4,
-     "y": 48,
-     "w": 4,
-     "h": 5,
-     "src": "/uploads/20261025-n7abub7k.jpg",
-     "caption": "",
-     "variants": {
-      "800": "/uploads/sized/20261025-n7abub7k-800.jpg",
-      "w": 1276
-     }
-    },
-    {
-     "id": "dy3o8wws",
-     "type": "image",
-     "x": 8,
-     "y": 48,
-     "w": 4,
-     "h": 5,
-     "src": "/uploads/20261025-v2i8wg9w.jpg",
-     "caption": "",
-     "variants": {
-      "800": "/uploads/sized/20261025-v2i8wg9w-800.jpg",
-      "w": 1276
-     }
-    },
-    {
-     "id": "sj3d4e9r",
-     "type": "image",
-     "x": 0,
-     "y": 54,
-     "w": 4,
-     "h": 5,
-     "src": "/uploads/20261025-rjuvsh9d.jpg",
-     "caption": "",
-     "variants": {
-      "800": "/uploads/sized/20261025-rjuvsh9d-800.jpg",
-      "w": 1276
-     }
-    },
-    {
-     "id": "e3mgetko",
-     "type": "image",
-     "x": 4,
-     "y": 54,
-     "w": 4,
-     "h": 5,
-     "src": "/uploads/20261025-zgbzpzte.jpg",
-     "caption": "",
-     "variants": {
-      "800": "/uploads/sized/20261025-zgbzpzte-800.jpg",
-      "w": 1274
-     }
-    },
-    {
-     "id": "uhcweimw",
-     "type": "image",
-     "x": 0,
-     "y": 32,
-     "w": 12,
-     "h": 7,
-     "src": "/uploads/20261025-8wxwjify.webp",
-     "caption": "",
-     "variants": {
-      "800": "/uploads/sized/20261025-8wxwjify-800.jpg",
-      "1200": "/uploads/sized/20261025-8wxwjify-1200.jpg",
-      "1600": "/uploads/sized/20261025-8wxwjify-1600.jpg",
-      "w": 2800
-     }
-    },
-    {
-     "id": "1x6sbw07",
-     "type": "image",
-     "x": 0,
-     "y": 40,
-     "w": 12,
-     "h": 7,
-     "src": "/uploads/20261025-ja61c3kc.webp",
-     "caption": "",
-     "variants": {
-      "800": "/uploads/sized/20261025-ja61c3kc-800.jpg",
-      "1200": "/uploads/sized/20261025-ja61c3kc-1200.jpg",
-      "1600": "/uploads/sized/20261025-ja61c3kc-1600.jpg",
-      "w": 2164
-     }
-    }
-   ]
-  },
-  "pressure": {
    "items": [
     {
      "id": "p1",
@@ -720,6 +478,248 @@
       "1200": "/uploads/sized/20261009-wstj8idl-1200.jpg",
       "1600": "/uploads/sized/20261009-wstj8idl-1600.jpg",
       "w": 2800
+     }
+    }
+   ]
+  },
+  "pressure": {
+   "items": [
+    {
+     "id": "a1",
+     "type": "text",
+     "x": 0,
+     "y": 0,
+     "w": 4,
+     "h": 10,
+     "size": "m",
+     "html": "<p>A K–5 elementary school organized by the relationship between ground and roof, treated as two opposing yet interdependent surfaces. The ground steps in terraces while the roof folds and lifts into a butterfly geometry. Because the two are displaced from one another, the section varies continuously across the building, producing a field of pressure rather than a uniform interior. Where the surfaces converge, space is compressed; where they diverge, it is released. This alternation structures the sequence of the school, moving occupants between low, contained areas and taller, open ones as they cross the building. The substructure acts as an intermediary between the two surfaces. Its walls, columns and stairs negotiate the changing distance between ground and roof, and in doing so establish the scale, enclosure and light of each interior. Skylights puncture the roof at the points of greatest compression, introducing daylight where the section is lowest and marking moments of release within otherwise contained spaces. At the classrooms, this condition extends outward. Large garage-style doors open onto the terraced ground, dissolving the threshold between interior and exterior and allowing instruction to continue beyond the building edge.</p><p><br></p><p>Individual Project</p><p>2A Design Studio: Environments I</p><p>Institution: SCI Arc</p><p>Instructor: Angelica Lorenzi</p>"
+    },
+    {
+     "id": "a2",
+     "type": "image",
+     "x": 5,
+     "y": 0,
+     "w": 7,
+     "h": 10,
+     "caption": "Image",
+     "src": "/uploads/20261024-7h2bbrs1.webp",
+     "variants": {
+      "800": "/uploads/sized/20261024-7h2bbrs1-800.jpg",
+      "1200": "/uploads/sized/20261024-7h2bbrs1-1200.jpg",
+      "1600": "/uploads/sized/20261024-7h2bbrs1-1600.jpg",
+      "w": 2164
+     }
+    },
+    {
+     "id": "a3",
+     "type": "image",
+     "x": 0,
+     "y": 12,
+     "w": 12,
+     "h": 8,
+     "caption": "Image",
+     "src": "/uploads/20261024-6khpee2h.webp",
+     "variants": {
+      "800": "/uploads/sized/20261024-6khpee2h-800.jpg",
+      "1200": "/uploads/sized/20261024-6khpee2h-1200.jpg",
+      "1600": "/uploads/sized/20261024-6khpee2h-1600.jpg",
+      "w": 2800
+     }
+    },
+    {
+     "id": "u60msflt",
+     "type": "image",
+     "x": 6,
+     "y": 21,
+     "w": 6,
+     "h": 4,
+     "src": "/uploads/20261024-7y4lfj7s.webp",
+     "caption": "",
+     "variants": {
+      "800": "/uploads/sized/20261024-7y4lfj7s-800.jpg",
+      "1200": "/uploads/sized/20261024-7y4lfj7s-1200.jpg",
+      "1600": "/uploads/sized/20261024-7y4lfj7s-1600.jpg",
+      "w": 2800
+     }
+    },
+    {
+     "id": "a8bb94go",
+     "type": "image",
+     "x": 0,
+     "y": 26,
+     "w": 6,
+     "h": 4,
+     "src": "/uploads/20261024-ln9aqask.webp",
+     "caption": "",
+     "variants": {
+      "800": "/uploads/sized/20261024-ln9aqask-800.jpg",
+      "1200": "/uploads/sized/20261024-ln9aqask-1200.jpg",
+      "1600": "/uploads/sized/20261024-ln9aqask-1600.jpg",
+      "w": 2800
+     }
+    },
+    {
+     "id": "62yy84it",
+     "type": "image",
+     "x": 0,
+     "y": 21,
+     "w": 6,
+     "h": 4,
+     "src": "/uploads/20261024-14x0cy76.webp",
+     "caption": "",
+     "variants": {
+      "800": "/uploads/sized/20261024-14x0cy76-800.jpg",
+      "1200": "/uploads/sized/20261024-14x0cy76-1200.jpg",
+      "1600": "/uploads/sized/20261024-14x0cy76-1600.jpg",
+      "w": 2800
+     }
+    },
+    {
+     "id": "ys34kvi2",
+     "type": "image",
+     "x": 8,
+     "y": 28,
+     "w": 3,
+     "h": 2,
+     "src": "/uploads/20261024-s7259jov.webp",
+     "caption": "",
+     "variants": {
+      "800": "/uploads/sized/20261024-s7259jov-800.jpg",
+      "1200": "/uploads/sized/20261024-s7259jov-1200.jpg",
+      "1600": "/uploads/sized/20261024-s7259jov-1600.jpg",
+      "w": 1916
+     }
+    },
+    {
+     "id": "4utreuun",
+     "type": "image",
+     "x": 8,
+     "y": 26,
+     "w": 3,
+     "h": 2,
+     "src": "/uploads/20261024-jbogt509.png",
+     "caption": "",
+     "variants": {
+      "800": "/uploads/sized/20261024-jbogt509-800.jpg",
+      "1200": "/uploads/sized/20261024-jbogt509-1200.jpg",
+      "1600": "/uploads/sized/20261024-jbogt509-1600.jpg",
+      "w": 3300
+     }
+    },
+    {
+     "id": "4bwprcam",
+     "type": "image",
+     "x": 8,
+     "y": 54,
+     "w": 4,
+     "h": 5,
+     "src": "/uploads/20261025-qu19oexu.jpg",
+     "caption": "",
+     "variants": {
+      "800": "/uploads/sized/20261025-qu19oexu-800.jpg",
+      "w": 1276
+     }
+    },
+    {
+     "id": "krj9imqu",
+     "type": "image",
+     "x": 0,
+     "y": 48,
+     "w": 4,
+     "h": 5,
+     "src": "/uploads/20261025-e0dsd7o5.jpg",
+     "caption": "",
+     "variants": {
+      "800": "/uploads/sized/20261025-e0dsd7o5-800.jpg",
+      "w": 1276
+     }
+    },
+    {
+     "id": "wo5g4l0n",
+     "type": "image",
+     "x": 4,
+     "y": 48,
+     "w": 4,
+     "h": 5,
+     "src": "/uploads/20261025-n7abub7k.jpg",
+     "caption": "",
+     "variants": {
+      "800": "/uploads/sized/20261025-n7abub7k-800.jpg",
+      "w": 1276
+     }
+    },
+    {
+     "id": "dy3o8wws",
+     "type": "image",
+     "x": 8,
+     "y": 48,
+     "w": 4,
+     "h": 5,
+     "src": "/uploads/20261025-v2i8wg9w.jpg",
+     "caption": "",
+     "variants": {
+      "800": "/uploads/sized/20261025-v2i8wg9w-800.jpg",
+      "w": 1276
+     }
+    },
+    {
+     "id": "sj3d4e9r",
+     "type": "image",
+     "x": 0,
+     "y": 54,
+     "w": 4,
+     "h": 5,
+     "src": "/uploads/20261025-rjuvsh9d.jpg",
+     "caption": "",
+     "variants": {
+      "800": "/uploads/sized/20261025-rjuvsh9d-800.jpg",
+      "w": 1276
+     }
+    },
+    {
+     "id": "e3mgetko",
+     "type": "image",
+     "x": 4,
+     "y": 54,
+     "w": 4,
+     "h": 5,
+     "src": "/uploads/20261025-zgbzpzte.jpg",
+     "caption": "",
+     "variants": {
+      "800": "/uploads/sized/20261025-zgbzpzte-800.jpg",
+      "w": 1274
+     }
+    },
+    {
+     "id": "uhcweimw",
+     "type": "image",
+     "x": 0,
+     "y": 32,
+     "w": 12,
+     "h": 7,
+     "src": "/uploads/20261025-8wxwjify.webp",
+     "caption": "",
+     "variants": {
+      "800": "/uploads/sized/20261025-8wxwjify-800.jpg",
+      "1200": "/uploads/sized/20261025-8wxwjify-1200.jpg",
+      "1600": "/uploads/sized/20261025-8wxwjify-1600.jpg",
+      "w": 2800
+     }
+    },
+    {
+     "id": "1x6sbw07",
+     "type": "image",
+     "x": 0,
+     "y": 40,
+     "w": 12,
+     "h": 7,
+     "src": "/uploads/20261025-ja61c3kc.webp",
+     "caption": "",
+     "variants": {
+      "800": "/uploads/sized/20261025-ja61c3kc-800.jpg",
+      "1200": "/uploads/sized/20261025-ja61c3kc-1200.jpg",
+      "1600": "/uploads/sized/20261025-ja61c3kc-1600.jpg",
+      "w": 2164
      }
     }
    ]

@@ -190,7 +190,15 @@ async function boot() {
    ========================================================= */
 function render() {
   const proj = route.type === 'project' ? C.projects[route.slug] : null;
-  document.title = proj ? `${proj.title} — ${C.site.name || ''}` : (C.site.title || C.site.name || 'Portfolio');
+  const who = (C.site.title || C.site.name || 'Portfolio').split(' — ')[0];
+  document.title = proj ? `${proj.title} — ${who}` : (C.site.title || C.site.name || 'Portfolio');
+  // search engines that run the page read these per page
+  const desc = document.querySelector('meta[name="description"]'), canon = document.querySelector('link[rel="canonical"]');
+  if (desc) {
+    desc.dataset.home ??= desc.content;
+    desc.content = proj ? `${proj.title}${proj.sub ? ' — ' + proj.sub : ''}. A project by ${who}.` : desc.dataset.home;
+  }
+  if (canon) canon.href = `${location.origin}/${proj ? '?p=' + encodeURIComponent(route.slug) : ''}`;
   if (proj) syncProjectCaption.prev[route.slug] = proj.title;
   $('#view').innerHTML = route.type === 'project' ? projectHTML(route.slug) : homeHTML();
   document.body.classList.toggle('page-project', route.type === 'project');   // project pages: no scroll fades below the top
