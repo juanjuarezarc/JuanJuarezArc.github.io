@@ -516,7 +516,9 @@ function measureHero() {
   const w = S.w * k, h = S.h * k, x = br.left + 6 * cell;
   heroGeo.T = { x: x + (colW - w), y: top + (colH - h - extra) / 2, w, h };   // right column, flush with its right edge
   if (moveCredits) Object.assign(credits.style, { left: `${x}px`, top: `${heroGeo.T.y + h + 16}px` });
-  Object.assign(copy.style, { marginLeft: `${br.left}px`, width: `${colW}px`, minHeight: `${colH}px`, paddingTop: `${top}px` });   // text on the left
+  // text on the left, centred on the same band as the image (longer text simply starts at the top of it)
+  const bottom = innerHeight - top - colH;
+  Object.assign(copy.style, { marginLeft: `${br.left}px`, width: `${colW}px`, minHeight: `${innerHeight}px`, paddingTop: `${top}px`, paddingBottom: `${bottom}px` });
 }
 
 // Dominant colour of the photo (most common colour, averaged)
